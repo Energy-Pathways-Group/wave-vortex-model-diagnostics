@@ -188,6 +188,8 @@ classdef WVDiagnostics < handle
 
             col = configureDictionary("string","cell");
             col{"source"} = [191 191 250]/255;
+            col{"ke_g"} = [205 253 254]/255;
+            col{"pe_g"} = [205 253 254]/255;
             col{"te_gmda"} = [205 253 254]/255;
             col{"te_wave"} = [205 253 197]/255;
             col{"sink"} = [245 194 193]/255;
