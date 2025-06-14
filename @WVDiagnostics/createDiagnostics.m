@@ -10,6 +10,7 @@ end
 
 if exist(self.diagfile,"file")
     warning('A diagnostics file already exists. Returning.');
+    return
 end
 
 if options.shouldMeasureAntialiasingFlux
@@ -33,6 +34,7 @@ int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 
 %% setup diagnostic output file
 diagfile = NetCDFFile(self.diagpath);
+self.diagfile = diagfile;
 
 dimensionNames = ["j","kRadial"];
 for iDim=1:length(dimensionNames)
