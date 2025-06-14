@@ -2,6 +2,8 @@ classdef WVDiagnostics < handle
     %WVDiagnostics Produces diagnostics and figures from WVModel output
     %   This is a collection of diagnostic tools for analyzing model output
     properties
+        wvpath
+        diagpath
         wvfile
         diagfile
         wvt
@@ -17,19 +19,27 @@ classdef WVDiagnostics < handle
     end
 
     methods
-        function self = WVDiagnostics(filename)
+        function self = WVDiagnostics(filename,options)
             arguments
                 filename
+                options.diagnosticsFilePath
             end
+            self.wvpath = filename;
+
+
             [self.wvt, self.wvfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=Inf);
             [fpath,fname,~] = fileparts(filename);
-            if ~isempty(fpath)
-                diagfilename = fullfile(fpath,strcat(fname,"-diagnostics.nc"));
+            if ~isfield(options,"diagnosticsFilePath")
+                if ~isempty(fpath)
+                    self.diagpath = fullfile(fpath,strcat(fname,"-diagnostics.nc"));
+                else
+                    self.diagpath= fullfile(strcat(fname,"-diagnostics.nc"));
+                end
             else
-                diagfilename = fullfile(strcat(fname,"-diagnostics.nc"));
+                self.diagpath = options.diagnosticsFilePath;
             end
-            if exist(diagfilename,"file")
-                self.diagfile = NetCDFFile(diagfilename);
+            if exist(self.diagpath,"file")
+                self.diagfile = NetCDFFile(self.diagpath);
             else
                 warning("No diagnostics file found. Some functionality will not be available.")
             end
@@ -77,14 +87,15 @@ classdef WVDiagnostics < handle
         function fig = plotEnergyForReservoirOverTime(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te", "te_quadratic"]
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.shouldIncludeExactTotalEnergy = true
                 options.tscale = 86400
                 options.tscale_units = "days"
                 options.escale = 3.74
                 options.escale_units = "GM"
                 options.visible = "on"
             end
-            reservoirs = self.energyForReservoirOverTime(reservoirNames=options.reservoirNames);
+            reservoirs = self.energyForReservoirOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy);
             t = self.diagfile.readVariables('t');
 
             fig = figure(Visible=options.visible);
@@ -110,7 +121,7 @@ classdef WVDiagnostics < handle
             % wvd.plotEnergyFluxForReservoirOverTime(filter=@(v) movmean(v,51));
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"]
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.tscale = 86400
                 options.tscale_units = "days"
                 options.escale = 3.74/(86400*365)
@@ -118,19 +129,19 @@ classdef WVDiagnostics < handle
                 options.visible = "on"
                 options.filter = @(v) v;
             end
-            forcing_fluxes = self.forcingFluxesForReservoirOverTime(reservoirNames=options.reservoirNames);
+            forcing_fluxes = self.forcingFluxesForReservoirOverTime(energyReservoirs=options.energyReservoirs);
             t = self.diagfile.readVariables('t');
 
             fig = figure(Visible=options.visible);
-            tl = tiledlayout(length(options.reservoirNames),1,TileSpacing="compact");
-            for iReservoir = 1:length(options.reservoirNames)
+            tl = tiledlayout(length(options.energyReservoirs),1,TileSpacing="compact");
+            for iReservoir = 1:length(options.energyReservoirs)
                 nexttile(tl);
                 for iForce = 1:length(forcing_fluxes)
-                    plot(t/options.tscale,options.filter(forcing_fluxes(iForce).(options.reservoirNames(iReservoir))/options.escale)), hold on
+                    plot(t/options.tscale,options.filter(forcing_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/options.escale)), hold on
                 end
                 legend(forcing_fluxes.fancyName)
 
-                fancyName = self.fancyNameForName(options.reservoirNames(iReservoir));
+                fancyName = options.energyReservoirs(iReservoir).fancyName;
                 xlabel("time (" + options.tscale_units + ")")
                 ylabel("flux into " + fancyName + " (" + options.escale_units + ")")
                 xlim([min(t) max(t)]/options.tscale);
@@ -141,7 +152,7 @@ classdef WVDiagnostics < handle
             % wvd.plotInertialFluxForReservoirOverTime(filter=@(v) movmean(v,51));
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"]
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.tscale = 86400
                 options.tscale_units = "days"
                 options.escale = 3.74/(86400*365)
@@ -149,19 +160,19 @@ classdef WVDiagnostics < handle
                 options.visible = "on"
                 options.filter = @(v) v;
             end
-            inertial_fluxes = self.inertialFluxesForReservoirOverTime(reservoirNames=options.reservoirNames);
+            inertial_fluxes = self.inertialFluxesForReservoirOverTime(energyReservoirs=options.energyReservoirs);
             t = self.diagfile.readVariables('t');
 
             fig = figure(Visible=options.visible);
-            tl = tiledlayout(length(options.reservoirNames),1,TileSpacing="compact");
-            for iReservoir = 1:length(options.reservoirNames)
+            tl = tiledlayout(length(options.energyReservoirs),1,TileSpacing="compact");
+            for iReservoir = 1:length(options.energyReservoirs)
                 nexttile(tl);
                 for iForce = 1:length(inertial_fluxes)
-                    plot(t/options.tscale,options.filter(inertial_fluxes(iForce).(options.reservoirNames(iReservoir))/options.escale)), hold on
+                    plot(t/options.tscale,options.filter(inertial_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/options.escale)), hold on
                 end
                 legend(inertial_fluxes.fancyName)
 
-                fancyName = self.fancyNameForName(options.reservoirNames(iReservoir));
+                fancyName = options.energyReservoirs(iReservoir).fancyName;
                 xlabel("time (" + options.tscale_units + ")")
                 ylabel("flux into " + fancyName + " (" + options.escale_units + ")")
                 xlim([min(t) max(t)]/options.tscale);
@@ -171,7 +182,7 @@ classdef WVDiagnostics < handle
         function fig = plotSourcesSinksReservoirsDiagram(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"]
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave];
                 options.flux_scale = 3.74/(86400*365)
                 options.flux_scale_units = "GM/yr"
                 options.energy_scale = 3.74
@@ -184,7 +195,7 @@ classdef WVDiagnostics < handle
                 options.title = "Energy Pathways";
                 options.visible = "on"
             end
-            forcing_fluxes = self.forcingFluxesForReservoirSpatialTemporalAverage(reservoirNames=options.reservoirNames,timeIndices=options.timeIndices);
+            forcing_fluxes = self.forcingFluxesForReservoirSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
             col = configureDictionary("string","cell");
             col{"source"} = [191 191 250]/255;
@@ -196,8 +207,8 @@ classdef WVDiagnostics < handle
 
             reserviors = configureDictionary("string","Box");
             [reservoirEnergy, t] = self.energyForReservoirOverTime(timeIndices=options.timeIndices);
-            for iReservoir = 1:length(options.reservoirNames)
-                name = options.reservoirNames(iReservoir);
+            for iReservoir = 1:length(options.energyReservoirs)
+                name = options.energyReservoirs(iReservoir).name;
                 if name == "te_quadratic"
                     continue;
                 end
@@ -297,7 +308,7 @@ classdef WVDiagnostics < handle
 
             inertial_arrows = Arrow.empty(0,0);
             if length(reserviors.keys) == 2
-                inertial_fluxes = self.inertialFluxesForReservoirSpatialTemporalAverage(reservoirNames=options.reservoirNames,timeIndices=options.timeIndices);
+                inertial_fluxes = self.inertialFluxesForReservoirSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
                 mag_geo = sum([inertial_fluxes(:).te_gmda])/options.flux_scale;
                 mag_wave = sum([inertial_fluxes(:).te_wave])/options.flux_scale;
@@ -330,7 +341,8 @@ classdef WVDiagnostics < handle
         function [reservoirs, t] = energyForReservoirOverTime(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te", "te_quadratic"];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.shouldIncludeExactTotalEnergy = true
                 options.timeIndices = Inf;
             end
             %% Measure total energy in each reservoir
@@ -344,43 +356,52 @@ classdef WVDiagnostics < handle
 
             % we have to preallocated an array of structs
             clear reservoirs;
-            reservoirs(length(options.reservoirNames)) = struct("name","placeholder");
-            for iReservoir = length(options.reservoirNames):-1:1
-                reservoirs(iReservoir).name = options.reservoirNames(iReservoir);
-                reservoirs(iReservoir).fancyName = self.fancyNameForName(options.reservoirNames(iReservoir));
-                switch options.reservoirNames(iReservoir)
-                    case "ke_g"
+            if options.shouldIncludeExactTotalEnergy
+                reservoirs(length(options.energyReservoirs)+1) = struct("name","placeholder");
+            else
+                reservoirs(length(options.energyReservoirs)) = struct("name","placeholder");
+            end
+            for iReservoir = 1:length(options.energyReservoirs)
+                reservoirs(iReservoir).name = options.energyReservoirs(iReservoir).name;
+                reservoirs(iReservoir).fancyName = options.energyReservoirs(iReservoir).fancyName;
+                switch options.energyReservoirs(iReservoir)
+                    case EnergyReservoir.geostrophic_kinetic
                         reservoirs(iReservoir).energy = KE_g;
-                    case "pe_g"
+                    case EnergyReservoir.geostrophic_potential
                         reservoirs(iReservoir).energy = PE_g;
-                    case "te_g"
+                    case EnergyReservoir.geostrophic
                         reservoirs(iReservoir).energy = KE_g + PE_g;
-                    case "te_mda"
+                    case EnergyReservoir.mda
                         reservoirs(iReservoir).energy = E_mda;
-                    case "te_gmda"
+                    case EnergyReservoir.geostrophic_mda
                         reservoirs(iReservoir).energy = KE_g + PE_g + E_mda;
-                    case "te_igw"
+                    case EnergyReservoir.igw
                         reservoirs(iReservoir).energy = E_w;
-                    case "te_io"
+                    case EnergyReservoir.io
                         reservoirs(iReservoir).energy = E_io;
-                    case "te_wave"
+                    case EnergyReservoir.wave
                         reservoirs(iReservoir).energy = E_w+E_io;
-                    case "te"
-                        reservoirs(iReservoir).energy = ke + ape;
-                    case "te_quadratic"
+                    case EnergyReservoir.total
                         reservoirs(iReservoir).energy = ke + pe_quadratic;
                     otherwise
                         error("unknown energy reservoir");
                 end
                 reservoirs(iReservoir).energy = filter(reservoirs(iReservoir).energy);
             end
+            if options.shouldIncludeExactTotalEnergy
+                reservoirs(end).name = "te";
+                reservoirs(end).fancyName = "total";
+                reservoirs(end).energy = ke + ape;
+                reservoirs(end).energy = filter(reservoirs(end).energy);
+            end
+
             t = filter(self.diagfile.readVariables('t'));
         end
 
         function forcing_fluxes = forcingFluxesForReservoirOverTime(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.timeIndices = Inf;
             end
             if isinf(options.timeIndices)
@@ -388,7 +409,7 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) reshape( sum(sum(v(:,:,options.timeIndices),1),2), [], 1);
             end
-            forcing_fluxes = self.forcingFluxesForReservoir(reservoirNames=options.reservoirNames);
+            forcing_fluxes = self.forcingFluxesForReservoir(energyReservoirs=options.energyReservoirs);
             exact_forcing_fluxes = self.exactForcingFluxesOverTime();
             for iForce=1:length(forcing_fluxes)
                 forcing_fluxes(iForce).te = reshape(exact_forcing_fluxes(iForce).te,1,1,[]);
@@ -400,17 +421,17 @@ classdef WVDiagnostics < handle
         function inertial_fluxes = inertialFluxesForReservoirOverTime(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
-                options.shouldConsolidateTriads = true;
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
             end
             filter_space = @(v) reshape( sum(sum(v,1),2), [], 1);
-            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(reservoirNames=options.reservoirNames,shouldConsolidateTriads=options.shouldConsolidateTriads),filter=filter_space);
+            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
         function forcing_fluxes = forcingFluxesForReservoirTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.timeIndices = Inf;
             end
 
@@ -419,15 +440,15 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) mean(v(:,:,options.timeIndices),3);
             end
-            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesForReservoir(reservoirNames=options.reservoirNames),filter=filter_space);
+            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesForReservoir(energyReservoirs=options.energyReservoirs),filter=filter_space);
         end
 
         function inertial_fluxes = inertialFluxesForReservoirTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.timeIndices = Inf;
-                options.shouldConsolidateTriads = true;
+                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
             end
 
             if isinf(options.timeIndices)
@@ -435,25 +456,25 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) mean(v(:,:,options.timeIndices),3);
             end
-            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(reservoirNames=options.reservoirNames,shouldConsolidateTriads=options.shouldConsolidateTriads),filter=filter_space);
+            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
         function forcing_fluxes = forcingFluxesForReservoirSpatialTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.timeIndices = Inf;
             end
 
-            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesForReservoirOverTime(reservoirNames=options.reservoirNames,timeIndices=options.timeIndices),filter=@(v) mean(v));
+            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesForReservoirOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices),filter=@(v) mean(v));
         end
 
         function inertial_fluxes = inertialFluxesForReservoirSpatialTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.timeIndices = Inf;
-                options.shouldConsolidateTriads = true;
+                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
             end
 
             if isinf(options.timeIndices)
@@ -461,7 +482,7 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) sum(sum(mean(v(:,:,options.timeIndices),3),1),2);
             end
-            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(reservoirNames=options.reservoirNames,shouldConsolidateTriads=options.shouldConsolidateTriads),filter=filter_space);
+            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
         function forcing_fluxes = exactForcingFluxesOverTime(self)
@@ -483,7 +504,7 @@ classdef WVDiagnostics < handle
         function forcing_fluxes = forcingFluxesForReservoir(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
             end
             forcingNames = self.wvt.forcingNames;
             forcing_fluxes(length(forcingNames)) = struct("name","placeholder");
@@ -502,9 +523,9 @@ classdef WVDiagnostics < handle
                 forcing_fluxes(iForce).fancyName = forcingNames(iForce);
 
                 % per-reservoir fluxes
-                fluxes = self.energyFluxForReservoirFromStructure(Ejk,options.reservoirNames);
-                for iReservoir = 1:length(options.reservoirNames)
-                    forcing_fluxes(iForce).(options.reservoirNames(iReservoir)) = fluxes{iReservoir};
+                fluxes = self.energyFluxForReservoirFromStructure(Ejk,options.energyReservoirs);
+                for iReservoir = 1:length(options.energyReservoirs)
+                    forcing_fluxes(iForce).(options.energyReservoirs(iReservoir).name) = fluxes{iReservoir};
                 end
             end
         end
@@ -512,17 +533,17 @@ classdef WVDiagnostics < handle
         function inertial_fluxes = inertialFluxesForReservoir(self,options)
             arguments
                 self WVDiagnostics
-                options.reservoirNames = ["te_gmda", "te_wave", "te_quadratic"];
-                options.shouldConsolidateTriads = true;
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total]
+                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
             end
 
-            triadFlowComponents_t = self.wvt.primaryFlowComponents;
-            inertial_fluxes(length(triadFlowComponents_t)^2) = struct("name","placeholder");
+            primaryFlowComponents_t = self.wvt.primaryFlowComponents;
+            inertial_fluxes(length(primaryFlowComponents_t)^2) = struct("name","placeholder");
 
             counter = 1;
-            for i=1:length(triadFlowComponents_t)
-                for j=1:length(triadFlowComponents_t)
-                    name = triadFlowComponents_t(i).abbreviatedName + "_" + triadFlowComponents_t(j).abbreviatedName;
+            for i=1:length(primaryFlowComponents_t)
+                for j=1:length(primaryFlowComponents_t)
+                    name = primaryFlowComponents_t(i).abbreviatedName + "_" + primaryFlowComponents_t(j).abbreviatedName;
 
                     % these are temporary variavbles for use within this loop only
                     Ejk.Ep = self.diagfile.readVariables("Ep_" + name);
@@ -532,12 +553,12 @@ classdef WVDiagnostics < handle
 
                     % total fluxes
                     inertial_fluxes(counter).name = name;
-                    inertial_fluxes(counter).fancyName = triadFlowComponents_t(i).shortName + "-" + triadFlowComponents_t(j).shortName;
+                    inertial_fluxes(counter).fancyName = primaryFlowComponents_t(i).shortName + "-" + primaryFlowComponents_t(j).shortName;
 
                     % per-reservoir fluxes
-                    fluxes = self.energyFluxForReservoirFromStructure(Ejk,options.reservoirNames);
-                    for iReservoir = 1:length(options.reservoirNames)
-                        inertial_fluxes(counter).(options.reservoirNames(iReservoir)) = fluxes{iReservoir};
+                    fluxes = self.energyFluxForReservoirFromStructure(Ejk,options.energyReservoirs);
+                    for iReservoir = 1:length(options.energyReservoirs)
+                        inertial_fluxes(counter).(options.energyReservoirs(iReservoir).name) = fluxes{iReservoir};
                     end
 
                     % increment counter
@@ -545,58 +566,43 @@ classdef WVDiagnostics < handle
                 end
             end
 
-            if options.shouldConsolidateTriads
-                arraySize = size(inertial_fluxes(counter-1).(options.reservoirNames(iReservoir)));
-
-                consolidatedFlowComponents_t = WVFlowComponent.empty(0,0);
-                for iReservoir = 1:length(options.reservoirNames)
-                    switch options.reservoirNames(iReservoir)
-                        case "ke_g"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.geostrophicComponent;
-                        case "pe_g"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.geostrophicComponent;
-                        case "te_g"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.geostrophicComponent;
-                        case "te_mda"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.mdaComponent;
-                        case "te_gmda"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.geostrophicComponent + self.wvt.mdaComponent;
-                        case "te_igw"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.waveComponent;
-                        case "te_io"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.inertialComponent;
-                        case "te_wave"
-                            consolidatedFlowComponents_t(end+1) = self.wvt.waveComponent + self.wvt.inertialComponent;
-                    end
-                end
-                % consolidatedFlowComponents_t = unique(consolidatedFlowComponents_t);
-                inertial_fluxes_consol(length(consolidatedFlowComponents_t)^2) = struct("name","placeholder");
-                n = length(consolidatedFlowComponents_t);
-                for i=1:length(consolidatedFlowComponents_t)
-                    for j=1:length(consolidatedFlowComponents_t)
-                        counter = j+(i-1)*n;
-                        inertial_fluxes_consol(counter).name = consolidatedFlowComponents_t(i).abbreviatedName + "_" + consolidatedFlowComponents_t(j).abbreviatedName;
-                        inertial_fluxes_consol(counter).fancyName = consolidatedFlowComponents_t(i).shortName + "-" + consolidatedFlowComponents_t(j).shortName;
-                        for iReservoir = 1:length(options.reservoirNames)
-                            inertial_fluxes_consol(counter).(options.reservoirNames(iReservoir)) = zeros(arraySize);
-                        end
-                    end
-                end
-
-                counter = 1;
-                for i=1:length(triadFlowComponents_t)
-                    index_i = find(arrayfun(@(a) a.contains(triadFlowComponents_t(i)), consolidatedFlowComponents_t));
-                    for j=1:length(triadFlowComponents_t)
-                        index_j = find(arrayfun(@(a) a.contains(triadFlowComponents_t(j)), consolidatedFlowComponents_t));
-                        for iReservoir = 1:length(options.reservoirNames)
-                            inertial_fluxes_consol(index_j+(index_i-1)*n).(options.reservoirNames(iReservoir)) = inertial_fluxes(counter).(options.reservoirNames(iReservoir)) + inertial_fluxes_consol(index_j+(index_i-1)*n).(options.reservoirNames(iReservoir));
-                        end
-                        counter = counter+1;
-                    end
-                end
-
-                inertial_fluxes = inertial_fluxes_consol;
+            consolidatedFlowComponents_t = WVFlowComponent.empty(0,0);
+            for i=1:length(options.triadComponents)
+                consolidatedFlowComponents_t(end+1) = options.triadComponents(i).flowComponent(self.wvt);
             end
+
+            
+
+            inertial_fluxes_consol(length(options.triadComponents)^2) = struct("name","placeholder");
+            n = length(options.triadComponents);
+            for i=1:n
+                for j=1:n
+                    counter = j+(i-1)*n;
+                    inertial_fluxes_consol(counter).name = options.triadComponents(i).name + "_" + options.triadComponents(j).name;
+                    inertial_fluxes_consol(counter).fancyName = options.triadComponents(i).name + "{\nabla}" + options.triadComponents(j).name;
+                    for iReservoir = 1:length(options.energyReservoirs)
+                        arraySize = size(inertial_fluxes(1).(options.energyReservoirs(iReservoir).name));
+                        inertial_fluxes_consol(counter).(options.energyReservoirs(iReservoir).name) = zeros(arraySize);
+                    end
+                end
+            end
+
+            counter = 1;
+            for i=1:length(primaryFlowComponents_t)
+                index_i = find(arrayfun(@(a) a.contains(primaryFlowComponents_t(i)), consolidatedFlowComponents_t));
+                for j=1:length(primaryFlowComponents_t)
+                    index_j = find(arrayfun(@(a) a.contains(primaryFlowComponents_t(j)), consolidatedFlowComponents_t));
+                    for iReservoir = 1:length(options.energyReservoirs)
+                        a = inertial_fluxes(counter).(options.energyReservoirs(iReservoir).name);
+                        b = inertial_fluxes_consol(index_j+(index_i-1)*n).(options.energyReservoirs(iReservoir).name);
+                        inertial_fluxes_consol(index_j+(index_i-1)*n).(options.energyReservoirs(iReservoir).name) = a + b;
+                    end
+                    counter = counter+1;
+                end
+            end
+
+            inertial_fluxes = inertial_fluxes_consol;
+
         end
     end
 
@@ -606,6 +612,20 @@ classdef WVDiagnostics < handle
         function iTimeChanged(metaProp,eventData)
             wvd = eventData.AffectedObject;
             wvd.wvt.initFromNetCDFFile(wvd.wvfile,iTime=wvd.iTime);
+        end
+
+        function bool = areEnergyReservoirsComplete(reservoirs)
+            bool = all(sum([reservoirs.vectorContents],2)==1);
+            if ~bool
+                warning('The collection of energy reservoirs is either not complete or over complete')
+            end
+        end
+
+        function bool = areTriadComponentsComplete(reservoirs)
+            bool = all(sum([reservoirs.vectorContents],2)==1);
+            if ~bool
+                warning('The collection of triad components is either not complete or over complete')
+            end
         end
 
         function fancyName = fancyNameForName(name)
@@ -656,23 +676,23 @@ classdef WVDiagnostics < handle
             eFlux = cell(length(reservoirNames),1);
             for iReservoir = 1:length(reservoirNames)
                 switch reservoirNames(iReservoir)
-                    case "ke_g"
+                    case EnergyReservoir.geostrophic_kinetic
                         eFlux{iReservoir} = Ejk.KE0(:,2:end,:);
-                    case "pe_g"
+                    case EnergyReservoir.geostrophic_potential
                         eFlux{iReservoir} = Ejk.PE0(:,2:end,:);
-                    case "te_g"
+                    case EnergyReservoir.geostrophic
                         eFlux{iReservoir} = Ejk.KE0(:,2:end,:)+Ejk.PE0(:,2:end,:);
-                    case "te_mda"
+                    case EnergyReservoir.mda
                         eFlux{iReservoir} = Ejk.PE0(:,1,:);
-                    case "te_gmda"
+                    case EnergyReservoir.geostrophic_mda
                         eFlux{iReservoir} = Ejk.KE0 + Ejk.PE0;
-                    case "te_igw"
+                    case EnergyReservoir.igw
                         eFlux{iReservoir} = Ejk.Ep(:,2:end,:) + Ejk.Em(:,2:end,:);
-                    case "te_io"
+                    case EnergyReservoir.io
                         eFlux{iReservoir} = Ejk.Ep(:,1,:) + Ejk.Em(:,1,:);
-                    case "te_wave"
+                    case EnergyReservoir.wave
                         eFlux{iReservoir} = Ejk.Ep+Ejk.Em;
-                    case "te_quadratic"
+                    case EnergyReservoir.total
                         eFlux{iReservoir} = Ejk.Ep+Ejk.Em+Ejk.KE0+Ejk.PE0;
                     otherwise
                         error("unknown energy reservoir");
