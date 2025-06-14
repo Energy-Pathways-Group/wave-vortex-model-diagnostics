@@ -292,7 +292,7 @@ classdef WVDiagnostics < handle
             % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave];
+                options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave];
                 options.flux_scale = 3.74/(86400*365)
                 options.flux_scale_units = "GM/yr"
                 options.energy_scale = 3.74
@@ -315,7 +315,7 @@ classdef WVDiagnostics < handle
             col{"te_wave"} = [205 253 197]/255;
             col{"sink"} = [245 194 193]/255;
 
-            reserviors = configureDictionary("string","Box");
+            reservoirs = configureDictionary("string","Box");
             [reservoirEnergy, t] = self.energyForReservoirOverTime(timeIndices=options.timeIndices);
             for iReservoir = 1:length(options.energyReservoirs)
                 name = options.energyReservoirs(iReservoir).name;
@@ -329,18 +329,18 @@ classdef WVDiagnostics < handle
                     fancyName = self.fancyNameForName(name);
                 end
 
-                reserviors(name) = Box(fancyName,FaceColor=col{name}, FontSize=16, CornerRadius=0.10);
+                reservoirs(name) = Box(fancyName,FaceColor=col{name}, FontSize=16, CornerRadius=0.10);
                 if options.shouldShowReservoirEnergy
-                    energy = mean(reservoirEnergy(iReservior).energy)/options.energy_scale;
-                    flux = (reservoirEnergy(iReservior).energy(end) - reservoirEnergy(iReservior).energy(1))/(t(end)-t(1))/options.flux_scale;
+                    energy = mean(reservoirEnergy(iReservoir).energy)/options.energy_scale;
+                    flux = (reservoirEnergy(iReservoir).energy(end) - reservoirEnergy(iReservoir).energy(1))/(t(end)-t(1))/options.flux_scale;
                     if abs(flux) > options.fluxTolerance
                         if flux > 0
-                            reserviors(name).Sublabel=sprintf("%.2f %s + %.2f %s",energy,options.energy_scale_units,abs(flux),options.flux_scale_units);
+                            reservoirs(name).Sublabel=sprintf("%.2f %s + %.2f %s",energy,options.energy_scale_units,abs(flux),options.flux_scale_units);
                         else
-                            reserviors(name).Sublabel=sprintf("%.2f %s – %.2f %s",energy,options.energy_scale_units,abs(flux),options.flux_scale_units);
+                            reservoirs(name).Sublabel=sprintf("%.2f %s – %.2f %s",energy,options.energy_scale_units,abs(flux),options.flux_scale_units);
                         end
                     else
-                        reserviors(name).Sublabel=sprintf("%.2f %s",energy,options.energy_scale_units);
+                        reservoirs(name).Sublabel=sprintf("%.2f %s",energy,options.energy_scale_units);
                     end
                 end
             end
@@ -366,9 +366,9 @@ classdef WVDiagnostics < handle
 
                 if forcing_fluxes(iFlux).te/options.flux_scale/2 > options.fluxTolerance
                     sources(end+1) = Box(fancyName,FaceColor=col{"source"}, FontSize=16);
-                    reserviorNames = reserviors.keys;
-                    for iRes=1:length(reserviorNames)
-                        name = reserviorNames(iRes);
+                    reservoirNames = reservoirs.keys;
+                    for iRes=1:length(reservoirNames)
+                        name = reservoirNames(iRes);
                         magnitude = abs(forcing_fluxes(iFlux).(name))/options.flux_scale;
                         if options.shouldShowUnits
                             label = sprintf("%.2f %s",magnitude,options.flux_scale_units);
@@ -376,14 +376,14 @@ classdef WVDiagnostics < handle
                             label = sprintf("%.2f",magnitude);
                         end
                         if abs(magnitude) > options.fluxTolerance
-                            source_arrows(end+1) = Arrow(sources(end),reserviors(name),Label=label,Magnitude=magnitude, LabelOffset=0.5, FontSize=14);
+                            source_arrows(end+1) = Arrow(sources(end),reservoirs(name),Label=label,Magnitude=magnitude, LabelOffset=0.5, FontSize=14);
                         end
                     end
                 elseif forcing_fluxes(iFlux).te/options.flux_scale/2 < -options.fluxTolerance
                     sinks(end+1) = Box(fancyName,FaceColor=col{"sink"}, FontSize=16);
-                    reserviorNames = reserviors.keys;
-                    for iRes=1:length(reserviorNames)
-                        name = reserviorNames(iRes);
+                    reservoirNames = reservoirs.keys;
+                    for iRes=1:length(reservoirNames)
+                        name = reservoirNames(iRes);
                         magnitude = abs(forcing_fluxes(iFlux).(name))/options.flux_scale;
                         if options.shouldShowUnits
                             label = sprintf("%.2f %s",magnitude,options.flux_scale_units);
@@ -391,7 +391,7 @@ classdef WVDiagnostics < handle
                             label = sprintf("%.2f",magnitude);
                         end
                         if abs(magnitude) > options.fluxTolerance
-                            sink_arrows(end+1) = Arrow(reserviors(name),sinks(end),Label=label,Magnitude=magnitude, LabelOffset=0.25, FontSize=14);
+                            sink_arrows(end+1) = Arrow(reservoirs(name),sinks(end),Label=label,Magnitude=magnitude, LabelOffset=0.25, FontSize=14);
                         end
                     end
                 end
@@ -401,9 +401,9 @@ classdef WVDiagnostics < handle
             % reservoir order is assumed fixed. So what the heck is the
             % logic here?
             sources_sorted = Box.empty(0,0);
-            reserviorNames = reserviors.keys;
-            for iRes=1:length(reserviorNames)
-                indices = arrayfun( @(a) a.Target == reserviors(reserviorNames(iRes)), source_arrows);
+            reservoirNames = reservoirs.keys;
+            for iRes=1:length(reservoirNames)
+                indices = arrayfun( @(a) a.Target == reservoirs(reservoirNames(iRes)), source_arrows);
                 candidate_sources = unique([source_arrows(indices).Source]);
                 for k = 1:numel(candidate_sources)
                     if ~any(candidate_sources(k) == sources_sorted)
@@ -417,7 +417,7 @@ classdef WVDiagnostics < handle
             sources = sources_sorted;
 
             inertial_arrows = Arrow.empty(0,0);
-            if length(reserviors.keys) == 2
+            if length(reservoirs.keys) == 2
                 inertial_fluxes = self.inertialFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
                 mag_geo = sum([inertial_fluxes(:).te_gmda])/options.flux_scale;
@@ -430,16 +430,16 @@ classdef WVDiagnostics < handle
                 end
                 if magnitude > options.fluxTolerance
                     if mag_geo > 0
-                        inertial_arrows(end+1) = Arrow(reserviors("te_wave"),reserviors("te_gmda"),Label=label,Magnitude=magnitude, LabelOffset=0.5, FontSize=14);
+                        inertial_arrows(end+1) = Arrow(reservoirs("te_wave"),reservoirs("te_gmda"),Label=label,Magnitude=magnitude, LabelOffset=0.5, FontSize=14);
                     else
-                        inertial_arrows(end+1) = Arrow(reserviors("te_gmda"),reserviors("te_wave"),Label=label,Magnitude=magnitude, LabelOffset=0.5, FontSize=14);
+                        inertial_arrows(end+1) = Arrow(reservoirs("te_gmda"),reservoirs("te_wave"),Label=label,Magnitude=magnitude, LabelOffset=0.5, FontSize=14);
                     end
                 end
                     
             end
 
 
-            fig = plotThreeRowBoxDiagram(sources, reserviors.values, sinks, cat(2,source_arrows,sink_arrows,inertial_arrows), BoxSize=[3.0 1.5], Title=options.title, visible=options.visible);
+            fig = plotThreeRowBoxDiagram(sources, reservoirs.values, sinks, cat(2,source_arrows,sink_arrows,inertial_arrows), BoxSize=[3.0 1.5], Title=options.title, visible=options.visible);
         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

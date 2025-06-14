@@ -26,7 +26,7 @@ inertial_fluxes = inertialFluxes(self,options);
 ```
 both of which return arrays of structs. The forcing fluxes will have one entry for each forcing in the model, and the inertial fluxes will have one entry for each triad (explained below). The structs always have a `name` field, `fancyName` name field, and a field for each energy reservoir (explained below). The fields for each energy reservoir contain all the data, usually a matrix of dimension `[j kRadial t]`.
 
-*Energy reservoirs* are defined by the `EnergyReservoir` class, and encompass several common combinationgs of energy reservoirs which might be useful for analysis. The two core fluxes functions have default energy reservoirs, but you can override this, e.g.,
+*Energy reservoirs* are defined by the `EnergyReservoir` class, and encompass several common combinations of energy reservoirs which might be useful for analysis. The two core fluxes functions have default energy reservoirs, but you can override this, e.g.,
 ```
 energyReservoirs = [EnergyReservoir.geostrophic_kinetic, EnergyReservoir.geostrophic_potential, EnergyReservoir.wave, EnergyReservoir.total];
 forcing_fluxes = wvd.forcingFluxes(energyReservoirs = energyReservoirs);
