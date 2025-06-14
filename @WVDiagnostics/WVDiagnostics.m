@@ -22,6 +22,13 @@ classdef WVDiagnostics < handle
 
     methods
         function self = WVDiagnostics(filename,options)
+            % Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
+            %
+            % - Topic: Constructor
+            % - Declaration: self = WVDiagnostics(filename,options)
+            % - Parameter filename: path to the WVModel output file
+            % - Parameter options.diagnosticsFilePath: (optional) path to the diagnostics file
+            % - Returns self: the constructed WVDiagnostics object
             arguments
                 filename
                 options.diagnosticsFilePath
@@ -50,32 +57,64 @@ classdef WVDiagnostics < handle
         end
 
         function t = get.t_diag(self)
+            % Get time vector from the diagnostics file
+            %
+            % Reads the 't' variable from the diagnostics file.
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.t_diag(self)
+            % - Returns t: time vector from diagnostics file
             t = self.diagfile.readVariables('t');
         end
 
         function t = get.j(self)
+            % Get j indices
+            %
+            % Reads the 'j' variable from the diagnostics file.
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.j(self)
+            % - Returns t: j indices from diagnostics file
             t = self.diagfile.readVariables('j');
         end
 
         function t = get.kRadial(self)
+            % Get kRadial indices
+            %
+            % Reads the 'kRadial' variable from the diagnostics file.
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.kRadial(self)
+            % - Returns t: kRadial indices from diagnostics file
             t = self.diagfile.readVariables('kRadial');
         end
 
         function t = get.t_wv(self)
+            % Get time vector from the model output file
+            %
+            % Reads the 't' variable from the wave-vortex file.
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.t_wv(self)
+            % - Returns t: time vector from wave-vortex file
             t = self.wvfile.readVariables('t');
         end
 
-        createDiagnosticsFile(self,options);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Figures (over time)
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        createDiagnosticsFile(self,options)
         fig = plotMooringRotarySpectrum(self)
         fig = plotFluidStateMultipanel(self,options)
-        
+
         function fig = plotEnstrophyOverTime(self,options)
+            % Plot enstrophy over time
+            %
+            % Plots the quadratic and APV enstrophy as a function of time.
+            %
+            % - Topic: Figures (over time)
+            % - Declaration: fig = plotEnstrophyOverTime(self,options)
+            % - Parameter options.tscale: time scaling factor (default: 86400)
+            % - Parameter options.tscale_units: units for time axis (default: "days")
+            % - Parameter options.visible: figure visibility (default: "on")
+            % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.tscale = 86400;
@@ -97,6 +136,20 @@ classdef WVDiagnostics < handle
         end
 
         function fig = plotEnergyForReservoirOverTime(self,options)
+            % Plot energy for each reservoir over time
+            %
+            % Plots the energy in each specified reservoir as a function of time.
+            %
+            % - Topic: Figures (over time)
+            % - Declaration: fig = plotEnergyForReservoirOverTime(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
+            % - Parameter options.tscale: time scaling factor (default: 86400)
+            % - Parameter options.tscale_units: units for time axis (default: "days")
+            % - Parameter options.escale: energy scaling factor (default: 3.74)
+            % - Parameter options.escale_units: units for energy axis (default: "GM")
+            % - Parameter options.visible: figure visibility (default: "on")
+            % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -130,7 +183,20 @@ classdef WVDiagnostics < handle
         end
 
         function fig = plotForcingFluxForReservoirOverTime(self,options)
-            % wvd.plotEnergyFluxForReservoirOverTime(filter=@(v) movmean(v,51));
+            % Plot forcing flux for each reservoir over time
+            %
+            % Plots the energy flux into each reservoir from external forcing as a function of time.
+            %
+            % - Topic: Figures (over time)
+            % - Declaration: fig = plotForcingFluxForReservoirOverTime(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.tscale: time scaling factor (default: 86400)
+            % - Parameter options.tscale_units: units for time axis (default: "days")
+            % - Parameter options.escale: energy scaling factor (default: 3.74/(86400*365))
+            % - Parameter options.escale_units: units for energy axis (default: "GM/yr")
+            % - Parameter options.visible: figure visibility (default: "on")
+            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
+            % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -161,7 +227,20 @@ classdef WVDiagnostics < handle
         end
 
         function fig = plotInertialFluxForReservoirOverTime(self,options)
-            % wvd.plotInertialFluxForReservoirOverTime(filter=@(v) movmean(v,51));
+            % Plot inertial flux for each reservoir over time
+            %
+            % Plots the energy flux between reservoirs due to inertial interactions as a function of time.
+            %
+            % - Topic: Figures (over time)
+            % - Declaration: fig = plotInertialFluxForReservoirOverTime(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.tscale: time scaling factor (default: 86400)
+            % - Parameter options.tscale_units: units for time axis (default: "days")
+            % - Parameter options.escale: energy scaling factor (default: 3.74/(86400*365))
+            % - Parameter options.escale_units: units for energy axis (default: "GM/yr")
+            % - Parameter options.visible: figure visibility (default: "on")
+            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
+            % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -192,6 +271,25 @@ classdef WVDiagnostics < handle
         end
 
         function fig = plotSourcesSinksReservoirsDiagram(self,options)
+            % Plot sources, sinks, and reservoirs diagram
+            %
+            % Generates a diagram showing energy sources, sinks, and reservoirs, including fluxes between them.
+            %
+            % - Topic: Figures (over time)
+            % - Declaration: fig = plotSourcesSinksReservoirsDiagram(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave])
+            % - Parameter options.flux_scale: scaling for fluxes (default: 3.74/(86400*365))
+            % - Parameter options.flux_scale_units: units for fluxes (default: "GM/yr")
+            % - Parameter options.energy_scale: scaling for energy (default: 3.74)
+            % - Parameter options.energy_scale_units: units for energy (default: "GM")
+            % - Parameter options.customNames: dictionary for custom names
+            % - Parameter options.fluxTolerance: tolerance for displaying fluxes (default: 1e-2)
+            % - Parameter options.shouldShowUnits: show units in labels (default: true)
+            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
+            % - Parameter options.shouldShowReservoirEnergy: show reservoir energy (default: true)
+            % - Parameter options.title: diagram title (default: "Energy Pathways")
+            % - Parameter options.visible: figure visibility (default: "on")
+            % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave];
@@ -233,8 +331,8 @@ classdef WVDiagnostics < handle
 
                 reserviors(name) = Box(fancyName,FaceColor=col{name}, FontSize=16, CornerRadius=0.10);
                 if options.shouldShowReservoirEnergy
-                    energy = mean(reservoirEnergy(iReservoir).energy)/options.energy_scale;
-                    flux = (reservoirEnergy(iReservoir).energy(end) - reservoirEnergy(iReservoir).energy(1))/(t(end)-t(1))/options.flux_scale;
+                    energy = mean(reservoirEnergy(iReservior).energy)/options.energy_scale;
+                    flux = (reservoirEnergy(iReservior).energy(end) - reservoirEnergy(iReservior).energy(1))/(t(end)-t(1))/options.flux_scale;
                     if abs(flux) > options.fluxTolerance
                         if flux > 0
                             reserviors(name).Sublabel=sprintf("%.2f %s + %.2f %s",energy,options.energy_scale_units,abs(flux),options.flux_scale_units);
@@ -351,6 +449,17 @@ classdef WVDiagnostics < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         function [reservoirs, t] = energyForReservoirOverTime(self,options)
+            % Compute energy for each reservoir over time
+            %
+            % Returns the energy in each specified reservoir as a function of time.
+            %
+            % - Topic: Figures (over time)
+            % - Declaration: [reservoirs, t] = energyForReservoirOverTime(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
+            % - Parameter options.timeIndices: indices for time selection (default: Inf)
+            % - Returns reservoirs: struct array with energy for each reservoir
+            % - Returns t: time vector
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -410,7 +519,96 @@ classdef WVDiagnostics < handle
             t = filter(self.diagfile.readVariables('t'));
         end
 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Flux averages, scalar
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function forcing_fluxes = forcingFluxesSpatialTemporalAverage(self,options)
+            % Compute spatial-temporal average of forcing fluxes
+            %
+            % Returns the spatial-temporal average of energy fluxes from external forcing for each reservoir.
+            %
+            % - Topic: Flux averages, scalar
+            % - Declaration: forcing_fluxes = forcingFluxesSpatialTemporalAverage(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
+            % - Returns forcing_fluxes: struct array with averaged fluxes
+            arguments
+                self WVDiagnostics
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.timeIndices = Inf;
+            end
+
+            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices),filter=@(v) mean(v));
+        end
+
+        function inertial_fluxes = inertialFluxesSpatialTemporalAverage(self,options)
+            % Compute spatial-temporal average of inertial fluxes
+            %
+            % Returns the spatial-temporal average of energy fluxes due to inertial interactions for each reservoir.
+            %
+            % - Topic: Flux averages, scalar
+            % - Declaration: inertial_fluxes = inertialFluxesSpatialTemporalAverage(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
+            % - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
+            % - Returns inertial_fluxes: struct array with averaged fluxes
+            arguments
+                self WVDiagnostics
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.timeIndices = Inf;
+                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
+            end
+
+            if isinf(options.timeIndices)
+                filter_space = @(v) sum(sum(mean(v,3),1),2);
+            else
+                filter_space = @(v) sum(sum(mean(v(:,:,options.timeIndices),3),1),2);
+            end
+            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
+        end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Fluxes over time, [t 1]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function forcing_fluxes = exactForcingFluxesOverTime(self)
+            % Compute exact forcing fluxes over time
+            %
+            % Returns the exact energy fluxes from external forcing for each time step.
+            %
+            % - Topic: Fluxes over time, [t 1]
+            % - Declaration: forcing_fluxes = exactForcingFluxesOverTime(self)
+            % - Returns forcing_fluxes: struct array with exact fluxes
+            arguments
+                self WVDiagnostics
+            end
+            forcingNames = self.wvt.forcingNames;
+            forcing_fluxes(length(forcingNames)) = struct("name","placeholder");
+
+            for iForce=1:length(forcingNames)
+                name = replace(forcingNames(iForce),"-","_");
+                name = replace(name," ","_");
+                forcing_fluxes(iForce).name = name;
+                forcing_fluxes(iForce).fancyName = forcingNames(iForce);
+                forcing_fluxes(iForce).te = self.diagfile.readVariables("E_" + name);
+            end
+        end
+
         function forcing_fluxes = forcingFluxesOverTime(self,options)
+            % Compute forcing fluxes over time
+            %
+            % Returns the energy fluxes from external forcing for each reservoir as a function of time.
+            %
+            % - Topic: Fluxes over time, [t 1]
+            % - Declaration: forcing_fluxes = forcingFluxesOverTime(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.timeIndices: indices for time selection (default: Inf)
+            % - Returns forcing_fluxes: struct array with fluxes over time
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -431,6 +629,15 @@ classdef WVDiagnostics < handle
         end
 
         function inertial_fluxes = inertialFluxesOverTime(self,options)
+            % Compute inertial fluxes over time
+            %
+            % Returns the energy fluxes due to inertial interactions for each reservoir as a function of time.
+            %
+            % - Topic: Fluxes over time, [t 1]
+            % - Declaration: inertial_fluxes = inertialFluxesOverTime(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
+            % - Returns inertial_fluxes: struct array with fluxes over time
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -440,7 +647,22 @@ classdef WVDiagnostics < handle
             inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Fluxes in space, [j kRadial]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         function forcing_fluxes = forcingFluxesTemporalAverage(self,options)
+            % Compute temporally averaged forcing fluxes
+            %
+            % Returns the temporally averaged energy fluxes from external forcing for each reservoir.
+            %
+            % - Topic: Fluxes in space, [j kRadial]
+            % - Declaration: forcing_fluxes = forcingFluxesTemporalAverage(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
+            % - Returns forcing_fluxes: struct array with averaged fluxes
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -455,7 +677,18 @@ classdef WVDiagnostics < handle
             forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxes(energyReservoirs=options.energyReservoirs),filter=filter_space);
         end
 
+
         function inertial_fluxes = inertialFluxesTemporalAverage(self,options)
+            % Computes the temporally averaged inertial fluxes.
+            %
+            % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial].
+            %
+            % - Topic: Fluxes in space, [j kRadial]
+            % - Declaration: inertial_fluxes = inertialFluxesTemporalAverage(options)
+            % - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total].
+            % - Parameter timeIndices: (optional) indices specifying which time steps to average over. Defaults to Inf (all).
+            % - Parameter triadComponents: (optional) a vector of TriadFlowComponent objects that specify which triad components to include in the output. Defaults to [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave].
+            % - Returns inertial_fluxes: an array of structs
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -471,48 +704,6 @@ classdef WVDiagnostics < handle
             inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
-        function forcing_fluxes = forcingFluxesSpatialTemporalAverage(self,options)
-            arguments
-                self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.timeIndices = Inf;
-            end
-
-            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices),filter=@(v) mean(v));
-        end
-
-        function inertial_fluxes = inertialFluxesSpatialTemporalAverage(self,options)
-            arguments
-                self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.timeIndices = Inf;
-                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
-            end
-
-            if isinf(options.timeIndices)
-                filter_space = @(v) sum(sum(mean(v,3),1),2);
-            else
-                filter_space = @(v) sum(sum(mean(v(:,:,options.timeIndices),3),1),2);
-            end
-            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
-        end
-
-        function forcing_fluxes = exactForcingFluxesOverTime(self)
-            arguments
-                self WVDiagnostics
-            end
-            forcingNames = self.wvt.forcingNames;
-            forcing_fluxes(length(forcingNames)) = struct("name","placeholder");
-
-            for iForce=1:length(forcingNames)
-                name = replace(forcingNames(iForce),"-","_");
-                name = replace(name," ","_");
-                forcing_fluxes(iForce).name = name;
-                forcing_fluxes(iForce).fancyName = forcingNames(iForce);
-                forcing_fluxes(iForce).te = self.diagfile.readVariables("E_" + name);
-            end
-        end
-
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Core fluxes functions, [j kRadial t]
@@ -520,7 +711,14 @@ classdef WVDiagnostics < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         function forcing_fluxes = forcingFluxes(self,options)
-            % return the energy flux from the
+            % Return the energy flux from the forcing terms
+            %
+            % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial t].
+            %
+            % - Topic: Core function — spatial temporal
+            % - Declaration: forcing_fluxes = forcingFluxes(options)
+            % - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total].
+            % - Returns forcing_fluxes: an array of structs
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -550,6 +748,15 @@ classdef WVDiagnostics < handle
         end
 
         function inertial_fluxes = inertialFluxes(self,options)
+            % Return the energy flux from the inertial terms, specified as triad components
+            %
+            % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial t].
+            %
+            % - Topic: Core function — spatial temporal
+            % - Declaration: inertial_fluxes = inertialFluxes(options)
+            % - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total].
+            % - Parameter triadComponents: (optional) a vector of TriadFlowComponent objects that specify which triad components to include in the output. Defaults to [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave].
+            % - Returns inertial_fluxes: an array of structs
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total]
@@ -589,8 +796,6 @@ classdef WVDiagnostics < handle
             for i=1:length(options.triadComponents)
                 consolidatedFlowComponents_t(end+1) = options.triadComponents(i).flowComponent(self.wvt);
             end
-
-            
 
             inertial_fluxes_consol(length(options.triadComponents)^2) = struct("name","placeholder");
             n = length(options.triadComponents);
