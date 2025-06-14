@@ -1,4 +1,4 @@
-function createDiagnostics(self,options)
+function createDiagnosticsFile(self,options)
 arguments
     self WVDiagnostics 
     options.stride = 1
@@ -8,7 +8,7 @@ arguments
     options.shouldUseHigherOrderFlux logical = false
 end
 
-if exist(self.diagfile,"file")
+if exist(self.diagpath,"file")
     warning('A diagnostics file already exists. Returning.');
     return
 end

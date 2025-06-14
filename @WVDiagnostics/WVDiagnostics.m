@@ -12,6 +12,8 @@ classdef WVDiagnostics < handle
     properties (Dependent)
         t_diag
         t_wv
+        j
+        kRadial
     end
 
     properties (SetObservable)
@@ -51,9 +53,19 @@ classdef WVDiagnostics < handle
             t = self.diagfile.readVariables('t');
         end
 
+        function t = get.j(self)
+            t = self.diagfile.readVariables('j');
+        end
+
+        function t = get.kRadial(self)
+            t = self.diagfile.readVariables('kRadial');
+        end
+
         function t = get.t_wv(self)
             t = self.wvfile.readVariables('t');
         end
+
+        createDiagnosticsFile(self,options);
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -129,7 +141,7 @@ classdef WVDiagnostics < handle
                 options.visible = "on"
                 options.filter = @(v) v;
             end
-            forcing_fluxes = self.forcingFluxesForReservoirOverTime(energyReservoirs=options.energyReservoirs);
+            forcing_fluxes = self.forcingFluxesOverTime(energyReservoirs=options.energyReservoirs);
             t = self.diagfile.readVariables('t');
 
             fig = figure(Visible=options.visible);
@@ -160,7 +172,7 @@ classdef WVDiagnostics < handle
                 options.visible = "on"
                 options.filter = @(v) v;
             end
-            inertial_fluxes = self.inertialFluxesForReservoirOverTime(energyReservoirs=options.energyReservoirs);
+            inertial_fluxes = self.inertialFluxesOverTime(energyReservoirs=options.energyReservoirs);
             t = self.diagfile.readVariables('t');
 
             fig = figure(Visible=options.visible);
@@ -195,7 +207,7 @@ classdef WVDiagnostics < handle
                 options.title = "Energy Pathways";
                 options.visible = "on"
             end
-            forcing_fluxes = self.forcingFluxesForReservoirSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+            forcing_fluxes = self.forcingFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
             col = configureDictionary("string","cell");
             col{"source"} = [191 191 250]/255;
@@ -308,7 +320,7 @@ classdef WVDiagnostics < handle
 
             inertial_arrows = Arrow.empty(0,0);
             if length(reserviors.keys) == 2
-                inertial_fluxes = self.inertialFluxesForReservoirSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+                inertial_fluxes = self.inertialFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
                 mag_geo = sum([inertial_fluxes(:).te_gmda])/options.flux_scale;
                 mag_wave = sum([inertial_fluxes(:).te_wave])/options.flux_scale;
@@ -398,7 +410,7 @@ classdef WVDiagnostics < handle
             t = filter(self.diagfile.readVariables('t'));
         end
 
-        function forcing_fluxes = forcingFluxesForReservoirOverTime(self,options)
+        function forcing_fluxes = forcingFluxesOverTime(self,options)
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -409,7 +421,7 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) reshape( sum(sum(v(:,:,options.timeIndices),1),2), [], 1);
             end
-            forcing_fluxes = self.forcingFluxesForReservoir(energyReservoirs=options.energyReservoirs);
+            forcing_fluxes = self.forcingFluxes(energyReservoirs=options.energyReservoirs);
             exact_forcing_fluxes = self.exactForcingFluxesOverTime();
             for iForce=1:length(forcing_fluxes)
                 forcing_fluxes(iForce).te = reshape(exact_forcing_fluxes(iForce).te,1,1,[]);
@@ -418,17 +430,17 @@ classdef WVDiagnostics < handle
             forcing_fluxes = self.filterFluxesForReservoir(forcing_fluxes,filter=filter_space);
         end
 
-        function inertial_fluxes = inertialFluxesForReservoirOverTime(self,options)
+        function inertial_fluxes = inertialFluxesOverTime(self,options)
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
             end
             filter_space = @(v) reshape( sum(sum(v,1),2), [], 1);
-            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
+            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
-        function forcing_fluxes = forcingFluxesForReservoirTemporalAverage(self,options)
+        function forcing_fluxes = forcingFluxesTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -440,10 +452,10 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) mean(v(:,:,options.timeIndices),3);
             end
-            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesForReservoir(energyReservoirs=options.energyReservoirs),filter=filter_space);
+            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxes(energyReservoirs=options.energyReservoirs),filter=filter_space);
         end
 
-        function inertial_fluxes = inertialFluxesForReservoirTemporalAverage(self,options)
+        function inertial_fluxes = inertialFluxesTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -456,20 +468,20 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) mean(v(:,:,options.timeIndices),3);
             end
-            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
+            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
-        function forcing_fluxes = forcingFluxesForReservoirSpatialTemporalAverage(self,options)
+        function forcing_fluxes = forcingFluxesSpatialTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.timeIndices = Inf;
             end
 
-            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesForReservoirOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices),filter=@(v) mean(v));
+            forcing_fluxes = self.filterFluxesForReservoir(self.forcingFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices),filter=@(v) mean(v));
         end
 
-        function inertial_fluxes = inertialFluxesForReservoirSpatialTemporalAverage(self,options)
+        function inertial_fluxes = inertialFluxesSpatialTemporalAverage(self,options)
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -482,7 +494,7 @@ classdef WVDiagnostics < handle
             else
                 filter_space = @(v) sum(sum(mean(v(:,:,options.timeIndices),3),1),2);
             end
-            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxesForReservoir(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
+            inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
         end
 
         function forcing_fluxes = exactForcingFluxesOverTime(self)
@@ -501,7 +513,14 @@ classdef WVDiagnostics < handle
             end
         end
 
-        function forcing_fluxes = forcingFluxesForReservoir(self,options)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Core fluxes functions, [j kRadial t]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function forcing_fluxes = forcingFluxes(self,options)
+            % return the energy flux from the
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
@@ -530,7 +549,7 @@ classdef WVDiagnostics < handle
             end
         end
 
-        function inertial_fluxes = inertialFluxesForReservoir(self,options)
+        function inertial_fluxes = inertialFluxes(self,options)
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total]
