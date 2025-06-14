@@ -39,3 +39,46 @@ will separate out the geostrophic energy into kinetic energy and potential energ
 forcing_fluxes = wvd.forcingFluxes(triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]);
 ```
 combines the geostrophic and mda components together, and also combines the igw and io components together.
+
+### Core WVDiagnostics Functions
+
+- `createDiagnosticsFile(self, options)`  
+  Create a diagnostics file and compute diagnostics from WVModel output.
+
+- `forcingFluxes(self, options)`  
+  Return the energy flux from external forcing for each reservoir, spatial location, and time.
+
+- `inertialFluxes(self, options)`  
+  Return the energy flux from inertial terms for each reservoir, spatial location, and time.
+
+- `forcingFluxesOverTime(self, options)`  
+  Compute the external forcing fluxes as a function of time.
+
+- `inertialFluxesOverTime(self, options)`  
+  Compute the inertial fluxes as a function of time.
+
+- `forcingFluxesTemporalAverage(self, options)`  
+  Compute the temporally averaged external forcing fluxes for each reservoir.
+
+- `inertialFluxesTemporalAverage(self, options)`  
+  Compute the temporally averaged inertial fluxes for each reservoir.
+
+- `forcingFluxesSpatialTemporalAverage(self, options)`  
+  Compute the spatial-temporal average of forcing fluxes for each reservoir.
+
+- `inertialFluxesSpatialTemporalAverage(self, options)`  
+  Compute the spatial-temporal average of inertial fluxes for each reservoir.
+
+- `plotEnergyForReservoirOverTime(self, options)`  
+  Plot the energy in each reservoir as a function of time.
+
+- `plotForcingFluxForReservoirOverTime(self, options)`  
+  Plot the energy flux into each reservoir from external forcing over time.
+
+- `plotInertialFluxForReservoirOverTime(self, options)`  
+  Plot the energy flux between reservoirs due to inertial interactions over time.
+
+- `plotSourcesSinksReservoirsDiagram(self, options)`  
+  Plot a diagram of energy sources, sinks, and reservoirs.
+
+---
