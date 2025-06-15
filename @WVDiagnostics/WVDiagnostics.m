@@ -7,6 +7,14 @@ classdef WVDiagnostics < handle
         wvfile
         diagfile
         wvt
+
+        % Default scaling and units for time, energy, and flux
+        tscale = 86400
+        tscale_units = "days"
+        escale = 3.74
+        escale_units = "GM"
+        flux_scale = 3.74/(86400*365)
+        flux_scale_units = "GM/yr"
     end
 
     properties (Dependent)
@@ -100,6 +108,40 @@ classdef WVDiagnostics < handle
             t = self.wvfile.readVariables('t');
         end
 
+        function setEnergyUnits(self, units)
+            % Set the time and energy scaling and units for plotting and output.
+            %
+            % Sets tscale, tscale_units, escale, and escale_units based on the specified units.
+            %
+            % - Topic: Configuration
+            % - Declaration: setEnergyUnits(self, units)
+            % - Parameter units: must be one of "si", "gm", or "si-yr"
+            % - Returns: None
+            arguments
+                self
+                units {mustBeMember(units, ["si", "gm", "si-yr"])}
+            end
+            switch lower(units)
+                case "si"
+                    self.escale = 1;
+                    self.escale_units = "m^3 s^{-2}";
+                    self.flux_scale = 1;
+                    self.flux_scale_units = "m^3 s^{-3}";
+                case "gm"
+                    self.escale = 3.74;
+                    self.escale_units = "GM";
+                    self.flux_scale = 3.74/(86400*365);
+                    self.flux_scale_units = "GM/yr";
+                case "si-yr"
+                    self.escale = 1;
+                    self.escale_units = "m^3 s^{-2}";
+                    self.flux_scale = 1/(86400*365);
+                    self.flux_scale_units = "m^3 s^{-2} yr^{-1}";
+                otherwise
+                    error("Unknown units: %s. Must be 'si', 'gm', or 'si-yr'.", units);
+            end
+        end
+
         createDiagnosticsFile(self,options)
 
         fig = plotFluidStateMultipanel(self,options)
@@ -116,14 +158,10 @@ classdef WVDiagnostics < handle
             %
             % - Topic: Figures (over time)
             % - Declaration: fig = plotEnstrophyOverTime(self,options)
-            % - Parameter options.tscale: time scaling factor (default: 86400)
-            % - Parameter options.tscale_units: units for time axis (default: "days")
             % - Parameter options.visible: figure visibility (default: "on")
             % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
-                options.tscale = 86400;
-                options.tscale_units = "days";
                 options.visible = "on"
             end
             [Z_quadratic,Z_apv] = self.diagfile.readVariables('enstrophy_quadratic','enstrophy_apv');
@@ -131,13 +169,13 @@ classdef WVDiagnostics < handle
             zscale = self.wvt.f^2;
             zscale_units = "f^2";
             fig = figure(Visible=options.visible);
-            plot(t/options.tscale,Z_quadratic/zscale,LineWidth=2), hold on
-            plot(t/options.tscale,Z_apv/zscale,LineWidth=2)
+            plot(t/self.tscale,Z_quadratic/zscale,LineWidth=2), hold on
+            plot(t/self.tscale,Z_apv/zscale,LineWidth=2)
             legend('quadratic','apv')
 
-            xlabel("time (" + options.tscale_units + ")")
+            xlabel("time (" + self.tscale_units + ")")
             ylabel("enstrophy (" + zscale_units + ")")
-            xlim([min(t) max(t)]/options.tscale);
+            xlim([min(t) max(t)]/self.tscale);
         end
 
         function fig = plotEnergyForReservoirOverTime(self,options)
@@ -149,20 +187,12 @@ classdef WVDiagnostics < handle
             % - Declaration: fig = plotEnergyForReservoirOverTime(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
             % - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
-            % - Parameter options.tscale: time scaling factor (default: 86400)
-            % - Parameter options.tscale_units: units for time axis (default: "days")
-            % - Parameter options.escale: energy scaling factor (default: 3.74)
-            % - Parameter options.escale_units: units for energy axis (default: "GM")
             % - Parameter options.visible: figure visibility (default: "on")
             % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.shouldIncludeExactTotalEnergy = true
-                options.tscale = 86400
-                options.tscale_units = "days"
-                options.escale = 3.74
-                options.escale_units = "GM"
                 options.visible = "on"
             end
             reservoirs = self.energyForReservoirOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy);
@@ -173,18 +203,18 @@ classdef WVDiagnostics < handle
             for iReservoir = 1:length(reservoirs)
                 switch reservoirs(iReservoir).name
                     case "te"
-                        plot(t/options.tscale,reservoirs(iReservoir).energy/options.escale,LineWidth=2, Color=[0 0 0]), hold on
+                        plot(t/self.tscale,reservoirs(iReservoir).energy/self.escale,LineWidth=2, Color=[0 0 0]), hold on
                     case "te_quadratic"
-                        plot(t/options.tscale,reservoirs(iReservoir).energy/options.escale,LineWidth=2, Color=[0 0 0], LineStyle="-."), hold on
+                        plot(t/self.tscale,reservoirs(iReservoir).energy/self.escale,LineWidth=2, Color=[0 0 0], LineStyle="-."), hold on
                     otherwise
-                        plot(t/options.tscale,reservoirs(iReservoir).energy/options.escale,LineWidth=2), hold on
+                        plot(t/self.tscale,reservoirs(iReservoir).energy/self.escale,LineWidth=2), hold on
                 end
             end
             legend(reservoirs.fancyName)
 
-            xlabel("time (" + options.tscale_units + ")")
-            ylabel("energy (" + options.escale_units + ")")
-            xlim([min(t) max(t)]/options.tscale);
+            xlabel("time (" + self.tscale_units + ")")
+            ylabel("energy (" + self.escale_units + ")")
+            xlim([min(t) max(t)]/self.tscale);
         end
 
         function fig = plotForcingFluxForReservoirOverTime(self,options)
@@ -195,20 +225,12 @@ classdef WVDiagnostics < handle
             % - Topic: Figures (over time)
             % - Declaration: fig = plotForcingFluxForReservoirOverTime(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.tscale: time scaling factor (default: 86400)
-            % - Parameter options.tscale_units: units for time axis (default: "days")
-            % - Parameter options.escale: energy scaling factor (default: 3.74/(86400*365))
-            % - Parameter options.escale_units: units for energy axis (default: "GM/yr")
             % - Parameter options.visible: figure visibility (default: "on")
             % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
             % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.tscale = 86400
-                options.tscale_units = "days"
-                options.escale = 3.74/(86400*365)
-                options.escale_units = "GM/yr"
                 options.visible = "on"
                 options.filter = @(v) v;
             end
@@ -220,14 +242,14 @@ classdef WVDiagnostics < handle
             for iReservoir = 1:length(options.energyReservoirs)
                 nexttile(tl);
                 for iForce = 1:length(forcing_fluxes)
-                    plot(t/options.tscale,options.filter(forcing_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/options.escale)), hold on
+                    plot(t/self.tscale,options.filter(forcing_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/self.flux_scale)), hold on
                 end
                 legend(forcing_fluxes.fancyName)
 
                 fancyName = options.energyReservoirs(iReservoir).fancyName;
-                xlabel("time (" + options.tscale_units + ")")
-                ylabel("flux into " + fancyName + " (" + options.escale_units + ")")
-                xlim([min(t) max(t)]/options.tscale);
+                xlabel("time (" + self.tscale_units + ")")
+                ylabel("flux into " + fancyName + " (" + self.flux_scale_units + ")")
+                xlim([min(t) max(t)]/self.tscale);
             end
         end
 
@@ -239,20 +261,12 @@ classdef WVDiagnostics < handle
             % - Topic: Figures (over time)
             % - Declaration: fig = plotInertialFluxForReservoirOverTime(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.tscale: time scaling factor (default: 86400)
-            % - Parameter options.tscale_units: units for time axis (default: "days")
-            % - Parameter options.escale: energy scaling factor (default: 3.74/(86400*365))
-            % - Parameter options.escale_units: units for energy axis (default: "GM/yr")
             % - Parameter options.visible: figure visibility (default: "on")
             % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
             % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.tscale = 86400
-                options.tscale_units = "days"
-                options.escale = 3.74/(86400*365)
-                options.escale_units = "GM/yr"
                 options.visible = "on"
                 options.filter = @(v) v;
             end
@@ -264,14 +278,14 @@ classdef WVDiagnostics < handle
             for iReservoir = 1:length(options.energyReservoirs)
                 nexttile(tl);
                 for iForce = 1:length(inertial_fluxes)
-                    plot(t/options.tscale,options.filter(inertial_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/options.escale)), hold on
+                    plot(t/self.tscale,options.filter(inertial_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/self.flux_scale)), hold on
                 end
                 legend(inertial_fluxes.fancyName)
 
                 fancyName = options.energyReservoirs(iReservoir).fancyName;
-                xlabel("time (" + options.tscale_units + ")")
-                ylabel("flux into " + fancyName + " (" + options.escale_units + ")")
-                xlim([min(t) max(t)]/options.tscale);
+                xlabel("time (" + self.tscale_units + ")")
+                ylabel("flux into " + fancyName + " (" + self.flux_scale_units + ")")
+                xlim([min(t) max(t)]/self.tscale);
             end
         end
 
@@ -283,10 +297,6 @@ classdef WVDiagnostics < handle
             % - Topic: Figures (over time)
             % - Declaration: fig = plotSourcesSinksReservoirsDiagram(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave])
-            % - Parameter options.flux_scale: scaling for fluxes (default: 3.74/(86400*365))
-            % - Parameter options.flux_scale_units: units for fluxes (default: "GM/yr")
-            % - Parameter options.energy_scale: scaling for energy (default: 3.74)
-            % - Parameter options.energy_scale_units: units for energy (default: "GM")
             % - Parameter options.customNames: dictionary for custom names
             % - Parameter options.fluxTolerance: tolerance for displaying fluxes (default: 1e-2)
             % - Parameter options.shouldShowUnits: show units in labels (default: true)
@@ -298,10 +308,6 @@ classdef WVDiagnostics < handle
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave];
-                options.flux_scale = 3.74/(86400*365)
-                options.flux_scale_units = "GM/yr"
-                options.energy_scale = 3.74
-                options.energy_scale_units = "GM"
                 options.customNames = configureDictionary("string","string")
                 options.fluxTolerance = 1e-2;
                 options.shouldShowUnits = true;
@@ -336,16 +342,16 @@ classdef WVDiagnostics < handle
 
                 reservoirs(name) = Box(fancyName,FaceColor=col{name}, FontSize=16, CornerRadius=0.10);
                 if options.shouldShowReservoirEnergy
-                    energy = mean(reservoirEnergy(iReservoir).energy)/options.energy_scale;
-                    flux = (reservoirEnergy(iReservoir).energy(end) - reservoirEnergy(iReservoir).energy(1))/(t(end)-t(1))/options.flux_scale;
+                    energy = mean(reservoirEnergy(iReservoir).energy)/self.energy_scale;
+                    flux = (reservoirEnergy(iReservoir).energy(end) - reservoirEnergy(iReservoir).energy(1))/(t(end)-t(1))/self.flux_scale;
                     if abs(flux) > options.fluxTolerance
                         if flux > 0
-                            reservoirs(name).Sublabel=sprintf("%.2f %s + %.2f %s",energy,options.energy_scale_units,abs(flux),options.flux_scale_units);
+                            reservoirs(name).Sublabel=sprintf("%.2f %s + %.2f %s",energy,self.energy_scale_units,abs(flux),self.flux_scale_units);
                         else
-                            reservoirs(name).Sublabel=sprintf("%.2f %s – %.2f %s",energy,options.energy_scale_units,abs(flux),options.flux_scale_units);
+                            reservoirs(name).Sublabel=sprintf("%.2f %s – %.2f %s",energy,self.energy_scale_units,abs(flux),self.flux_scale_units);
                         end
                     else
-                        reservoirs(name).Sublabel=sprintf("%.2f %s",energy,options.energy_scale_units);
+                        reservoirs(name).Sublabel=sprintf("%.2f %s",energy,self.energy_scale_units);
                     end
                 end
             end

@@ -30,13 +30,16 @@ fluxes = cat(2,forcing_fluxes,inertial_fluxes);
 
 if options.axes == "jk"
     colorLimits = max(arrayfun( @(v) max(abs(v.(options.energyReservoir.name)(:))), fluxes))*[-1 1]/options.overSaturationFactor;
+    colorLimits = colorLimits/self.flux_scale;
 end
+
+
 
 fig = figure;
 tl = tiledlayout(fig,"flow",TileSpacing='tight');
 
 for iComponent = 1:length(fluxes)
-    val = fluxes(iComponent).(options.energyReservoir.name);
+    val = fluxes(iComponent).(options.energyReservoir.name)/self.flux_scale;
     ax = nexttile(tl);
     switch options.axes
         case "jk"
@@ -66,14 +69,14 @@ switch options.axes
         ylabel(tl,"vertical mode")
         cb = colorbar;
         cb.Layout.Tile = 'east';
-        cb.Label.String = 'energy flux (m^3 s^{-3})';
+        cb.Label.String = "energy flux (" + self.flux_scale_units + ")";
     case "j"
         % j plot options
-        ylabel(tl,'energy flux (m^3 s^{-3})')
+        ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
         xlabel(tl, 'vertical mode')
     case "k"
         % kR plot options
-        ylabel(tl,'energy flux (m^3 s^{-3})')
+        ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
         xlabel(tl,'wavelength (km)')
 end
 
