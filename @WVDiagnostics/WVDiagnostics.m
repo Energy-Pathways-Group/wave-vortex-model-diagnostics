@@ -900,6 +900,7 @@ classdef WVDiagnostics < handle
 
     methods (Static)
         cmap = cmocean(ColormapName,varargin)
+        cmap = crameri(ColormapName,varargin)
 
         function iTimeChanged(metaProp,eventData)
             wvd = eventData.AffectedObject;
