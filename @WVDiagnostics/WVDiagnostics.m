@@ -144,9 +144,21 @@ classdef WVDiagnostics < handle
 
         createDiagnosticsFile(self,options)
 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures (instantaneous snapshot, from model output)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         fig = plotFluidStateMultipanel(self,options)
         fig = plotEnstrophySpectrum(self,options)
         fig = plotEnergySpectrum(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures (ancillary data, from model output)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         fig = plotMooringRotarySpectrum(self)
 
@@ -178,13 +190,19 @@ classdef WVDiagnostics < handle
             xlim([min(t) max(t)]/self.tscale);
         end
 
-        function fig = plotEnergyForReservoirOverTime(self,options)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures (over time, from diagnostics file)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function fig = plotEnergyOverTime(self,options)
             % Plot energy for each reservoir over time
             %
             % Plots the energy in each specified reservoir as a function of time.
             %
             % - Topic: Figures (over time)
-            % - Declaration: fig = plotEnergyForReservoirOverTime(self,options)
+            % - Declaration: fig = plotEnergyOverTime(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
             % - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
             % - Parameter options.visible: figure visibility (default: "on")
@@ -195,7 +213,7 @@ classdef WVDiagnostics < handle
                 options.shouldIncludeExactTotalEnergy = true
                 options.visible = "on"
             end
-            reservoirs = self.energyForReservoirOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy);
+            reservoirs = self.energyOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy);
             t = self.diagfile.readVariables('t');
 
             fig = figure(Visible=options.visible);
@@ -217,13 +235,13 @@ classdef WVDiagnostics < handle
             xlim([min(t) max(t)]/self.tscale);
         end
 
-        function fig = plotForcingFluxForReservoirOverTime(self,options)
+        function fig = plotForcingFluxOverTime(self,options)
             % Plot forcing flux for each reservoir over time
             %
             % Plots the energy flux into each reservoir from external forcing as a function of time.
             %
             % - Topic: Figures (over time)
-            % - Declaration: fig = plotForcingFluxForReservoirOverTime(self,options)
+            % - Declaration: fig = plotForcingFluxOverTime(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
             % - Parameter options.visible: figure visibility (default: "on")
             % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
@@ -253,13 +271,13 @@ classdef WVDiagnostics < handle
             end
         end
 
-        function fig = plotInertialFluxForReservoirOverTime(self,options)
+        function fig = plotInertialFluxOverTime(self,options)
             % Plot inertial flux for each reservoir over time
             %
             % Plots the energy flux between reservoirs due to inertial interactions as a function of time.
             %
             % - Topic: Figures (over time)
-            % - Declaration: fig = plotInertialFluxForReservoirOverTime(self,options)
+            % - Declaration: fig = plotInertialFluxOverTime(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
             % - Parameter options.visible: figure visibility (default: "on")
             % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
@@ -288,6 +306,12 @@ classdef WVDiagnostics < handle
                 xlim([min(t) max(t)]/self.tscale);
             end
         end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures (spatial temporal average, from diagnostics file)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         function fig = plotSourcesSinksReservoirsDiagram(self,options)
             % Plot sources, sinks, and reservoirs diagram
@@ -327,7 +351,7 @@ classdef WVDiagnostics < handle
             col{"sink"} = [245 194 193]/255;
 
             reservoirs = configureDictionary("string","Box");
-            [reservoirEnergy, t] = self.energyForReservoirOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+            [reservoirEnergy, t] = self.energyOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
             for iReservoir = 1:length(options.energyReservoirs)
                 name = options.energyReservoirs(iReservoir).name;
                 if name == "te_quadratic"
@@ -455,17 +479,17 @@ classdef WVDiagnostics < handle
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Figures (over time)
+        % Data (over time)
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        function [reservoirs, t] = energyForReservoirOverTime(self,options)
+        function [reservoirs, t] = energyOverTime(self,options)
             % Compute energy for each reservoir over time
             %
             % Returns the energy in each specified reservoir as a function of time.
             %
             % - Topic: Figures (over time)
-            % - Declaration: [reservoirs, t] = energyForReservoirOverTime(self,options)
+            % - Declaration: [reservoirs, t] = energyOverTime(self,options)
             % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
             % - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
             % - Parameter options.timeIndices: indices for time selection (default: Inf)
@@ -779,8 +803,8 @@ classdef WVDiagnostics < handle
 
             counter = 1;
             for i=1:length(primaryFlowComponents_t)
-                for j=1:length(primaryFlowComponents_t)
-                    name = primaryFlowComponents_t(i).abbreviatedName + "_" + primaryFlowComponents_t(j).abbreviatedName;
+                for m=1:length(primaryFlowComponents_t)
+                    name = primaryFlowComponents_t(i).abbreviatedName + "_" + primaryFlowComponents_t(m).abbreviatedName;
 
                     % these are temporary variavbles for use within this loop only
                     Ejk.Ep = self.diagfile.readVariables("Ep_" + name);
@@ -790,7 +814,7 @@ classdef WVDiagnostics < handle
 
                     % total fluxes
                     inertial_fluxes(counter).name = name;
-                    inertial_fluxes(counter).fancyName = primaryFlowComponents_t(i).shortName + "-" + primaryFlowComponents_t(j).shortName;
+                    inertial_fluxes(counter).fancyName = primaryFlowComponents_t(i).shortName + "-" + primaryFlowComponents_t(m).shortName;
 
                     % per-reservoir fluxes
                     fluxes = self.energyFluxForReservoirFromStructure(Ejk,options.energyReservoirs);
@@ -811,10 +835,10 @@ classdef WVDiagnostics < handle
             inertial_fluxes_consol(length(options.triadComponents)^2) = struct("name","placeholder");
             n = length(options.triadComponents);
             for i=1:n
-                for j=1:n
-                    counter = j+(i-1)*n;
-                    inertial_fluxes_consol(counter).name = options.triadComponents(i).name + "_" + options.triadComponents(j).name;
-                    inertial_fluxes_consol(counter).fancyName = options.triadComponents(i).name + "{\nabla}" + options.triadComponents(j).name;
+                for m=1:n
+                    counter = m+(i-1)*n;
+                    inertial_fluxes_consol(counter).name = options.triadComponents(i).name + "_" + options.triadComponents(m).name;
+                    inertial_fluxes_consol(counter).fancyName = options.triadComponents(i).name + "{\nabla}" + options.triadComponents(m).name;
                     for iReservoir = 1:length(options.energyReservoirs)
                         arraySize = size(inertial_fluxes(1).(options.energyReservoirs(iReservoir).name));
                         inertial_fluxes_consol(counter).(options.energyReservoirs(iReservoir).name) = zeros(arraySize);
@@ -825,8 +849,8 @@ classdef WVDiagnostics < handle
             counter = 1;
             for i=1:length(primaryFlowComponents_t)
                 index_i = find(arrayfun(@(a) a.contains(primaryFlowComponents_t(i)), consolidatedFlowComponents_t));
-                for j=1:length(primaryFlowComponents_t)
-                    index_j = find(arrayfun(@(a) a.contains(primaryFlowComponents_t(j)), consolidatedFlowComponents_t));
+                for m=1:length(primaryFlowComponents_t)
+                    index_j = find(arrayfun(@(a) a.contains(primaryFlowComponents_t(m)), consolidatedFlowComponents_t));
                     for iReservoir = 1:length(options.energyReservoirs)
                         a = inertial_fluxes(counter).(options.energyReservoirs(iReservoir).name);
                         b = inertial_fluxes_consol(index_j+(index_i-1)*n).(options.energyReservoirs(iReservoir).name);
@@ -908,7 +932,7 @@ classdef WVDiagnostics < handle
         cmap = cmocean(ColormapName,varargin)
         cmap = crameri(ColormapName,varargin)
 
-        function iTimeChanged(metaProp,eventData)
+        function iTimeChanged(~,eventData)
             wvd = eventData.AffectedObject;
             wvd.wvt.initFromNetCDFFile(wvd.wvfile,iTime=wvd.iTime);
         end
