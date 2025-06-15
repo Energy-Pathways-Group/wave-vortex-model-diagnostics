@@ -101,8 +101,13 @@ classdef WVDiagnostics < handle
         end
 
         createDiagnosticsFile(self,options)
-        fig = plotMooringRotarySpectrum(self)
+
         fig = plotFluidStateMultipanel(self,options)
+        fig = plotEnstrophySpectrum(self,options)
+        fig = plotEnergySpectrum(self,options)
+
+        fig = plotMooringRotarySpectrum(self)
+
 
         function fig = plotEnstrophyOverTime(self,options)
             % Plot enstrophy over time
@@ -316,7 +321,7 @@ classdef WVDiagnostics < handle
             col{"sink"} = [245 194 193]/255;
 
             reservoirs = configureDictionary("string","Box");
-            [reservoirEnergy, t] = self.energyForReservoirOverTime(timeIndices=options.timeIndices);
+            [reservoirEnergy, t] = self.energyForReservoirOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
             for iReservoir = 1:length(options.energyReservoirs)
                 name = options.energyReservoirs(iReservoir).name;
                 if name == "te_quadratic"
@@ -463,7 +468,7 @@ classdef WVDiagnostics < handle
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.shouldIncludeExactTotalEnergy = true
+                options.shouldIncludeExactTotalEnergy = false
                 options.timeIndices = Inf;
             end
             %% Measure total energy in each reservoir
@@ -828,6 +833,69 @@ classdef WVDiagnostics < handle
             inertial_fluxes = inertial_fluxes_consol;
 
         end
+
+        function setLogWavelengthXAxis(self,options)
+            arguments
+                self WVDiagnostics
+                options.num_ticks = 6
+                options.roundToNearest = 5
+            end
+            [labels_x,ticks_x] = self.logWavelengthAxis(num_ticks=options.num_ticks,roundToNearest=options.roundToNearest);
+            xscale('log')
+            xticks(ticks_x)
+            xticklabels(labels_x)
+        end
+
+        function [labels, ticks] = logWavelengthAxis(self,options)
+            % To use this:
+            % xticks(ticks_x)
+            % xticklabels(labels_x)
+            arguments
+                self WVDiagnostics
+                options.num_ticks = 6
+                options.roundToNearest = 5
+            end
+            ticks = logspace(log10(self.kRadial(2)),log10(self.kRadial(end)),options.num_ticks);
+            ticks = round(2*pi./(1e3.*ticks)/options.roundToNearest)*options.roundToNearest;
+            labels = cell(length(ticks),1);
+            for i=1:length(ticks)
+                labels{i} = sprintf('%.0f',ticks(i));
+            end
+            ticks = 2*pi./(1e3*ticks);
+        end
+
+        function overlayFrequencyContours(self,options)
+            arguments
+                self 
+                options.frequencies = [1.01 1.05 1.2 1.5 2 4 8 16]
+                options.textColor = [.5,.5,.5]
+                options.labelSpacing = 400
+                options.lineWidth = 1
+            end
+            [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
+            omegaJK = (omegaN./n)/self.wvt.f;
+            set(gca,'layer','top'),
+            hold on
+            [C,h] = contour(self.kRadial(2:end),self.j',(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+        end
+
+        function showRossbyRadiusYAxis(self,options)
+            arguments
+                self 
+                options.textColor = [.5,.5,.5] 
+            end
+            set(gca,'Layer','top','TickLength',[0.015 0.015])
+            % create some nice tick labels to show deformation radius
+            yticksTemp = yticks;
+            ticks_y = sqrt(self.wvt.Lr2)./1000;
+            labels_y = cell(length(yticksTemp),1);
+            for i=1:length(yticksTemp)
+                labels_y{i} = sprintf('%0.1f',ticks_y(yticksTemp(i)+1));
+            end
+            text(1.25*max(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',options.textColor,'HorizontalAlignment','left')
+            text(2*max(xlim),1.1*max(ylim),'L_r (km)','Color',options.textColor,'HorizontalAlignment','right')
+        end
     end
 
     methods (Static)
@@ -837,6 +905,8 @@ classdef WVDiagnostics < handle
             wvd = eventData.AffectedObject;
             wvd.wvt.initFromNetCDFFile(wvd.wvfile,iTime=wvd.iTime);
         end
+
+
 
         function bool = areEnergyReservoirsComplete(reservoirs)
             bool = all(sum([reservoirs.vectorContents],2)==1);
