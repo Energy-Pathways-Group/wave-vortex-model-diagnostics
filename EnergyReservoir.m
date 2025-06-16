@@ -25,6 +25,15 @@ classdef EnergyReservoir
        function v = get.vectorContents(self)
             v = [self.hasMDA,self.hasGeostrophicKinetic,self.hasGeostrophicPotential,self.hasInertial,self.hasInternalGravityWave].';
        end
+
+       function k = kFromKRadial(self,k)
+           switch self
+               case {EnergyReservoir.geostrophic_kinetic, EnergyReservoir.geostrophic_potential,EnergyReservoir.geostrophic,EnergyReservoir.igw}
+                   k = k(2:end);
+               case {EnergyReservoir.mda,EnergyReservoir.io}
+                   k = k(1);
+           end
+       end
    end
    enumeration
       mda                       (true,false,false,false,false,"te_mda","mean density anomaly")
@@ -37,5 +46,35 @@ classdef EnergyReservoir
       io                        (false,false,false,true,false,"te_io","inertial")
       wave                      (false,false,false,true,true,"te_wave","wave")
       total                     (true,true,true,true,true,"te_quadratic","total quadratic")
+   end
+
+   methods (Static)
+        function eFlux = energyFluxForReservoirFromStructure(Ejk,reservoirNames)
+            eFlux = cell(length(reservoirNames),1);
+            for iReservoir = 1:length(reservoirNames)
+                switch reservoirNames(iReservoir)
+                    case EnergyReservoir.geostrophic_kinetic
+                        eFlux{iReservoir} = Ejk.KE0(:,2:end,:);
+                    case EnergyReservoir.geostrophic_potential
+                        eFlux{iReservoir} = Ejk.PE0(:,2:end,:);
+                    case EnergyReservoir.geostrophic
+                        eFlux{iReservoir} = Ejk.KE0(:,2:end,:)+Ejk.PE0(:,2:end,:);
+                    case EnergyReservoir.mda
+                        eFlux{iReservoir} = Ejk.PE0(:,1,:);
+                    case EnergyReservoir.geostrophic_mda
+                        eFlux{iReservoir} = Ejk.KE0 + Ejk.PE0;
+                    case EnergyReservoir.igw
+                        eFlux{iReservoir} = Ejk.Ep(:,2:end,:) + Ejk.Em(:,2:end,:);
+                    case EnergyReservoir.io
+                        eFlux{iReservoir} = Ejk.Ep(:,1,:) + Ejk.Em(:,1,:);
+                    case EnergyReservoir.wave
+                        eFlux{iReservoir} = Ejk.Ep+Ejk.Em;
+                    case EnergyReservoir.total
+                        eFlux{iReservoir} = Ejk.Ep+Ejk.Em+Ejk.KE0+Ejk.PE0;
+                    otherwise
+                        error("unknown energy reservoir");
+                end
+            end
+        end
    end
 end

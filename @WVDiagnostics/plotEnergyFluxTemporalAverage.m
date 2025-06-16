@@ -43,7 +43,7 @@ for iComponent = 1:length(fluxes)
     ax = nexttile(tl);
     switch options.axes
         case "jk"
-            pcolor(ax,wvt.kRadial,wvt.j,val), shading flat
+            pcolor(ax,options.energyReservoir.kFromKRadial(wvt.kRadial),wvt.j,val), shading flat
             colormap(ax, options.colormap)
             self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
             if options.shouldOverlayWaveFrequencies
@@ -55,11 +55,11 @@ for iComponent = 1:length(fluxes)
             plot(wvt.j,zeros(size(wvt.j)),LineWidth=2,Color=0*[1 1 1]), hold on
             plot(ax,wvt.j,sum(val,2))
         case "k"
-            plot(wvt.kRadial,zeros(size(wvt.kRadial)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(options.energyReservoir.kFromKRadial(wvt.kRadial),zeros(size(wvt.kRadial)),LineWidth=2,Color=0*[1 1 1]), hold on
             plot(ax,wvt.kRadial,sum(val,1))
             self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
     end
-    title(ax,fluxes(iComponent).fancyName)
+    title(ax,fluxes(iComponent).fancyName + " (" + string(sum(val(:))) + " " + self.flux_scale_units + ")" )
 end
 
 switch options.axes

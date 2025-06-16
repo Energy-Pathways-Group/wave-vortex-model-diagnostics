@@ -15,6 +15,8 @@ classdef WVDiagnostics < handle
         escale_units = "GM"
         flux_scale = 3.74/(86400*365)
         flux_scale_units = "GM/yr"
+        zscale
+        zscale_units = "f^2";
     end
 
     properties (Dependent)
@@ -60,6 +62,7 @@ classdef WVDiagnostics < handle
             else
                 warning("No diagnostics file found. Some functionality will not be available.")
             end
+            self.zscale = self.wvt.f^2;
 
             addlistener(self,'iTime','PostSet',@WVDiagnostics.iTimeChanged);
         end
@@ -175,18 +178,18 @@ classdef WVDiagnostics < handle
             arguments
                 self WVDiagnostics
                 options.visible = "on"
+                options.timeIndices = Inf;
             end
-            [Z_quadratic,Z_apv] = self.diagfile.readVariables('enstrophy_quadratic','enstrophy_apv');
-            t = self.diagfile.readVariables('t');
-            zscale = self.wvt.f^2;
-            zscale_units = "f^2";
+            [Z_quadratic, t] = self.enstrophyQGPVOverTime(timeIndices=options.timeIndices);
+            [Z_apv, ~] = self.enstrophyAPVOverTime(timeIndices=options.timeIndices);
+
             fig = figure(Visible=options.visible);
-            plot(t/self.tscale,Z_quadratic/zscale,LineWidth=2), hold on
-            plot(t/self.tscale,Z_apv/zscale,LineWidth=2)
+            plot(t/self.tscale,Z_quadratic/self.zscale,LineWidth=2), hold on
+            plot(t/self.tscale,Z_apv/self.zscale,LineWidth=2)
             legend('quadratic','apv')
 
             xlabel("time (" + self.tscale_units + ")")
-            ylabel("enstrophy (" + zscale_units + ")")
+            ylabel("enstrophy (" + self.zscale_units + ")")
             xlim([min(t) max(t)]/self.tscale);
         end
 
@@ -211,10 +214,10 @@ classdef WVDiagnostics < handle
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.shouldIncludeExactTotalEnergy = true
+                options.timeIndices = Inf;
                 options.visible = "on"
             end
-            reservoirs = self.energyOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy);
-            t = self.diagfile.readVariables('t');
+            [reservoirs, t] = self.energyOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy,timeIndices=options.timeIndices);
 
             fig = figure(Visible=options.visible);
 
@@ -249,11 +252,11 @@ classdef WVDiagnostics < handle
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.timeIndices = Inf;
                 options.visible = "on"
                 options.filter = @(v) v;
             end
-            forcing_fluxes = self.forcingFluxesOverTime(energyReservoirs=options.energyReservoirs);
-            t = self.diagfile.readVariables('t');
+            [forcing_fluxes, t] = self.forcingFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
             fig = figure(Visible=options.visible);
             tl = tiledlayout(length(options.energyReservoirs),1,TileSpacing="compact");
@@ -285,11 +288,11 @@ classdef WVDiagnostics < handle
             arguments
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.timeIndices = Inf;
                 options.visible = "on"
                 options.filter = @(v) v;
             end
-            inertial_fluxes = self.inertialFluxesOverTime(energyReservoirs=options.energyReservoirs);
-            t = self.diagfile.readVariables('t');
+            [inertial_fluxes,t] = self.inertialFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
             fig = figure(Visible=options.visible);
             tl = tiledlayout(length(options.energyReservoirs),1,TileSpacing="compact");
@@ -366,16 +369,16 @@ classdef WVDiagnostics < handle
 
                 reservoirs(name) = Box(fancyName,FaceColor=col{name}, FontSize=16, CornerRadius=0.10);
                 if options.shouldShowReservoirEnergy
-                    energy = mean(reservoirEnergy(iReservoir).energy)/self.energy_scale;
+                    energy = mean(reservoirEnergy(iReservoir).energy)/self.escale;
                     flux = (reservoirEnergy(iReservoir).energy(end) - reservoirEnergy(iReservoir).energy(1))/(t(end)-t(1))/self.flux_scale;
                     if abs(flux) > options.fluxTolerance
                         if flux > 0
-                            reservoirs(name).Sublabel=sprintf("%.2f %s + %.2f %s",energy,self.energy_scale_units,abs(flux),self.flux_scale_units);
+                            reservoirs(name).Sublabel=sprintf("%.2f %s + %.2f %s",energy,self.escale_units,abs(flux),self.flux_scale_units);
                         else
-                            reservoirs(name).Sublabel=sprintf("%.2f %s – %.2f %s",energy,self.energy_scale_units,abs(flux),self.flux_scale_units);
+                            reservoirs(name).Sublabel=sprintf("%.2f %s – %.2f %s",energy,self.escale_units,abs(flux),self.flux_scale_units);
                         end
                     else
-                        reservoirs(name).Sublabel=sprintf("%.2f %s",energy,self.energy_scale_units);
+                        reservoirs(name).Sublabel=sprintf("%.2f %s",energy,self.escale_units);
                     end
                 end
             end
@@ -399,14 +402,14 @@ classdef WVDiagnostics < handle
                     fancyName = forcing_fluxes(iFlux).fancyName;
                 end
 
-                if forcing_fluxes(iFlux).te/options.flux_scale/2 > options.fluxTolerance
+                if forcing_fluxes(iFlux).te/self.flux_scale/2 > options.fluxTolerance
                     sources(end+1) = Box(fancyName,FaceColor=col{"source"}, FontSize=16);
                     reservoirNames = reservoirs.keys;
                     for iRes=1:length(reservoirNames)
                         name = reservoirNames(iRes);
-                        magnitude = abs(forcing_fluxes(iFlux).(name))/options.flux_scale;
+                        magnitude = abs(forcing_fluxes(iFlux).(name))/self.flux_scale;
                         if options.shouldShowUnits
-                            label = sprintf("%.2f %s",magnitude,options.flux_scale_units);
+                            label = sprintf("%.2f %s",magnitude,self.flux_scale_units);
                         else
                             label = sprintf("%.2f",magnitude);
                         end
@@ -414,14 +417,14 @@ classdef WVDiagnostics < handle
                             source_arrows(end+1) = Arrow(sources(end),reservoirs(name),Label=label,Magnitude=magnitude, LabelOffset=0.5, FontSize=14);
                         end
                     end
-                elseif forcing_fluxes(iFlux).te/options.flux_scale/2 < -options.fluxTolerance
+                elseif forcing_fluxes(iFlux).te/self.flux_scale/2 < -options.fluxTolerance
                     sinks(end+1) = Box(fancyName,FaceColor=col{"sink"}, FontSize=16);
                     reservoirNames = reservoirs.keys;
                     for iRes=1:length(reservoirNames)
                         name = reservoirNames(iRes);
-                        magnitude = abs(forcing_fluxes(iFlux).(name))/options.flux_scale;
+                        magnitude = abs(forcing_fluxes(iFlux).(name))/self.flux_scale;
                         if options.shouldShowUnits
-                            label = sprintf("%.2f %s",magnitude,options.flux_scale_units);
+                            label = sprintf("%.2f %s",magnitude,self.flux_scale_units);
                         else
                             label = sprintf("%.2f",magnitude);
                         end
@@ -554,6 +557,34 @@ classdef WVDiagnostics < handle
             t = filter(self.diagfile.readVariables('t'));
         end
 
+        function [enstrophy, t] = enstrophyQGPVOverTime(self, options)
+            arguments
+                self WVDiagnostics
+                options.timeIndices = Inf;
+            end
+            if isinf(options.timeIndices)
+                filter = @(v) v;
+            else
+                filter = @(v) v(options.timeIndices);
+            end
+            enstrophy = filter(self.diagfile.readVariables('enstrophy_quadratic'));
+            t = filter(self.diagfile.readVariables('t'));
+        end
+
+        function [enstrophy, t] = enstrophyAPVOverTime(self, options)
+            arguments
+                self WVDiagnostics
+                options.timeIndices = Inf;
+            end
+            if isinf(options.timeIndices)
+                filter = @(v) v;
+            else
+                filter = @(v) v(options.timeIndices);
+            end
+            enstrophy = filter(self.diagfile.readVariables('enstrophy_apv'));
+            t = filter(self.diagfile.readVariables('t'));
+        end
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Flux averages, scalar
@@ -634,7 +665,7 @@ classdef WVDiagnostics < handle
             end
         end
 
-        function forcing_fluxes = forcingFluxesOverTime(self,options)
+        function [forcing_fluxes,t] = forcingFluxesOverTime(self,options)
             % Compute forcing fluxes over time
             %
             % Returns the energy fluxes from external forcing for each reservoir as a function of time.
@@ -661,9 +692,13 @@ classdef WVDiagnostics < handle
             end
 
             forcing_fluxes = self.filterFluxesForReservoir(forcing_fluxes,filter=filter_space);
+            t = self.t_diag;
+            if ~isinf(options.timeIndices)
+                t = t(options.timeIndices);
+            end
         end
 
-        function inertial_fluxes = inertialFluxesOverTime(self,options)
+        function [inertial_fluxes,t] = inertialFluxesOverTime(self,options)
             % Compute inertial fluxes over time
             %
             % Returns the energy fluxes due to inertial interactions for each reservoir as a function of time.
@@ -677,9 +712,18 @@ classdef WVDiagnostics < handle
                 self WVDiagnostics
                 options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
                 options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
+                options.timeIndices = Inf;
             end
-            filter_space = @(v) reshape( sum(sum(v,1),2), [], 1);
+            if isinf(options.timeIndices)
+                filter_space = @(v) reshape( sum(sum(v,1),2), [], 1);
+            else
+                filter_space = @(v) reshape( sum(sum(v(:,:,options.timeIndices),1),2), [], 1);
+            end
             inertial_fluxes = self.filterFluxesForReservoir(self.inertialFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
+            t = self.t_diag;
+            if ~isinf(options.timeIndices)
+                t = t(options.timeIndices);
+            end
         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -775,7 +819,7 @@ classdef WVDiagnostics < handle
                 forcing_fluxes(iForce).fancyName = forcingNames(iForce);
 
                 % per-reservoir fluxes
-                fluxes = self.energyFluxForReservoirFromStructure(Ejk,options.energyReservoirs);
+                fluxes = EnergyReservoir.energyFluxForReservoirFromStructure(Ejk,options.energyReservoirs);
                 for iReservoir = 1:length(options.energyReservoirs)
                     forcing_fluxes(iForce).(options.energyReservoirs(iReservoir).name) = fluxes{iReservoir};
                 end
@@ -817,7 +861,7 @@ classdef WVDiagnostics < handle
                     inertial_fluxes(counter).fancyName = primaryFlowComponents_t(i).shortName + "-" + primaryFlowComponents_t(m).shortName;
 
                     % per-reservoir fluxes
-                    fluxes = self.energyFluxForReservoirFromStructure(Ejk,options.energyReservoirs);
+                    fluxes = EnergyReservoir.energyFluxForReservoirFromStructure(Ejk,options.energyReservoirs);
                     for iReservoir = 1:length(options.energyReservoirs)
                         inertial_fluxes(counter).(options.energyReservoirs(iReservoir).name) = fluxes{iReservoir};
                     end
@@ -997,32 +1041,6 @@ classdef WVDiagnostics < handle
             filtered_fluxes = fluxes;
         end
 
-        function eFlux = energyFluxForReservoirFromStructure(Ejk,reservoirNames)
-            eFlux = cell(length(reservoirNames),1);
-            for iReservoir = 1:length(reservoirNames)
-                switch reservoirNames(iReservoir)
-                    case EnergyReservoir.geostrophic_kinetic
-                        eFlux{iReservoir} = Ejk.KE0(:,2:end,:);
-                    case EnergyReservoir.geostrophic_potential
-                        eFlux{iReservoir} = Ejk.PE0(:,2:end,:);
-                    case EnergyReservoir.geostrophic
-                        eFlux{iReservoir} = Ejk.KE0(:,2:end,:)+Ejk.PE0(:,2:end,:);
-                    case EnergyReservoir.mda
-                        eFlux{iReservoir} = Ejk.PE0(:,1,:);
-                    case EnergyReservoir.geostrophic_mda
-                        eFlux{iReservoir} = Ejk.KE0 + Ejk.PE0;
-                    case EnergyReservoir.igw
-                        eFlux{iReservoir} = Ejk.Ep(:,2:end,:) + Ejk.Em(:,2:end,:);
-                    case EnergyReservoir.io
-                        eFlux{iReservoir} = Ejk.Ep(:,1,:) + Ejk.Em(:,1,:);
-                    case EnergyReservoir.wave
-                        eFlux{iReservoir} = Ejk.Ep+Ejk.Em;
-                    case EnergyReservoir.total
-                        eFlux{iReservoir} = Ejk.Ep+Ejk.Em+Ejk.KE0+Ejk.PE0;
-                    otherwise
-                        error("unknown energy reservoir");
-                end
-            end
-        end
+
     end
 end
