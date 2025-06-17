@@ -274,6 +274,37 @@ classdef WVDiagnostics < handle
             end
         end
 
+        function fig = plotExactForcingFluxOverTime(self,options)
+            % Plot forcing flux for each reservoir over time
+            %
+            % Plots the energy flux into each reservoir from external forcing as a function of time.
+            %
+            % - Topic: Figures (over time)
+            % - Declaration: fig = plotForcingFluxOverTime(self,options)
+            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+            % - Parameter options.visible: figure visibility (default: "on")
+            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
+            % - Returns fig: handle to the generated figure
+            arguments
+                self WVDiagnostics
+                options.timeIndices = Inf;
+                options.visible = "on"
+                options.filter = @(v) v;
+            end
+            [forcing_fluxes, t] = self.exactForcingFluxesOverTime(timeIndices=options.timeIndices);
+
+            fig = figure(Visible=options.visible);
+            tl = tiledlayout(1,1,TileSpacing="compact");
+            for iForce = 1:length(forcing_fluxes)
+                plot(t/self.tscale,options.filter(forcing_fluxes(iForce).te/self.flux_scale)), hold on
+            end
+            legend(forcing_fluxes.fancyName)
+
+            xlabel("time (" + self.tscale_units + ")")
+            ylabel("flux (" + self.flux_scale_units + ")")
+            xlim([min(t) max(t)]/self.tscale);
+        end
+
         function fig = plotInertialFluxOverTime(self,options)
             % Plot inertial flux for each reservoir over time
             %
@@ -642,7 +673,7 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        function forcing_fluxes = exactForcingFluxesOverTime(self)
+        function [forcing_fluxes, t] = exactForcingFluxesOverTime(self,options)
             % Compute exact forcing fluxes over time
             %
             % Returns the exact energy fluxes from external forcing for each time step.
@@ -652,6 +683,12 @@ classdef WVDiagnostics < handle
             % - Returns forcing_fluxes: struct array with exact fluxes
             arguments
                 self WVDiagnostics
+                options.timeIndices = Inf;
+            end
+            if isinf(options.timeIndices)
+                filter_space = @(v) reshape( sum(sum(v,1),2), [], 1);
+            else
+                filter_space = @(v) reshape( sum(sum(v(:,:,options.timeIndices),1),2), [], 1);
             end
             forcingNames = self.wvt.forcingNames;
             forcing_fluxes(length(forcingNames)) = struct("name","placeholder");
@@ -662,6 +699,11 @@ classdef WVDiagnostics < handle
                 forcing_fluxes(iForce).name = name;
                 forcing_fluxes(iForce).fancyName = forcingNames(iForce);
                 forcing_fluxes(iForce).te = self.diagfile.readVariables("E_" + name);
+            end
+
+            t = self.t_diag;
+            if ~isinf(options.timeIndices)
+                t = t(options.timeIndices);
             end
         end
 

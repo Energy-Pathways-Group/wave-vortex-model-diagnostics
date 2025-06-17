@@ -35,7 +35,7 @@ end
 
 
 
-fig = figure;
+fig = figure(Visible=options.visible);
 tl = tiledlayout(fig,"flow",TileSpacing='tight');
 
 for iComponent = 1:length(fluxes)
