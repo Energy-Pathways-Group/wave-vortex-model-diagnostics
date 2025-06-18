@@ -108,7 +108,7 @@ classdef WVDiagnostics < handle
             % - Topic: Dependent property getter
             % - Declaration: t = get.t_wv(self)
             % - Returns t: time vector from wave-vortex file
-            t = self.wvfile.readVariables('t');
+            t = self.wvfile.readVariables('wave-vortex/t');
         end
 
         function setEnergyUnits(self, units)
