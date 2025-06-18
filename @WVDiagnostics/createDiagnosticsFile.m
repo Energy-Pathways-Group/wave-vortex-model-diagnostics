@@ -22,106 +22,172 @@ arguments
 end
 
 if exist(self.diagpath,"file")
-    warning('A diagnostics file already exists. Returning.');
-    return
-end
+    [found, idx] = ismember(self.t_diag, self.t_wv);
+    if ~all(found)
+        error('Some entries of t_diag are not exactly in t_wv.');
+    end
+    didx = diff(idx);
+    stride = didx(1);
+    timeIndices = (idx(end)+stride):stride:length(self.t_wv);
+    wvt = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
+    diagfile = self.diagfile;
+    ncfile = self.wvfile;
 
-if options.shouldMeasureAntialiasingFlux
-    [wvt_lowres, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
-    wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
+    outputIndexOffset = length(self.t_diag);
+
+    wvt.addOperation(EtaTrueOperation());
+    wvt.addOperation(APEOperation(wvt));
+    wvt.addOperation(APVOperation());
+    wvt.addOperation(SpatialForcingOperation(wvt));
+    int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
+    
+    % 1. Measures of energy, APV and enstrophy
+    EnergyByComponent = configureDictionary("string","cell");
+    flowComponentNames = wvt.flowComponentNames;
+    for i=1:length(flowComponentNames)
+        comp = wvt.flowComponentWithName(flowComponentNames(i));
+        name = "E_" + comp.abbreviatedName;
+        EnergyByComponent{name} = diagfile.variableWithName(name);
+    end
+    EnergyByComponent{"KE_g"} = diagfile.variableWithName("KE_g");
+    EnergyByComponent{"PE_g"} = diagfile.variableWithName("PE_g");
+
+    variable_ke = diagfile.variableWithName("ke");
+    variable_pe = diagfile.variableWithName("pe_quadratic");
+    variable_ape = diagfile.variableWithName("ape");
+    variable_z = diagfile.variableWithName("enstrophy_quadratic");
+    variable_apv = diagfile.variableWithName("enstrophy_apv");
+
+    % 2. Forcing fluxes
+    EnergyFlux = configureDictionary("string","cell");
+    EnstrophyFlux = configureDictionary("string","cell");
+    EnergyFluxTrue = configureDictionary("string","cell");
+    forcingNames = wvt.forcingNames;
+    for i=1:length(forcingNames)
+        name = replace(forcingNames(i),"-","_");
+        name = replace(name," ","_");
+        EnergyFlux{forcingNames(i)}.Ep = diagfile.variableWithName("Ep_" + name);
+        EnergyFlux{forcingNames(i)}.Em = diagfile.variableWithName("Em_" + name);
+        EnergyFlux{forcingNames(i)}.KE0 = diagfile.variableWithName("KE0_" + name);
+        EnergyFlux{forcingNames(i)}.PE0 = diagfile.variableWithName("PE0_" + name);
+        EnstrophyFlux{forcingNames(i)} = diagfile.variableWithName("Z0_" + name);
+        EnergyFluxTrue{forcingNames(i)} = diagfile.variableWithName("E_" + name);
+    end
+
+    % 3. Triads
+    triadFlowComponents = [wvt.flowComponentWithName('wave'); wvt.flowComponentWithName('inertial'); wvt.flowComponentWithName('geostrophic'); wvt.flowComponentWithName('mda')];
+    EnergyTriads = configureDictionary("string","cell");
+    EnstrophyTriads = configureDictionary("string","cell");
+    for i=1:length(triadFlowComponents)
+        for j=1:length(triadFlowComponents)
+            name = triadFlowComponents(i).abbreviatedName + "_" + triadFlowComponents(j).abbreviatedName;
+            EnergyTriads{name}.Ep = diagfile.variableWithName("Ep_" + name);
+            EnergyTriads{name}.Em = diagfile.variableWithName("Em_" + name);
+            EnergyTriads{name}.KE0 = diagfile.variableWithName("KE0_" + name);
+            EnergyTriads{name}.PE0 = diagfile.variableWithName("PE0_" + name);
+            EnstrophyTriads{name} = diagfile.variableWithName("Z0_" + name);
+        end
+    end
 else
-    [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
-end
-tDim = ncfile.readVariables('wave-vortex/t');
-if ~isfield(options,"timeIndices")
-    timeIndices = 1:options.stride:length(tDim);
-else
-    timeIndices = options.timeIndices;
-end
+    outputIndexOffset = 0;
+    if options.shouldMeasureAntialiasingFlux
+        [wvt_lowres, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
+        wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
+    else
+        [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
+    end
+    tDim = ncfile.readVariables('wave-vortex/t');
 
-wvt.addOperation(EtaTrueOperation());
-wvt.addOperation(APEOperation(wvt));
-wvt.addOperation(APVOperation());
-wvt.addOperation(SpatialForcingOperation(wvt));
-int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
+    if ~isfield(options,"timeIndices")
+        timeIndices = 1:options.stride:length(tDim);
+    else
+        timeIndices = options.timeIndices;
+    end
 
-%% setup diagnostic output file
-diagfile = NetCDFFile(self.diagpath);
-self.diagfile = diagfile;
+    wvt.addOperation(EtaTrueOperation());
+    wvt.addOperation(APEOperation(wvt));
+    wvt.addOperation(APVOperation());
+    wvt.addOperation(SpatialForcingOperation(wvt));
+    int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 
-dimensionNames = ["j","kRadial"];
-for iDim=1:length(dimensionNames)
-    dimAnnotation = wvt.dimensionAnnotationWithName(dimensionNames(iDim));
-    dimAnnotation.attributes('units') = dimAnnotation.units;
-    dimAnnotation.attributes('long_name') = dimAnnotation.description;
-    diagfile.addDimension(dimAnnotation.name,wvt.(dimAnnotation.name),attributes=dimAnnotation.attributes);
-end
+    %% setup diagnostic output file
+    diagfile = NetCDFFile(self.diagpath);
+    self.diagfile = diagfile;
 
-varAnnotation = wvt.propertyAnnotationWithName('t');
-varAnnotation.attributes('units') = varAnnotation.units;
-varAnnotation.attributes('long_name') = varAnnotation.description;
-varAnnotation.attributes('standard_name') = 'time';
-varAnnotation.attributes('long_name') = 'time';
-varAnnotation.attributes('units') = 'seconds since 1970-01-01 00:00:00';
-varAnnotation.attributes('axis') = 'T';
-varAnnotation.attributes('calendar') = 'standard';
-diagfile.addDimension(varAnnotation.name,length=Inf,type="double",attributes=varAnnotation.attributes);
+    dimensionNames = ["j","kRadial"];
+    for iDim=1:length(dimensionNames)
+        dimAnnotation = wvt.dimensionAnnotationWithName(dimensionNames(iDim));
+        dimAnnotation.attributes('units') = dimAnnotation.units;
+        dimAnnotation.attributes('long_name') = dimAnnotation.description;
+        diagfile.addDimension(dimAnnotation.name,wvt.(dimAnnotation.name),attributes=dimAnnotation.attributes);
+    end
 
-% 1. Measures of energy, APV and enstrophy
-EnergyByComponent = configureDictionary("string","cell");
-flowComponentNames = wvt.flowComponentNames;
-for i=1:length(flowComponentNames)
-    comp = wvt.flowComponentWithName(flowComponentNames(i));
-    name = "E_" + comp.abbreviatedName;
-    EnergyByComponent{name} = diagfile.addVariable(name,"t",type="double",isComplex=false);
-end
-EnergyByComponent{"KE_g"} = diagfile.addVariable("KE_g","t",type="double",isComplex=false);
-EnergyByComponent{"PE_g"} = diagfile.addVariable("PE_g","t",type="double",isComplex=false);
-variable_ke = diagfile.addVariable("ke","t",type="double",isComplex=false);
-variable_pe = diagfile.addVariable("pe_quadratic","t",type="double",isComplex=false);
-variable_ape = diagfile.addVariable("ape","t",type="double",isComplex=false);
-variable_z = diagfile.addVariable("enstrophy_quadratic","t",type="double",isComplex=false);
-variable_apv = diagfile.addVariable("enstrophy_apv","t",type="double",isComplex=false);
+    varAnnotation = wvt.propertyAnnotationWithName('t');
+    varAnnotation.attributes('units') = varAnnotation.units;
+    varAnnotation.attributes('long_name') = varAnnotation.description;
+    varAnnotation.attributes('standard_name') = 'time';
+    varAnnotation.attributes('long_name') = 'time';
+    varAnnotation.attributes('units') = 'seconds since 1970-01-01 00:00:00';
+    varAnnotation.attributes('axis') = 'T';
+    varAnnotation.attributes('calendar') = 'standard';
+    diagfile.addDimension(varAnnotation.name,length=Inf,type="double",attributes=varAnnotation.attributes);
 
-% 2. Forcing fluxes
-EnergyFlux = configureDictionary("string","cell");
-EnstrophyFlux = configureDictionary("string","cell");
-EnergyFluxTrue = configureDictionary("string","cell");
-forcingNames = wvt.forcingNames;
-dimensionNames = ["j", "kRadial", "t"];
-for i=1:length(forcingNames)
-    name = replace(forcingNames(i),"-","_");
-    name = replace(name," ","_");
-    EnergyFlux{forcingNames(i)}.Ep = diagfile.addVariable("Ep_" + name,dimensionNames,type="double",isComplex=false);
-    EnergyFlux{forcingNames(i)}.Em = diagfile.addVariable("Em_" + name,dimensionNames,type="double",isComplex=false);
-    EnergyFlux{forcingNames(i)}.KE0 = diagfile.addVariable("KE0_" + name,dimensionNames,type="double",isComplex=false);
-    EnergyFlux{forcingNames(i)}.PE0 = diagfile.addVariable("PE0_" + name,dimensionNames,type="double",isComplex=false);
-    EnstrophyFlux{forcingNames(i)} = diagfile.addVariable("Z0_" + name,dimensionNames,type="double",isComplex=false);
-    EnergyFluxTrue{forcingNames(i)} = diagfile.addVariable("E_" + name,"t",type="double",isComplex=false);
-end
+    % 1. Measures of energy, APV and enstrophy
+    EnergyByComponent = configureDictionary("string","cell");
+    flowComponentNames = wvt.flowComponentNames;
+    for i=1:length(flowComponentNames)
+        comp = wvt.flowComponentWithName(flowComponentNames(i));
+        name = "E_" + comp.abbreviatedName;
+        EnergyByComponent{name} = diagfile.addVariable(name,"t",type="double",isComplex=false);
+    end
+    EnergyByComponent{"KE_g"} = diagfile.addVariable("KE_g","t",type="double",isComplex=false);
+    EnergyByComponent{"PE_g"} = diagfile.addVariable("PE_g","t",type="double",isComplex=false);
+    variable_ke = diagfile.addVariable("ke","t",type="double",isComplex=false);
+    variable_pe = diagfile.addVariable("pe_quadratic","t",type="double",isComplex=false);
+    variable_ape = diagfile.addVariable("ape","t",type="double",isComplex=false);
+    variable_z = diagfile.addVariable("enstrophy_quadratic","t",type="double",isComplex=false);
+    variable_apv = diagfile.addVariable("enstrophy_apv","t",type="double",isComplex=false);
 
-% 3. Triads
-triadFlowComponents = [wvt.flowComponentWithName('wave'); wvt.flowComponentWithName('inertial'); wvt.flowComponentWithName('geostrophic'); wvt.flowComponentWithName('mda')];
-EnergyTriads = configureDictionary("string","cell");
-EnstrophyTriads = configureDictionary("string","cell");
-dimensionNames = ["j", "kRadial", "t"];
-for i=1:length(triadFlowComponents)
-    for j=1:length(triadFlowComponents)
-        name = triadFlowComponents(i).abbreviatedName + "_" + triadFlowComponents(j).abbreviatedName;
-        EnergyTriads{name}.Ep = diagfile.addVariable("Ep_" + name,dimensionNames,type="double",isComplex=false);
-        EnergyTriads{name}.Em = diagfile.addVariable("Em_" + name,dimensionNames,type="double",isComplex=false);
-        EnergyTriads{name}.KE0 = diagfile.addVariable("KE0_" + name,dimensionNames,type="double",isComplex=false);
-        EnergyTriads{name}.PE0 = diagfile.addVariable("PE0_" + name,dimensionNames,type="double",isComplex=false);
-        EnstrophyTriads{name} = diagfile.addVariable("Z0_" + name,dimensionNames,type="double",isComplex=false);
+    % 2. Forcing fluxes
+    EnergyFlux = configureDictionary("string","cell");
+    EnstrophyFlux = configureDictionary("string","cell");
+    EnergyFluxTrue = configureDictionary("string","cell");
+    forcingNames = wvt.forcingNames;
+    dimensionNames = ["j", "kRadial", "t"];
+    for i=1:length(forcingNames)
+        name = replace(forcingNames(i),"-","_");
+        name = replace(name," ","_");
+        EnergyFlux{forcingNames(i)}.Ep = diagfile.addVariable("Ep_" + name,dimensionNames,type="double",isComplex=false);
+        EnergyFlux{forcingNames(i)}.Em = diagfile.addVariable("Em_" + name,dimensionNames,type="double",isComplex=false);
+        EnergyFlux{forcingNames(i)}.KE0 = diagfile.addVariable("KE0_" + name,dimensionNames,type="double",isComplex=false);
+        EnergyFlux{forcingNames(i)}.PE0 = diagfile.addVariable("PE0_" + name,dimensionNames,type="double",isComplex=false);
+        EnstrophyFlux{forcingNames(i)} = diagfile.addVariable("Z0_" + name,dimensionNames,type="double",isComplex=false);
+        EnergyFluxTrue{forcingNames(i)} = diagfile.addVariable("E_" + name,"t",type="double",isComplex=false);
+    end
+
+    % 3. Triads
+    triadFlowComponents = [wvt.flowComponentWithName('wave'); wvt.flowComponentWithName('inertial'); wvt.flowComponentWithName('geostrophic'); wvt.flowComponentWithName('mda')];
+    EnergyTriads = configureDictionary("string","cell");
+    EnstrophyTriads = configureDictionary("string","cell");
+    dimensionNames = ["j", "kRadial", "t"];
+    for i=1:length(triadFlowComponents)
+        for j=1:length(triadFlowComponents)
+            name = triadFlowComponents(i).abbreviatedName + "_" + triadFlowComponents(j).abbreviatedName;
+            EnergyTriads{name}.Ep = diagfile.addVariable("Ep_" + name,dimensionNames,type="double",isComplex=false);
+            EnergyTriads{name}.Em = diagfile.addVariable("Em_" + name,dimensionNames,type="double",isComplex=false);
+            EnergyTriads{name}.KE0 = diagfile.addVariable("KE0_" + name,dimensionNames,type="double",isComplex=false);
+            EnergyTriads{name}.PE0 = diagfile.addVariable("PE0_" + name,dimensionNames,type="double",isComplex=false);
+            EnstrophyTriads{name} = diagfile.addVariable("Z0_" + name,dimensionNames,type="double",isComplex=false);
+        end
     end
 end
-
 %% loop through time computing diagnostics
-for outputIndex = 1:length(timeIndices)
-    if mod(outputIndex,10) == 1
-        fprintf("%d..",outputIndex);
+for timeIndex = 1:length(timeIndices)
+    if mod(timeIndex,10) == 1
+        fprintf("%d..",timeIndex);
     end
-    iTime = timeIndices(outputIndex);
+    iTime = timeIndices(timeIndex);
+    outputIndex = timeIndex + outputIndexOffset;
     if options.shouldMeasureAntialiasingFlux
         wvt_lowres.initFromNetCDFFile(ncfile,iTime=iTime);
         [wvt.A0,wvt.Ap,wvt.Am] = wvt_lowres.spectralVariableWithResolution(wvt,wvt_lowres.A0,wvt_lowres.Ap,wvt_lowres.Am);
@@ -200,5 +266,4 @@ for outputIndex = 1:length(timeIndices)
     end
 end
 fprintf("\n");
-diagfile.close();
 end
