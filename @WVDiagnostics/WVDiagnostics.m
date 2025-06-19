@@ -489,11 +489,11 @@ classdef WVDiagnostics < handle
             if length(reservoirs.keys) == 2
                 inertial_fluxes = self.inertialFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
-                mag_geo = sum([inertial_fluxes(:).te_gmda])/options.flux_scale;
-                mag_wave = sum([inertial_fluxes(:).te_wave])/options.flux_scale;
+                mag_geo = sum([inertial_fluxes(:).te_gmda])/self.flux_scale;
+                mag_wave = sum([inertial_fluxes(:).te_wave])/self.flux_scale;
                 magnitude = (abs(mag_geo) + abs(mag_wave))/2;
                 if options.shouldShowUnits
-                    label = sprintf("%.2f %s",magnitude,options.flux_scale_units);
+                    label = sprintf("%.2f %s",magnitude,self.flux_scale_units);
                 else
                     label = sprintf("%.2f",magnitude);
                 end
