@@ -3,6 +3,7 @@ arguments
     self WVDiagnostics
     options.visible = "on"
     options.iTime
+    options.title
 end
 
 if isfield(options,"iTime")
@@ -10,6 +11,10 @@ if isfield(options,"iTime")
 end
 
 wvt = self.wvt;
+
+if ~isfield(options,"title")
+    options.title = sprintf('%d days',round(wvt.t/86400));
+end
 
 cmDivRWB = self.cmocean('balance'); % diverging positive-negative
 cmLinMono = self.cmocean('dense') ; % linear monochrome for data>0
@@ -19,10 +24,14 @@ zeta_limits = [-0.2 0.2];
 energy_limits = [-8 0];
 enstrophy_limits = [-16 -9];
 
+% % % % create radial wavelength vector
+% % % radialWavelength = 2*pi./wvt.kRadial/1000;
+% % % radialWavelength(1) = 2*radialWavelength(2);
+
 % create some nice tick labels to show wavelength
 % ticks_x = [500;300;200;100;50;30;20;10];
 % ticks_x = [500;50;30;20;15;12;10];
-ticks_x = round(2*pi./(1000.*linspace(wvt.kRadial(2),wvt.kRadial(end),6)));
+ticks_x = (2*pi./(1000.*linspace(wvt.kRadial(2),wvt.kRadial(end),6)));
 labels_x = cell(length(ticks_x),1);
 for i=1:length(ticks_x)
     labels_x{i} = sprintf('%.0f',ticks_x(i));
@@ -47,7 +56,7 @@ set(gcf,'PaperPositionMode','auto')
 
 tl = tiledlayout(2,3,TileSpacing="tight");
 
-title(tl, sprintf(':  %d days',round(wvt.t/86400)), 'Interpreter', 'none')
+title(tl, options.title, 'Interpreter', 'none')
 
 % compute some quantities
 TE_A0_j_kl = wvt.A0_TE_factor .* abs(wvt.A0).^2; % m^2/s^3
@@ -127,12 +136,15 @@ cb.Label.Interpreter = 'latex';
 ax = nexttile(tl,3);
 val = log10(TE_A0_j_kR);
 pcolor(ax,wvt.kRadial,wvt.j,val), shading flat,
+% % % pcolor(ax,radialWavelength,wvt.j,val), shading flat,
+% % % set(gca,'XDir','reverse')
+% % % set(gca,'XScale','log')
+xticklabels([])
 % title('geostrophic energy')
 title('energy spectrum')
 axis square
 clim(ax,energy_limits);
 xticks(ticks_x)
-xticklabels([])
 % xticklabels(labels_x)
 % xlabel('wavelength (km)')
 % xlabel("wavenumber")
@@ -147,8 +159,10 @@ labels_y = cell(length(yticksTemp),1);
 for i=1:length(yticksTemp)
     labels_y{i} = sprintf('%0.1f',ticks_y(yticksTemp(i)+1));
 end
-text(1.2*max(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',textColor,'HorizontalAlignment','left')
-text(1.3*max(xlim),1.05*max(ylim),'L_r (km)','Color',textColor,'HorizontalAlignment','right')
+text(1.25*max(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',textColor,'HorizontalAlignment','center')
+text(1.25*max(xlim),1.05*max(ylim),'L_r (km)','Color',textColor,'HorizontalAlignment','center')
+% % % text(.3*min(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',textColor,'HorizontalAlignment','center')
+% % % text(.3*min(xlim),1.05*max(ylim),'L_r (km)','Color',textColor,'HorizontalAlignment','center')
 % % add deformation radius contours
 % set(gca,'layer','top'),
 % hold on
@@ -156,10 +170,15 @@ text(1.3*max(xlim),1.05*max(ylim),'L_r (km)','Color',textColor,'HorizontalAlignm
 % [C,h] = contour(wvt.kRadial,wvt.j',deformationJK,v,'LineWidth',1,'Color',textColor);
 % clabel(C,h,v,'Color',textColor,'LabelSpacing',400)
 
+% self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
+
 % wave energy spectrum
 ax = nexttile(tl,6);
 val = log10(TE_Apm_j_kR);
 pcolor(ax,wvt.kRadial,wvt.j,val), shading flat,
+% % % pcolor(ax,radialWavelength,wvt.j,val), shading flat,
+% % % set(gca,'XDir','reverse')
+% % % set(gca,'XScale','log')
 % title('wave energy')
 % title('energy spectrum')
 axis square
@@ -181,6 +200,8 @@ hold on
 v = [1.01 1.05 1.2 1.5 2 4 8 16];
 [C,h] = contour(wvt.kRadial(2:end),wvt.j',(omegaJK(:,2:end)),v,'LineWidth',1,'Color',textColor);
 clabel(C,h,v,'Color',textColor,'LabelSpacing',400)
+
+% % % self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
 % Add a large label to the left of the first row (row 1)
 textAxes = axes('Position', [0, 0, 1, 1], 'Visible', 'off'); % Dummy invisible axes
