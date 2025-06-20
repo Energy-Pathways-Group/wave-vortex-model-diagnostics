@@ -1,4 +1,4 @@
-function fig = plotEnergySpectrumSimple(self,options)
+function fig = plotEnergySpectrumOLD(self,options)
 % Plot the wave/geostrophic energy spectra at a given time
 %
 % Makes a nice multiplanel plot of the wave and geostrophic spectra at a
@@ -64,84 +64,106 @@ TE_wave_j = sum(TE_wave_j_kR,2);
 linesTemp = lines;
 
 % create radial wavelength vector
-radialWavelength = 2*pi./wvt.kRadial/1000;
-radialWavelength(1) = 2*radialWavelength(2);
+% radialWavelength = 2*pi./wvt.kRadial/1000;
+% radialWavelength(1) = 2*radialWavelength(2);
 
 % create figure
 fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
 set(gcf,'PaperPositionMode','auto')
 set(gcf, 'Color', 'w');
-tl = tiledlayout(2,2,TileSpacing='tight');
+inertialPlotWidthRatio = 4;
+tl = tiledlayout(2,2*inertialPlotWidthRatio+2,TileSpacing='tight');
 title(tl,'Energy Spectrum')
+
+% plot the inertial energy
+val = log10(repmat(TE_Apm_j_kR(:,1),[1 2]));
+ax = nexttile;
+pcolor([0;1],wvt.j,val), shading flat,
+clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
+% clim([max(var(:))-6 max(var(:))])
+colormap(ax, self.cmocean('dense'));
+set(gca,'XTickLabel',[]);
+ylabel('mode')
+title('inertial')
+set(gca,'Layer','top','TickLength',[0.015 0.015])
 
 % plot the wave energy
 val = log10((TE_Apm_j_kR));
-axIGW = nexttile;
-pcolor(radialWavelength,wvt.j,val), shading flat
+axIGW = nexttile([1 inertialPlotWidthRatio]);
+pcolor(2*pi./wvt.kRadial/1000,wvt.j,val), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
+% clim([max(var(:))-6 max(var(:))])
 colormap(axIGW, self.cmocean('dense'));
-ylabel('vertical mode')
+
+% self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
+
+set(gca,'YTickLabel',[]);
 title('internal gravity wave')
 xlabel('wavelength (km)')
-text(radialWavelength(1),max(wvt.j)*1.05,'inertial','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
 
 self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
+% plot the MDA energy
+val = log10(repmat(TE_A0_j_kR(:,1),[1 2]));
+ax = nexttile;
+pcolor([0;1],wvt.j,val), shading flat,
+clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
+% clim([max(var(:))-6 max(var(:))])
+colormap(ax, self.cmocean('dense'));
+set(gca,'XTickLabel',[]);
+set(gca,'YTickLabel',[])
+title('MDA')
+set(gca,'Layer','top','TickLength',[0.015 0.015])
+
 % plot the geostrophic energy
 val = log10((TE_A0_j_kR).');
-axGEO = nexttile;
-pcolor(radialWavelength,wvt.j,val.'), shading flat
+axGEO = nexttile([1 inertialPlotWidthRatio]);
+pcolor(2*pi./wvt.kRadial/1000,wvt.j,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
+% clim([max(var(:))-6 max(var(:))])
 colormap(axGEO, self.cmocean('dense'));
 xscale('log')
+% xticks(ticks_x)
+% xticklabels(labels_x)
 set(gca,'YTickLabel',[]);
 title('geostrophic')
 xlabel('wavelength (km)')
-text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
 
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 
 % plot vertical mode spectrum
-axJ = nexttile;
+ax = nexttile(2*inertialPlotWidthRatio+4,[1 inertialPlotWidthRatio]);
 plot(wvt.j,TE_inertial_j+TE_wave_j+TE_A0_j,wvt.j,TE_A0_j,wvt.j,TE_inertial_j+TE_wave_j)
 hold on
 plot(wvt.j,TE_wave_j,'--','Color',linesTemp(3,:))
 plot(wvt.j,TE_inertial_j,':','Color',linesTemp(3,:))
 yscale('log')
 ylabel('energy (m^3 s^{-2})');
-xlabel('vertical mode');
+xlabel('vertical mode j');
 title('Vertical Mode Spectrum')
 legend('Total','Geostrophic','IO+IGW','IGW','IO','Location','southwest')
 
 % plot horizontal wavenumber spectrum
-axK = nexttile;
-plot(radialWavelength,TE_inertial_kR+TE_wave_kR+TE_A0_kR,radialWavelength,TE_A0_kR,radialWavelength,TE_inertial_kR+TE_wave_kR)
+axCOMB = nexttile(3*inertialPlotWidthRatio+5,[1 inertialPlotWidthRatio]);
+plot(2*pi./wvt.kRadial/1000,TE_inertial_kR+TE_wave_kR+TE_A0_kR,2*pi./wvt.kRadial/1000,TE_A0_kR,2*pi./wvt.kRadial/1000,TE_inertial_kR+TE_wave_kR)
 set(gca,'XDir','reverse')
 xscale('log'); yscale('log')
 title('Radial Wavenumber Spectrum')
 legend('Total','Geostrophic','IO+IGW','Location','southwest')
+% xticks(ticks_x)
+% xticklabels(labels_x)
 xlabel('wavelength (km)')
-% yticklabels([])
+yticklabels([])
+% ylabel('energy (m^3 s^{-2})');
 
-% match limits
-xlimK = get(axK,'xlim');
-ylimK = get(axK,'ylim');
-ylimJ = get(axJ,'ylim');
-set(axIGW,'xlim',xlimK);
-set(axGEO,'xlim',xlimK);
-set(axJ,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
-set(axK,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
-
-% colorbar
-cb = colorbar(axIGW);
-cb.Layout.Tile = 'south';
-cb.Label.String = "log10(m^3 s^{-2})";
+% match xlim
+xlimCOMB = get(axCOMB,'xlim');
+set(axIGW,'xlim',xlimCOMB);
+set(axGEO,'xlim',xlimCOMB);
 
 
 end

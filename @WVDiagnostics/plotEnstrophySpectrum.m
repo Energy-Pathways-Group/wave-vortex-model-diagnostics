@@ -38,42 +38,64 @@ TZ_A0_j = sum(TZ_A0_j_kR,2);
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% create radial wavelength vector
+radialWavelength = 2*pi./wvt.kRadial/1000;
+radialWavelength(1) = 2*radialWavelength(2);
+
 % create figure
 fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
 set(gcf,'PaperPositionMode','auto')
 set(gcf, 'Color', 'w');
-inertialPlotWidthRatio = 4;
-tl = tiledlayout(2,2*inertialPlotWidthRatio+1,TileSpacing="compact");
+tl = tiledlayout(2,2,TileSpacing="compact");
 title(tl,'Enstrophy Spectrum')
 
 % wave enstrophy???
+axIGW = nexttile;
 
 % plot the geostrophic enstrophy
 val = log10((TZ_A0_j_kR).');
-ax = nexttile(inertialPlotWidthRatio+2, [1 inertialPlotWidthRatio]);
-pcolor(wvt.kRadial,wvt.j,val.'), shading flat,
-% clim([max(var(:))-6 max(var(:))])
-colormap(ax, self.cmocean('dense'));
-
-self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
+axGEO = nexttile;
+pcolor(radialWavelength,wvt.j,val.'), shading flat
+set(gca,'XDir','reverse')
+set(gca,'XScale','log')
+title('geostrophic')
+colormap(axGEO, self.cmocean('dense'));
+text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
+line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
 
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 
 % plot vertical mode spectrum
-ax = nexttile(2*inertialPlotWidthRatio+3,[1 inertialPlotWidthRatio]);
+axJ = nexttile;
 plot(wvt.j,TZ_A0_j)
 yscale('log')
+axis tight
 ylabel('enstrophy (m s^{-2})');
 xlabel('vertical mode j');
 title('Vertical Mode Spectrum')
 
 % plot horizontal wavenumber spectrum
-ax = nexttile(3*inertialPlotWidthRatio+3,[1 inertialPlotWidthRatio]);
-plot(wvt.kRadial,TZ_A0_kR)
+axK = nexttile;
+plot(radialWavelength,TZ_A0_kR)
+set(gca,'XDir','reverse')
 xscale('log'); yscale('log')
+axis tight
 title('Radial Wavenumber Spectrum')
-ylabel('enstrophy (m s^{-2})');
-self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
+% ylabel('enstrophy (m s^{-2})');
 xlabel('wavelength (km)')
+
+% match limits
+xlimK = get(axK,'xlim');
+ylimK = get(axK,'ylim');
+ylimJ = get(axJ,'ylim');
+% set(axIGW,'xlim',xlimK);
+set(axGEO,'xlim',xlimK);
+set(axJ,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
+set(axK,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
+
+% colorbar
+cb = colorbar(axGEO);
+cb.Layout.Tile = 'south';
+cb.Label.String = "log10(m s^{-2})";
 
 end
