@@ -86,6 +86,7 @@ ylabel('vertical mode')
 title('internal gravity wave')
 xlabel('wavelength (km)')
 text(radialWavelength(1),max(wvt.j)*1.05,'inertial','FontWeight','bold')
+line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
 
 self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
@@ -102,11 +103,12 @@ set(gca,'YTickLabel',[]);
 title('geostrophic')
 xlabel('wavelength (km)')
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
+line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
 
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 
 % plot vertical mode spectrum
-ax = nexttile;
+axJ = nexttile;
 plot(wvt.j,TE_inertial_j+TE_wave_j+TE_A0_j,wvt.j,TE_A0_j,wvt.j,TE_inertial_j+TE_wave_j)
 hold on
 plot(wvt.j,TE_wave_j,'--','Color',linesTemp(3,:))
@@ -118,19 +120,28 @@ title('Vertical Mode Spectrum')
 legend('Total','Geostrophic','IO+IGW','IGW','IO','Location','southwest')
 
 % plot horizontal wavenumber spectrum
-axCOMB = nexttile;
+axK = nexttile;
 plot(radialWavelength,TE_inertial_kR+TE_wave_kR+TE_A0_kR,radialWavelength,TE_A0_kR,radialWavelength,TE_inertial_kR+TE_wave_kR)
 set(gca,'XDir','reverse')
 xscale('log'); yscale('log')
 title('Radial Wavenumber Spectrum')
 legend('Total','Geostrophic','IO+IGW','Location','southwest')
 xlabel('wavelength (km)')
-yticklabels([])
+% yticklabels([])
 
-% match xlim
-xlimCOMB = get(axCOMB,'xlim');
-set(axIGW,'xlim',xlimCOMB);
-set(axGEO,'xlim',xlimCOMB);
+% match limits
+xlimK = get(axK,'xlim');
+ylimK = get(axK,'ylim');
+ylimJ = get(axJ,'ylim');
+set(axIGW,'xlim',xlimK);
+set(axGEO,'xlim',xlimK);
+set(axJ,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
+set(axK,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
+
+% colorbar
+cb = colorbar(axIGW);
+cb.Layout.Tile = 'south';
+cb.Label.String = "log10(m^3 s^{-2})";
 
 
 end

@@ -155,6 +155,7 @@ classdef WVDiagnostics < handle
 
         fig = plotFluidStateMultipanel(self,options)
         fig = plotEnstrophySpectrum(self,options)
+        fig = plotEnstrophySpectrumSimple(self,options)
         fig = plotEnergySpectrum(self,options)
         fig = plotEnergySpectrumSimple(self,options)
 
