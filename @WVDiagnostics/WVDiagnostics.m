@@ -165,7 +165,8 @@ classdef WVDiagnostics < handle
 
         fig = plotMooringRotarySpectrum(self)
 
-
+        fig = plotEnergyFluxTemporalAverage(self,options)
+        
         function fig = plotEnstrophyOverTime(self,options)
             % Plot enstrophy over time
             %
