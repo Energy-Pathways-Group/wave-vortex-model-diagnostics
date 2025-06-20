@@ -156,6 +156,7 @@ classdef WVDiagnostics < handle
         fig = plotFluidStateMultipanel(self,options)
         fig = plotEnstrophySpectrum(self,options)
         fig = plotEnergySpectrum(self,options)
+        fig = plotEnergySpectrumSimple(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -992,7 +993,7 @@ classdef WVDiagnostics < handle
             omegaJK = (omegaN./n)/self.wvt.f;
             set(gca,'layer','top'),
             hold on
-            [C,h] = contour(self.kRadial(2:end),self.j',(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
+            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j',(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
             clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
         end
 
@@ -1009,8 +1010,8 @@ classdef WVDiagnostics < handle
             for i=1:length(yticksTemp)
                 labels_y{i} = sprintf('%0.1f',ticks_y(yticksTemp(i)+1));
             end
-            text(1.25*max(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',options.textColor,'HorizontalAlignment','left')
-            text(2*max(xlim),1.1*max(ylim),'L_r (km)','Color',options.textColor,'HorizontalAlignment','right')
+            text(.7*min(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',options.textColor,'HorizontalAlignment','center')
+            text(.7*min(xlim),1.1*max(ylim),'L_r (km)','Color',options.textColor,'HorizontalAlignment','center')
         end
     end
 
