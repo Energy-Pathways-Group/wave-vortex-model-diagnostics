@@ -18,7 +18,7 @@ arguments
     options.timeIndices = Inf;
     options.axes {mustBeMember(options.axes,{'jk','j','k'})} = 'jk'
     options.shouldOverlayWaveFrequencies = true
-    options.colormap = WVDiagnostics.crameri('bam')
+    options.colormap = WVDiagnostics.crameri('-bam')
     options.visible = "on"
     options.overSaturationFactor = 10;
 end
