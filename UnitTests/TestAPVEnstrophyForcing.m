@@ -28,4 +28,19 @@ for iForce=1:length(forcingNames)
 
     Z2 = wvt.qgpv .* (wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(Feta));
     fprintf("Total approximate enstrophy for " + forcingNames(iForce) + " forcing: " + int_vol(Z2)/enstrophyScale + "\n");
+
+    zeta_x = wvt.diffY(wvt.w) - wvt.diffZF(wvt.v); % w_y - v_z
+    zeta_y = wvt.diffZF(wvt.u) - wvt.diffX(wvt.w);  % u_z - w_x
+    zeta_z = wvt.diffX(wvt.v) - wvt.diffY(wvt.u);  % v_x - u_y
+
+    % DF_x = wvt.diffY(Fw) - wvt.diffZF(Fv); % w_y - v_z
+    % DF_y = wvt.diffZF(Fu) - wvt.diffX(Fw;  % u_z - w_x
+    % DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
+
+    DF_x = - wvt.diffZF(Fv); % w_y - v_z
+    DF_y = wvt.diffZF(Fu);  % u_z - w_x
+    DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
+
+    Z_NL = - zeta_x .* wvt.diffX(Feta) - zeta_y .* wvt.diffY(Feta)- zeta_z .* wvt.diffZG(Feta);
+    Z_NL = Z_NL - wvt.diffX(eta_true) .* DF_x - wvt.diffY(eta_true) .* DF_y - wvt.diffZG(eta_true) .* DF_z; 
 end
