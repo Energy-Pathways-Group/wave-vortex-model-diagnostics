@@ -11,6 +11,7 @@ function hFig = plotThreeRowBoxDiagram(row1,row2,row3, arrows, options)
         row3 Box
         arrows Arrow
         options.RowLabels (1,3) string = ["Sources" "Reservoirs" "Sinks"]
+        options.RowSublabels (1,3) string = strings(1,3)
         options.BoxSize (1,2) double {mustBePositive} = [2 1]
         options.Dx double {mustBeNonnegative} = 1
         options.Dy double {mustBeNonnegative} = 2
@@ -79,12 +80,16 @@ function hFig = plotThreeRowBoxDiagram(row1,row2,row3, arrows, options)
     arrayfun(@(a) a.draw(ax), arrows);
 
     % Row labels
-    lblOffset = 0.4;
+    lblOffset = 0.8;
     for r = 1:nRows
         yMid  = rows{r}(1).Position(2) + h/2;
         xLeft = x0 - lblOffset;
-        text(ax,xLeft,yMid,options.RowLabels(r),'FontSize',12,'FontWeight','bold', ...
+        text(ax,xLeft,yMid,options.RowLabels(r),'FontSize',16,'FontWeight','bold', ...
             'Rotation',90,'HorizontalAlignment','center','VerticalAlignment','middle');
+        if all(strlength(options.RowSublabels))
+            text(ax,xLeft + 0.3,yMid,options.RowSublabels(r),'FontSize',12,'FontWeight','normal', ...
+                'Rotation',90,'HorizontalAlignment','center','VerticalAlignment','middle');
+        end
     end
 
     if strlength(options.Title)>0
