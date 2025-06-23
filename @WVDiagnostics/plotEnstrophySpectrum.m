@@ -27,8 +27,12 @@ wvt = self.wvt;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % total enstrophy, A0
-TZ_A0_j_kl = wvt.A0_TZ_factor .* abs(wvt.A0).^2;
+% TZ_A0_j_kl = wvt.A0_TZ_factor .* abs(wvt.A0).^2;
+prefactor = wvt.h_0/2; prefactor(1) = wvt.Lz/2;
+TZ_A0_j_kl = prefactor.*abs(wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(wvt.qgpv))).^2;
+TZ_APV_j_kl = prefactor.*abs(wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(wvt.apv))).^2;
 TZ_A0_j_kR = wvt.transformToRadialWavenumber(TZ_A0_j_kl);
+TZ_APV_j_kR = wvt.transformToRadialWavenumber(TZ_APV_j_kl);
 TZ_A0_kR = sum(TZ_A0_j_kR,1);
 TZ_A0_j = sum(TZ_A0_j_kR,2);
 
@@ -50,7 +54,16 @@ tl = tiledlayout(2,2,TileSpacing="compact");
 title(tl,'Enstrophy Spectrum')
 
 % wave enstrophy???
+val = log10((TZ_APV_j_kR).');
 axIGW = nexttile;
+pcolor(radialWavelength,wvt.j,val.'), shading flat
+set(gca,'XDir','reverse')
+set(gca,'XScale','log')
+title('apv')
+colormap(axIGW, self.cmocean('dense'));
+text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
+line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
+clim([-17 -8])
 
 % plot the geostrophic enstrophy
 val = log10((TZ_A0_j_kR).');
@@ -58,10 +71,11 @@ axGEO = nexttile;
 pcolor(radialWavelength,wvt.j,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
-title('geostrophic')
+title('qgpv')
 colormap(axGEO, self.cmocean('dense'));
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
 line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
+clim([-17 -8])
 
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 

@@ -152,6 +152,7 @@ else
     EnergyFlux = configureDictionary("string","cell");
     EnstrophyFlux = configureDictionary("string","cell");
     EnergyFluxTrue = configureDictionary("string","cell");
+    EnstrophyFluxTrue = configureDictionary("string","cell");
     forcingNames = wvt.forcingNames;
     dimensionNames = ["j", "kRadial", "t"];
     for i=1:length(forcingNames)
@@ -163,6 +164,7 @@ else
         EnergyFlux{forcingNames(i)}.PE0 = diagfile.addVariable("PE0_" + name,dimensionNames,type="double",isComplex=false);
         EnstrophyFlux{forcingNames(i)} = diagfile.addVariable("Z0_" + name,dimensionNames,type="double",isComplex=false);
         EnergyFluxTrue{forcingNames(i)} = diagfile.addVariable("E_" + name,"t",type="double",isComplex=false);
+        EnstrophyFluxTrue{forcingNames(i)} = diagfile.addVariable("Z_" + name,"t",type="double",isComplex=false);
     end
 
     % 3. Triads
@@ -222,18 +224,32 @@ for timeIndex = 1:length(timeIndices)
         if isa(wvt,"WVTransformHydrostatic")
             [Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             F_density = wvt.u .* Fu + wvt.v .* Fv+ wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+
+            DF_x =  - wvt.diffZF(Fv); % w_y - v_z
+            DF_y = wvt.diffZF(Fu);  % u_z - w_x
+            DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
         elseif isa(wvt,"WVTransformBoussinesq")
             [Fu,Fv,Fw,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+
+            DF_x = wvt.diffY(Fw) - wvt.diffZF(Fv); % w_y - v_z
+            DF_y = wvt.diffZF(Fu) - wvt.diffX(Fw);  % u_z - w_x
+            DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
         else
             error("Transform not yet supported.");
         end
+
+        G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*Feta;
+        Z_NL = - wvt.zeta_x .* wvt.diffX(G_eta) - wvt.zeta_y .* wvt.diffY(G_eta)- wvt.zeta_z .* wvt.diffZG(G_eta);
+        Z_NL = Z_NL - wvt.diffX(wvt.eta_true) .* DF_x - wvt.diffY(wvt.eta_true) .* DF_y - wvt.diffZG(wvt.eta_true) .* DF_z;
+        Z_density = wvt.apv .* (wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta) + Z_NL);
 
         if forcingNames(i) == "nonlinear advection"
             F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
         end
 
         EnergyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(int_vol(F_density),'t',outputIndex);
+        EnstrophyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(int_vol(Z_density),'t',outputIndex);
 
         EnergyFlux{forcingNames(i)}.Ep.setValueAlongDimensionAtIndex(Ep_jk,'t',outputIndex);
         EnergyFlux{forcingNames(i)}.Em.setValueAlongDimensionAtIndex(Em_jk,'t',outputIndex);
