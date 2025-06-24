@@ -327,12 +327,13 @@ classdef WVDiagnostics < handle
             % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave];
+                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
                 options.timeIndices = Inf;
                 options.visible = "on"
                 options.filter = @(v) v;
             end
-            [inertial_fluxes,t] = self.inertialFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+            [inertial_fluxes,t] = self.inertialFluxesOverTime(triadComponents=options.triadComponents,energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
             fig = figure(Visible=options.visible);
             tl = tiledlayout(length(options.energyReservoirs),1,TileSpacing="compact");
