@@ -2,6 +2,9 @@ function fig = plotMooringRotarySpectrum(self,options)
 arguments
     self WVDiagnostics
     options.visible = "on"
+    options.title = "total velocity";
+    options.shouldShowLegend = true;
+    options.shouldShowSpectralTitles = true
 end
 
 figTitle = "total velocity";
@@ -35,7 +38,9 @@ Snn = mean(Snn,3);
 % two panel rotary spectrum
 fig = figure(Visible=options.visible);
 tl = tiledlayout(1,2,"TileSpacing","tight");
-title(tl,figTitle);
+if options.title ~= "none"
+    title(tl, options.title, 'Interpreter', 'none')
+end
 ax1 = nexttile(tl,1);
 set(ax1,'xdir','reverse')
 set(ax1,'XScale','log')
@@ -43,14 +48,18 @@ set(ax1,'YScale','log')
 axis tight
 box on
 hold on
+if options.shouldShowSpectralTitles
 title('Negative Rotary Spectra')
+end
 ax2 = nexttile(tl,2);
 set(ax2,'XScale','log')
 set(ax2,'YScale','log')
 axis tight
 box on
 hold on
+if options.shouldShowSpectralTitles
 title('Positive Rotary Spectra')
+end
 
 % plot model spectrum
 set(ax1,'ColorOrderIndex',1)
@@ -87,7 +96,9 @@ ax2.XLim = ax1.XLim;
 ax2.YTickLabels={};
 % legend and labels
 % legend(ax2,[plt2',plt17,plt5,plt7,plt9,plt11,plt13,plt15],'location','northeastoutside')
-legend(ax2,plt2','location','eastoutside')
+if options.shouldShowLegend
+    legend(ax2,plt2','location','eastoutside')
+end
 textY = .5*max(ax2.YLim);
 text(ax2,.9*wvt.f*86400/2/pi,textY,'f','Color','r')
 text(ax2,.75*2*pi/M2Period*86400/2/pi,textY,'M2','Color','b')
