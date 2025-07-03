@@ -62,6 +62,7 @@ if exist(self.diagpath,"file")
     EnergyFlux = configureDictionary("string","cell");
     EnstrophyFlux = configureDictionary("string","cell");
     EnergyFluxTrue = configureDictionary("string","cell");
+    EnstrophyFluxTrue = configureDictionary("string","cell");
     forcingNames = wvt.forcingNames;
     for i=1:length(forcingNames)
         name = replace(forcingNames(i),"-","_");
@@ -72,6 +73,7 @@ if exist(self.diagpath,"file")
         EnergyFlux{forcingNames(i)}.PE0 = diagfile.variableWithName("PE0_" + name);
         EnstrophyFlux{forcingNames(i)} = diagfile.variableWithName("Z0_" + name);
         EnergyFluxTrue{forcingNames(i)} = diagfile.variableWithName("E_" + name);
+        EnstrophyFluxTrue{forcingNames(i)} = diagfile.addVariable("Z_" + name);
     end
 
     % 3. Triads
