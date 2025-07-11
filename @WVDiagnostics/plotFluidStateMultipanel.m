@@ -6,6 +6,7 @@ arguments
     options.title
     options.shouldShowEnergySpectra = true
     options.shouldShowTotalFields = false
+    options.figureHandle
 end
 
 if isfield(options,"iTime")
@@ -63,8 +64,14 @@ else
     figPos = [50 50 600 615];
 end
 
-fig = figure(Units='points',Position=figPos,Visible = options.visible);
-set(gcf,'PaperPositionMode','auto')
+if ~isfield(options,"figureHandle")
+    fig = figure(Units='points',Position=figPos,Visible = options.visible);
+    set(gcf,'PaperPositionMode','auto')
+else
+    fig = options.figureHandle;
+    clf(options.figureHandle)
+    set(0, 'currentfigure', options.figureHandle);
+end
 
 
 tl = tiledlayout(2,nColumns,TileSpacing="tight");
