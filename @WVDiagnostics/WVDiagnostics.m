@@ -1075,6 +1075,23 @@ classdef WVDiagnostics < handle
             clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
         end
 
+        function overlayGeostrophicKineticPotentialRatioContours(self,options)
+            arguments
+                self 
+                options.ratios = [-2.5 -2.0 -1.5 -1.0 -0.5 0 0.5 1.0 1.5 2.0 2.5]
+                options.textColor = [.5,.5,.5]
+                options.labelSpacing = 400
+                options.lineWidth = 1
+            end
+            hke = self.wvt.transformToRadialWavenumber( self.wvt.A0_KE_factor );
+            pe = self.wvt.transformToRadialWavenumber( self.wvt.A0_PE_factor );
+            ratio = log10(hke./pe);
+            set(gca,'layer','top'),
+            hold on
+            [C,h] = contour(self.kRadial(2:end),self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+        end
+
         function showRossbyRadiusYAxis(self,options)
             arguments
                 self 
