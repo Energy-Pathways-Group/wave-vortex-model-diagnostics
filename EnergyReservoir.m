@@ -57,6 +57,8 @@ classdef EnergyReservoir
                         eFlux{iReservoir} = Ejk.KE0(:,2:end,:);
                     case EnergyReservoir.geostrophic_potential
                         eFlux{iReservoir} = Ejk.PE0(:,2:end,:);
+                    case EnergyReservoir.geostrophic_potential_mda
+                        eFlux{iReservoir} = Ejk.PE0;
                     case EnergyReservoir.geostrophic
                         eFlux{iReservoir} = Ejk.KE0(:,2:end,:)+Ejk.PE0(:,2:end,:);
                     case EnergyReservoir.mda
