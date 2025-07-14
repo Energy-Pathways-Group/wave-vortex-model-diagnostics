@@ -38,6 +38,7 @@ classdef EnergyReservoir
    enumeration
       mda                       (true,false,false,false,false,"te_mda","mean density anomaly")
       geostrophic_kinetic       (false,true,false,false,false,"ke_g","geostrophic kinetic")
+      geostrophic_kinetic_mda   (false,true,false,false,false,"ke_g","geostrophic kinetic + mda")
       geostrophic_potential     (false,false,true,false,false,"pe_g","geostrophic potential")
       geostrophic_potential_mda (true,false,true,false,false,"pe_g","geostrophic potential + mda")
       geostrophic               (false,true,true,false,false,"te_g","geostrophic")
@@ -55,6 +56,8 @@ classdef EnergyReservoir
                 switch reservoirNames(iReservoir)
                     case EnergyReservoir.geostrophic_kinetic
                         eFlux{iReservoir} = Ejk.KE0(:,2:end,:);
+                    case EnergyReservoir.geostrophic_kinetic_mda
+                        eFlux{iReservoir} = Ejk.KE0;
                     case EnergyReservoir.geostrophic_potential
                         eFlux{iReservoir} = Ejk.PE0(:,2:end,:);
                     case EnergyReservoir.geostrophic_potential_mda
