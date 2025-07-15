@@ -65,7 +65,7 @@ linesTemp = lines;
 
 % create radial wavelength vector
 radialWavelength = 2*pi./wvt.kRadial/1000;
-radialWavelength(1) = 2*radialWavelength(2);
+radialWavelength(1) = 1.5*radialWavelength(2);
 
 % create figure
 fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
@@ -86,7 +86,7 @@ ylabel('vertical mode')
 title('internal gravity wave')
 xlabel('wavelength (km)')
 text(radialWavelength(1),max(wvt.j)*1.05,'inertial','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
+line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)
 
 self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
@@ -102,7 +102,7 @@ set(gca,'YTickLabel',[]);
 title('geostrophic')
 xlabel('wavelength (km)')
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
+line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)
 
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 

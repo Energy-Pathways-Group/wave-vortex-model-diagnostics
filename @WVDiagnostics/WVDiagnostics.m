@@ -1250,7 +1250,8 @@ classdef WVDiagnostics < handle
             ratio = log10(hke./pe);
             set(gca,'layer','top'),
             hold on
-            [C,h] = contour(self.kRadial(2:end),self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
+            % [C,h] = contour(self.kRadial(2:end),self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
+            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
             clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
         end
 
