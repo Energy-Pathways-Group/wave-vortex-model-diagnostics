@@ -368,8 +368,12 @@ classdef WVDiagnostics < handle
                 options.timeIndices = Inf;
                 options.visible = "on"
                 options.filter = @(v) v;
+                options.shouldShowNonlinearAdvection = false
             end
             [forcing_fluxes, t] = self.exactEnstrophyFluxesOverTime(timeIndices=options.timeIndices);
+            if ~options.shouldShowNonlinearAdvection
+                forcing_fluxes(1) = [];
+            end
 
             fig = figure(Visible=options.visible);
             tl = tiledlayout(1,1,TileSpacing="compact");
@@ -403,8 +407,14 @@ classdef WVDiagnostics < handle
                 options.timeIndices = Inf;
                 options.visible = "on"
                 options.filter = @(v,t) v;
+                options.shouldShowNonlinearAdvection = false
             end
             [forcing_fluxes, t] = self.enstrophyFluxesOverTime(timeIndices=options.timeIndices);
+            if ~options.shouldShowNonlinearAdvection
+                forcing_fluxes(1) = [];
+            else
+                forcing_fluxes(1).Z0 = -forcing_fluxes(1).Z0;
+            end
 
             fig = figure(Visible=options.visible);
             tl = tiledlayout(1,1,TileSpacing="compact");
@@ -482,7 +492,7 @@ classdef WVDiagnostics < handle
             % - Returns t: time vector
             arguments
                 self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total] 
                 options.shouldIncludeExactTotalEnergy = false
                 options.timeIndices = Inf;
             end
@@ -646,6 +656,28 @@ classdef WVDiagnostics < handle
                 enstrophy_fluxes(iForce).Z0 = mean(enstrophy_fluxes(iForce).Z0);
             end
         end
+
+        function enstrophy_fluxes = enstrophyFluxesSpatialTemporalAverage(self,options)
+            % Compute spatial-temporal average of the qgpv enstrophy fluxes
+            %
+            % Returns the spatial-temporal average of the qgpv enstrophy fluxes from external forcing
+            %
+            % - Topic: Flux averages, scalar
+            % - Declaration: forcing_fluxes = enstrophyFluxesSpatialTemporalAverage(self,options)
+            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
+            % - Returns forcing_fluxes: struct array with averaged fluxes
+            arguments
+                self WVDiagnostics
+                options.timeIndices = Inf;
+            end
+
+            enstrophy_fluxes = self.enstrophyFluxesOverTime(timeIndices=options.timeIndices);
+            for iForce = 1:length(enstrophy_fluxes)
+                enstrophy_fluxes(iForce).Z0 = mean(enstrophy_fluxes(iForce).Z0);
+            end
+        end
+
+        % enstrophyFluxesOverTime
 
         function inertial_fluxes = inertialFluxesSpatialTemporalAverage(self,options)
             % Compute spatial-temporal average of inertial fluxes

@@ -227,6 +227,10 @@ for timeIndex = 1:length(timeIndices)
             [Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             F_density = wvt.u .* Fu + wvt.v .* Fv+ wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
 
+            if forcingNames(iForce) == "nonlinear advection"
+                Fu = Fu + wvt.f*wvt.v;
+                Fv = Fv - wvt.f*wvt.u;
+            end
             DF_x =  - wvt.diffZF(Fv); % w_y - v_z
             DF_y = wvt.diffZF(Fu);  % u_z - w_x
             DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
@@ -234,6 +238,10 @@ for timeIndex = 1:length(timeIndices)
             [Fu,Fv,Fw,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
 
+            if forcingNames(iForce) == "nonlinear advection"
+                Fu = Fu + wvt.f*wvt.v;
+                Fv = Fv - wvt.f*wvt.u;
+            end
             DF_x = wvt.diffY(Fw) - wvt.diffZF(Fv); % w_y - v_z
             DF_y = wvt.diffZF(Fu) - wvt.diffX(Fw);  % u_z - w_x
             DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
@@ -241,14 +249,16 @@ for timeIndex = 1:length(timeIndices)
             error("Transform not yet supported.");
         end
 
-        G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*Feta;
+        if forcingNames(i) == "nonlinear advection"
+            F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
+            G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*(Feta + wvt.w);
+        else
+            G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*Feta;
+        end
+
         Z_NL = - wvt.zeta_x .* wvt.diffX(G_eta) - wvt.zeta_y .* wvt.diffY(G_eta)- wvt.zeta_z .* wvt.diffZG(G_eta);
         Z_NL = Z_NL - wvt.diffX(wvt.eta_true) .* DF_x - wvt.diffY(wvt.eta_true) .* DF_y - wvt.diffZG(wvt.eta_true) .* DF_z;
         Z_density = wvt.apv .* (wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta) + Z_NL);
-
-        if forcingNames(i) == "nonlinear advection"
-            F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
-        end
 
         EnergyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(int_vol(F_density),'t',outputIndex);
         EnstrophyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(int_vol(Z_density),'t',outputIndex);
