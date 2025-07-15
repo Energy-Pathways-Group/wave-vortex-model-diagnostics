@@ -21,7 +21,7 @@ arguments
     options.shouldUseHigherOrderFlux logical = false
 end
 
-if exist(self.diagpath,"file")
+if exist(self.diagpath,"file") && ~isfield(options,"outpath")
     [found, idx] = ismember(self.t_diag, self.t_wv);
     if ~all(found)
         error('Some entries of t_diag are not exactly in t_wv.');
@@ -113,7 +113,11 @@ else
     int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 
     %% setup diagnostic output file
-    diagfile = NetCDFFile(self.diagpath);
+    if isfield(options,"outpath")
+        diagfile = NetCDFFile(options.outpath);
+    else
+        diagfile = NetCDFFile(self.diagpath);
+    end
     self.diagfile = diagfile;
 
     dimensionNames = ["j","kRadial"];
@@ -227,7 +231,7 @@ for timeIndex = 1:length(timeIndices)
             [Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             F_density = wvt.u .* Fu + wvt.v .* Fv+ wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
 
-            if forcingNames(iForce) == "nonlinear advection"
+            if forcingNames(i) == "nonlinear advection"
                 Fu = Fu + wvt.f*wvt.v;
                 Fv = Fv - wvt.f*wvt.u;
             end
@@ -238,7 +242,7 @@ for timeIndex = 1:length(timeIndices)
             [Fu,Fv,Fw,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
 
-            if forcingNames(iForce) == "nonlinear advection"
+            if forcingNames(i) == "nonlinear advection"
                 Fu = Fu + wvt.f*wvt.v;
                 Fv = Fv - wvt.f*wvt.u;
             end
@@ -251,7 +255,7 @@ for timeIndex = 1:length(timeIndices)
 
         if forcingNames(i) == "nonlinear advection"
             F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
-            G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*(Feta + wvt.w);
+            G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*(Feta + wvt.w);
         else
             G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*Feta;
         end

@@ -413,7 +413,7 @@ classdef WVDiagnostics < handle
             if ~options.shouldShowNonlinearAdvection
                 forcing_fluxes(1) = [];
             else
-                forcing_fluxes(1).Z0 = -forcing_fluxes(1).Z0;
+                forcing_fluxes(1).Z0 = forcing_fluxes(1).Z0;
             end
 
             fig = figure(Visible=options.visible);

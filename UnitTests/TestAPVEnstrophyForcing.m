@@ -1,12 +1,9 @@
 basedir = "/Users/Shared/CimRuns_June2025/output/";
-runNumber=1; runName = "hydrostatic: geostrophic";
+% runNumber=1; runName = "hydrostatic: geostrophic";
 % runNumber=9; runName = "hydrostatic: geostrophic + waves";
-% runNumber=18; runName = "non-hydrostatic: geostrophic + waves";
-wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
-
-runName = getRunParameters(runNumber);
-
-filepath = basedir + runName + ".nc";
+runNumber=18; runName = "non-hydrostatic: geostrophic + waves";
+filepath = basedir + replace(getRunParameters(runNumber),"256","512") + ".nc";
+wvd = WVDiagnostics(filepath);
 
 [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(filepath);
 
@@ -24,7 +21,7 @@ forcingNames = wvt.forcingNames;
 indices = 800:825;
 Z2_qgpv_t = zeros(length(indices),1);
 Z2_t = zeros(length(indices),1);
-indices = 800;
+indices = 100;
 for iIndex=1:length(indices)
 
     wvt.initFromNetCDFFile(ncfile,iTime=indices(iIndex));
