@@ -215,6 +215,7 @@ for timeIndex = 1:length(timeIndices)
     outputIndex = timeIndex + outputIndexOffset;
     if options.shouldMeasureAntialiasingFlux
         wvt_lowres.initFromNetCDFFile(ncfile,iTime=iTime);
+        wvt.t = wvt_lowres.t;
         [wvt.A0,wvt.Ap,wvt.Am] = wvt_lowres.spectralVariableWithResolution(wvt,wvt_lowres.A0,wvt_lowres.Ap,wvt_lowres.Am);
     else
         wvt.initFromNetCDFFile(ncfile,iTime=iTime);
