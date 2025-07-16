@@ -8,7 +8,7 @@ function createDiagnosticsFile(self,options)
 % - Parameter self: WVDiagnostics object.
 % - Parameter options.stride: (optional) Stride for time sampling (default: 1).
 % - Parameter options.timeIndices: (optional) Indices of time steps to process.
-% - Parameter options.outpath: (optional) Output path for the diagnostics file.
+% - Parameter options.filename: (optional) Output path for the diagnostics file.
 % - Parameter options.shouldMeasureAntialiasingFlux: (optional, logical) If true, computes antialiasing flux diagnostics (default: false).
 % - Parameter options.shouldUseHigherOrderFlux: (optional, logical) If true, uses higher-order flux calculation (default: false).
 % - Returns: None. Writes diagnostics to a NetCDF file at self.diagpath.
@@ -16,12 +16,12 @@ arguments
     self WVDiagnostics
     options.stride = 1
     options.timeIndices
-    options.outpath
+    options.filename
     options.shouldMeasureAntialiasingFlux logical = false
     options.shouldUseHigherOrderFlux logical = false
 end
 
-if exist(self.diagpath,"file") && ~isfield(options,"outpath")
+if exist(self.diagpath,"file") && ~isfield(options,"filename")
     [found, idx] = ismember(self.t_diag, self.t_wv);
     if ~all(found)
         error('Some entries of t_diag are not exactly in t_wv.');
@@ -113,8 +113,15 @@ else
     int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 
     %% setup diagnostic output file
-    if isfield(options,"outpath")
-        diagfile = NetCDFFile(options.outpath);
+    if isfield(options,"filename")
+        fpath = fileparts(self.diagpath);
+        if ~isempty(fpath)
+            filepath = fullfile(fpath,options.filename);
+        else
+            filepath= fullfile(pwd,options.filename);
+        end
+        disp("writing diagnostics file: " + filepath);
+        diagfile = NetCDFFile(filepath);
     else
         diagfile = NetCDFFile(self.diagpath);
     end
@@ -190,10 +197,20 @@ else
     end
 end
 %% loop through time computing diagnostics
+integrationLastInformWallTime = datetime('now');
+integrationLastInformLoopNumber = 1;
+integrationInformTime = 10;
+disp("Starting loop");
 for timeIndex = 1:length(timeIndices)
-    if mod(timeIndex,10) == 1
-        fprintf("%d..",timeIndex);
+    deltaWallTime = datetime('now')-integrationLastInformWallTime;
+    if ( seconds(deltaWallTime) > integrationInformTime)
+        wallTimePerLoopTime = deltaWallTime / (timeIndex - integrationLastInformLoopNumber);
+        wallTimeRemaining = wallTimePerLoopTime*(length(timeIndices) - timeIndex);
+        fprintf('Time index %d of %d. Estimated time to finish is %s (%s)\n', timeIndex, length(timeIndices), wallTimeRemaining, datetime(datetime('now')+wallTimeRemaining,TimeZone='local',Format='d-MMM-y HH:mm:ss Z')) ;
+        integrationLastInformWallTime = datetime('now');
+        integrationLastInformLoopNumber = timeIndex;
     end
+
     iTime = timeIndices(timeIndex);
     outputIndex = timeIndex + outputIndexOffset;
     if options.shouldMeasureAntialiasingFlux

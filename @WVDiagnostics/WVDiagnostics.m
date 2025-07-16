@@ -59,7 +59,7 @@ classdef WVDiagnostics < handle
                 if ~isempty(fpath)
                     self.diagpath = fullfile(fpath,strcat(fname,"-diagnostics.nc"));
                 else
-                    self.diagpath= fullfile(strcat(fname,"-diagnostics.nc"));
+                    self.diagpath= fullfile(pwd,strcat(fname,"-diagnostics.nc"));
                 end
             else
                 self.diagpath = options.diagnosticsFilePath;
