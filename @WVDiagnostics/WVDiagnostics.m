@@ -369,6 +369,8 @@ classdef WVDiagnostics < handle
                 options.visible = "on"
                 options.filter = @(v) v;
                 options.shouldShowNonlinearAdvection = false
+                options.shouldShowTotal = true
+                options.shouldShowDtEnstrophy = true
             end
             [forcing_fluxes, t] = self.exactEnstrophyFluxesOverTime(timeIndices=options.timeIndices);
             if ~options.shouldShowNonlinearAdvection
@@ -377,14 +379,33 @@ classdef WVDiagnostics < handle
 
             fig = figure(Visible=options.visible);
             tl = tiledlayout(1,1,TileSpacing="compact");
+            total = zeros(size(forcing_fluxes(1).Z0));
             for iForce = 1:length(forcing_fluxes)
                 plot(t/self.tscale,options.filter(forcing_fluxes(iForce).Z0/self.z_flux_scale)), hold on
+                total = total + forcing_fluxes(iForce).Z0;
             end
-            legend(forcing_fluxes.fancyName)
+            if options.shouldShowTotal
+                plot(t/self.tscale,options.filter(total/self.z_flux_scale),Color=0*[1 1 1],LineWidth=2), hold on
+                legendValues = cat(1,forcing_fluxes.fancyName,"total");
+            else
+                legendValues = forcing_fluxes.fancyName;
+            end
+
+            if options.shouldShowDtEnstrophy
+                Z_apv = self.enstrophyAPVOverTime(timeIndices=options.timeIndices);
+                t2 = t(2:end) - (t(2)-t(1))/2;
+                dZdt = diff(Z_apv)./diff(t);
+                plot(t2/self.tscale,options.filter(dZdt/self.z_flux_scale),Color=0*[1 1 1],LineWidth=2,LineStyle="--"), hold on
+                legendValues = cat(1,legendValues,"$\frac{d Z}{dt}$");
+            end
+
+            legend(legendValues);
 
             xlabel("time (" + self.tscale_units + ")")
             ylabel("flux (" + self.z_flux_scale_units + ")")
             xlim([min(t) max(t)]/self.tscale);
+
+            mean(total/self.z_flux_scale)
         end
 
         function fig = plotEnstrophyFluxOverTime(self,options)
