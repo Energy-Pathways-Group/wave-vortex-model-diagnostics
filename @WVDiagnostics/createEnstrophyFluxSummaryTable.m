@@ -1,0 +1,141 @@
+function tableString = createEnstrophyFluxSummaryTable(self,options)
+% Plot sources, sinks, and reservoirs diagram
+%
+% Generates a diagram showing energy sources, sinks, and reservoirs, including fluxes between them.
+%
+% - Topic: Figures (over time)
+% - Declaration: fig = plotSourcesSinksReservoirsDiagram(self,options)
+% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave])
+% - Parameter options.customNames: dictionary for custom names
+% - Parameter options.fluxTolerance: tolerance for displaying fluxes (default: 1e-2)
+% - Parameter options.shouldShowUnits: show units in labels (default: true)
+% - Parameter options.timeIndices: indices for time averaging (default: Inf)
+% - Parameter options.shouldShowReservoirEnergy: show reservoir energy (default: true)
+% - Parameter options.title: diagram title (default: "Energy Pathways")
+% - Parameter options.visible: figure visibility (default: "on")
+% - Returns fig: handle to the generated figure
+arguments
+    self WVDiagnostics
+    options.customNames = configureDictionary("string","string")
+    % options.fluxTolerance = 1e-2;
+    % options.shouldShowUnits = true;
+    options.timeIndices = Inf;
+end
+
+enstrophy_fluxes = self.exactEnstrophyFluxesSpatialTemporalAverage(timeIndices=options.timeIndices);
+enstrophy_fluxes_qgpv = self.enstrophyFluxesSpatialTemporalAverage(timeIndices=options.timeIndices);
+
+[Z_quadratic, t] = self.enstrophyQGPVOverTime(timeIndices=options.timeIndices);
+[Z_apv, ~] = self.enstrophyAPVOverTime(timeIndices=options.timeIndices);
+
+
+sourceIndices = find([enstrophy_fluxes.Z0] > 0);
+sinkIndices = find([enstrophy_fluxes.Z0] < 0);
+sources = enstrophy_fluxes(sourceIndices);
+[~, idx] = sort([sources.Z0],'descend');
+sources = sources(idx);
+sinks = enstrophy_fluxes(sinkIndices);
+[~, idx] = sort([sinks.Z0],'ascend');
+sinks = sinks(idx);
+
+
+tableString = "\n\\begin{tabular}{rlr}\n";
+tableString = tableString + "& forcing & flux APV (QGPV) \\\\ \\hline\\hline \n";
+% tableString = tableString + "\\hline\n";
+enstrophy_fluxes = sources;
+qgpvTotal = 0;
+for iFlux=1:length(enstrophy_fluxes)
+    if isKey(options.customNames,enstrophy_fluxes(iFlux).name)
+        fancyName=options.customNames(enstrophy_fluxes(iFlux).name);
+    else
+        fancyName=enstrophy_fluxes(iFlux).fancyName;
+    end
+    qgpvIndex = find(enstrophy_fluxes(iFlux).name == [enstrophy_fluxes_qgpv.name]);
+    qgpvTotal = qgpvTotal + enstrophy_fluxes_qgpv(qgpvIndex).Z0;
+    tableString = tableString + " & " + fancyName + " & ";
+    tableString = tableString + sprintf("%.2f (%.2f)",enstrophy_fluxes(iFlux).Z0/self.z_flux_scale,enstrophy_fluxes_qgpv(qgpvIndex).Z0/self.z_flux_scale)  + " \\\\ \n";
+end
+tableString = tableString + "\\textbf{sources total} & & \\textbf{";
+tableString = tableString + sprintf('%.2f (%.2f)}',sum([enstrophy_fluxes.Z0])/self.z_flux_scale,qgpvTotal/self.z_flux_scale)  + " \\\\ \\hline \n";
+
+enstrophy_fluxes = sinks;
+qgpvTotal = 0;
+for iFlux=1:length(enstrophy_fluxes)
+    if isKey(options.customNames,enstrophy_fluxes(iFlux).name)
+        fancyName=options.customNames(enstrophy_fluxes(iFlux).name);
+    else
+        fancyName=enstrophy_fluxes(iFlux).fancyName;
+    end
+        qgpvIndex = find(enstrophy_fluxes(iFlux).name == [enstrophy_fluxes_qgpv.name]);
+    qgpvTotal = qgpvTotal + enstrophy_fluxes_qgpv(qgpvIndex).Z0;
+    tableString = tableString + " & " + fancyName + " & ";
+    tableString = tableString + sprintf("%.2f (%.2f)",enstrophy_fluxes(iFlux).Z0/self.z_flux_scale,enstrophy_fluxes_qgpv(qgpvIndex).Z0/self.z_flux_scale)  + " \\\\ \n";
+end
+tableString = tableString + "\\textbf{sinks total} & & \\textbf{";
+tableString = tableString + sprintf("%.2f (%.2f)}",sum([enstrophy_fluxes.Z0])/self.z_flux_scale,qgpvTotal/self.z_flux_scale)  + " \\\\ \\hline \n";
+
+tableString = tableString + " \\hline\n";
+tableString = tableString + "\\textbf{flux total} & & ";
+tableString = tableString + sprintf("%.2f (%.2f)",(sum([sources.Z0])+sum([sinks.Z0]))/self.z_flux_scale,sum([enstrophy_fluxes_qgpv.Z0])/self.z_flux_scale)  + " \\\\ \n";
+
+% tableString = tableString + " \\hline\n";
+tableString = tableString + "\\textbf{measured} $\\Delta$ & & ";
+tableString = tableString + sprintf("%.2f (%.2f)",(Z_apv(end)-Z_apv(1))/(t(end)-t(1))/self.z_flux_scale,(Z_quadratic(end)-Z_quadratic(1))/(t(end)-t(1))/self.z_flux_scale)  + " \\\\ \n";
+
+tableString = tableString + " \\hline\n\\end{tabular} \n";
+
+
+
+% %% ——— align all ampersands for human‐readable LaTeX code ———
+% % split into individual lines
+% lines = strsplit(sprintf(tableString), "\n");
+% % lines = split(tableString, "\n");
+% 
+% % find only the "data" lines (those with '&', but not pure \hline or \end{tabular})
+% isData = cellfun(@(s) ...
+%     contains(s, "&") && ...
+%     ~startsWith(strtrim(s), "\hline") && ...
+%     ~contains(s, "\end{tabular}"), ...
+%     lines);
+% 
+% % extract and trim each cell
+% dataCells = {};
+% for ii = find(isData)
+%     % split on &, trim whitespace
+%     tok = strtrim(strsplit(lines{ii}, "&"));
+%     dataCells(end+1,1) = {tok};  %#ok<AGROW>
+% end
+% 
+% % figure out how many columns and their max widths
+% nCols = max(cellfun(@numel, dataCells));
+% % pad any short rows (just in case)
+% for i = 1:numel(dataCells)
+%     if numel(dataCells{i}) < nCols
+%         dataCells{i}(nCols) = {""};
+%     end
+% end
+% colWidths = zeros(1,nCols);
+% for c = 1:nCols
+%     % compute the longest cell in column c
+%     colWidths(c) = max(cellfun(@strlength, cellfun(@(r) r{c}, dataCells, 'UniformOutput',false)));
+% end
+% 
+% % rebuild each data line with fixed-width fields
+% idx = 1;
+% for ii = 1:numel(lines)
+%     if isData(ii)
+%         rowCells = dataCells{idx};
+%         parts = strings(1,nCols);
+%         for c = 1:nCols
+%             % left-justify each cell to its column width
+%             parts(c) = sprintf("%-*s", colWidths(c), rowCells{c});
+%         end
+%         % rejoin with ' & '
+%         lines{ii} = convertStringsToChars(strjoin(parts, " & "));
+%         idx = idx + 1;
+%     end
+% end
+% 
+% % reassemble the tableString
+% tableString = join(lines, "\n");
+end

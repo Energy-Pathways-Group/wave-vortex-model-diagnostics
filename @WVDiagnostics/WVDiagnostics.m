@@ -471,6 +471,8 @@ classdef WVDiagnostics < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         fig = plotSourcesSinksReservoirsDiagram(self,options)
+        
+        tableString = createEnstrophyFluxSummaryTable(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -763,7 +765,11 @@ classdef WVDiagnostics < handle
                 filter_space = @(v) v(options.timeIndices);
             end
             forcingNames = self.wvt.forcingNames;
-            forcing_fluxes(length(forcingNames)) = struct("name","placeholder");
+            nForcings = length(forcingNames);
+            if self.diagfile.hasVariableWithName("Z_antialias_filter")
+                nForcings = nForcings + 1;
+            end
+            forcing_fluxes(nForcings) = struct("name","placeholder");
 
             for iForce=1:length(forcingNames)
                 name = replace(forcingNames(iForce),"-","_");
@@ -771,6 +777,11 @@ classdef WVDiagnostics < handle
                 forcing_fluxes(iForce).name = name;
                 forcing_fluxes(iForce).fancyName = forcingNames(iForce);
                 forcing_fluxes(iForce).Z0 = filter_space(self.diagfile.readVariables("Z_" + name));
+            end
+            if self.diagfile.hasVariableWithName("Z_antialias_filter")
+                forcing_fluxes(iForce+1).name = "antialias_filter";
+                forcing_fluxes(iForce+1).fancyName = "antialias filter";
+                forcing_fluxes(iForce+1).Z0 = filter_space(self.diagfile.readVariables("Z_antialias_filter"));
             end
 
             t = self.t_diag;
@@ -1117,7 +1128,11 @@ classdef WVDiagnostics < handle
                 self WVDiagnostics
             end
             forcingNames = self.wvt.forcingNames;
-            enstrophy_fluxes(length(forcingNames)) = struct("name","placeholder");
+            nForcings = length(forcingNames);
+            if self.diagfile.hasVariableWithName("Z0_antialias_filter")
+                nForcings = nForcings + 1;
+            end
+            enstrophy_fluxes(nForcings) = struct("name","placeholder");
 
             for iForce=1:length(forcingNames)
                 name = replace(forcingNames(iForce),"-","_");
@@ -1126,6 +1141,12 @@ classdef WVDiagnostics < handle
                 enstrophy_fluxes(iForce).name = name;
                 enstrophy_fluxes(iForce).fancyName = forcingNames(iForce);
                 enstrophy_fluxes(iForce).Z0 = self.diagfile.readVariables("Z0_" + name);
+            end
+
+            if self.diagfile.hasVariableWithName("Z0_antialias_filter")
+                enstrophy_fluxes(iForce+1).name = "antialias_filter";
+                enstrophy_fluxes(iForce+1).fancyName = "antialias filter";
+                enstrophy_fluxes(iForce+1).Z0 = self.diagfile.readVariables("Z0_antialias_filter");
             end
         end
 
