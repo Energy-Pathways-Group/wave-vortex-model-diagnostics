@@ -222,7 +222,7 @@ classdef WVDiagnostics < handle
             % - Returns fig: handle to the generated figure
             arguments
                 self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+                options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total];
                 options.shouldIncludeExactTotalEnergy = true
                 options.timeIndices = Inf;
                 options.visible = "on"
