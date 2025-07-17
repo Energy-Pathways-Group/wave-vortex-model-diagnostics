@@ -73,7 +73,7 @@ zeta_z_w = wvt.diffX(wvt.v_w) - wvt.diffY(wvt.u_w);  % wave
 ax = nexttile(tl,1);
 makeVorticityXYPlot(wvt.zeta_z);
 xticklabels([])
-ylabel('depth (km)')
+ylabel('y-distance (km)')
 title(ax, "total")
 
 ax = nexttile(tl,2);

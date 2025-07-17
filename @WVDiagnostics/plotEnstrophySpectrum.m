@@ -14,6 +14,7 @@ arguments
     options.visible = "on"
     options.title
     options.clim = [-14 -8]
+    options.figureHandle
 end
 
 if isfield(options,"iTime")
@@ -62,10 +63,15 @@ TZ_Error_j = sum(TZ_Error_j_kR,2);
 radialWavelength = 2*pi./wvt.kRadial/1000;
 radialWavelength(1) = 2*radialWavelength(2);
 
-% create figure
-fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
-set(gcf,'PaperPositionMode','auto')
-set(gcf, 'Color', 'w');
+if ~isfield(options,"figureHandle")
+    fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
+    set(gcf,'PaperPositionMode','auto')
+    set(gcf, 'Color', 'w');
+else
+    fig = options.figureHandle;
+    clf(options.figureHandle)
+    set(0, 'currentfigure', options.figureHandle);
+end
 tl = tiledlayout(2,2,TileSpacing="compact");
 if options.title ~= "none"
     title(tl, options.title, 'Interpreter', 'none')
