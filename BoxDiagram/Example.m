@@ -2,8 +2,10 @@
 
 %% Colours
 col.sources = [191 191 250]/255;
-col.geo     = [205 253 254]/255;
-col.wave    = [205 253 197]/255;
+col.geo     = [205 253 254]/255; % basically pale 'cyan'
+col.geoBold = [205/10 253 254]/255;
+col.wave    = [205 253 197]/255; % basically pale 'green'
+col.waveBold= [205/10 253 197/10]/255;
 col.sinks   = [245 194 193]/255;
 
 row1=[  Box("mean flow", FaceColor=col.sources, FontSize=16),...

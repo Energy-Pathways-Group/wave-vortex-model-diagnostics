@@ -1295,6 +1295,28 @@ classdef WVDiagnostics < handle
             % [C,h] = contour(self.kRadial(2:end),self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
             [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
             clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(1:end)',(ratio(1:end,2:end)),[-100,100],'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+        end
+
+        function overlayGeostrophicKineticPotentialFractionContours(self,options)
+            arguments
+                self 
+                % options.fractions = [.1,.2,.3,.4,.5,.6,.7,.8,.9]
+                options.fractions = [.01,.1,.25,.5,.75,.9,.99]
+                options.textColor = [.5,.5,.5]
+                options.labelSpacing = 400
+                options.lineWidth = 1
+            end
+            hke = self.wvt.transformToRadialWavenumber( self.wvt.A0_KE_factor );
+            pe = self.wvt.transformToRadialWavenumber( self.wvt.A0_PE_factor );
+            fraction = hke./(hke+pe);
+            set(gca,'layer','top'),
+            hold on
+            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(2:end)',(fraction(2:end,2:end)),options.fractions,'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.fractions,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(1:end)',(fraction(1:end,2:end)),[1e-5,1-1e-5],'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.fractions,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
         end
 
         function showRossbyRadiusYAxis(self,options)
