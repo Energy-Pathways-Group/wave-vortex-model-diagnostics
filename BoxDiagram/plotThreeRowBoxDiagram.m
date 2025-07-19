@@ -93,6 +93,6 @@ function hFig = plotThreeRowBoxDiagram(row1,row2,row3, arrows, options)
     end
 
     if strlength(options.Title)>0
-        title(ax,options.Title,'FontWeight','bold');
+        title(ax,options.Title,'FontWeight','bold', 'Interpreter', 'none');
     end
 end
