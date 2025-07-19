@@ -61,7 +61,7 @@ TZ_Error_j = sum(TZ_Error_j_kR,2);
 
 % create radial wavelength vector
 radialWavelength = 2*pi./wvt.kRadial/1000;
-radialWavelength(1) = 2*radialWavelength(2);
+radialWavelength(1) = 1.5*radialWavelength(2);
 
 if ~isfield(options,"figureHandle")
     fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
@@ -77,13 +77,15 @@ if options.title ~= "none"
     title(tl, options.title, 'Interpreter', 'none')
 end
 
-% wave enstrophy???
+% plot theavailable potential enstrophy
 val = log10((TZ_APV_j_kR).');
 axIGW = nexttile;
 pcolor(radialWavelength,wvt.j,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
+ylabel('vertical mode')
 title('apv')
+xlabel('wavelength (km)')
 colormap(axIGW, self.cmocean('dense'));
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
 line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
@@ -95,7 +97,9 @@ axGEO = nexttile;
 pcolor(radialWavelength,wvt.j,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
+set(gca,'YTickLabel',[]);
 title('qgpv')
+xlabel('wavelength (km)')
 colormap(axGEO, self.cmocean('dense'));
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
 line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
@@ -112,7 +116,7 @@ yscale('log')
 ylim(10.^options.clim);
 axis tight
 ylabel('enstrophy (m s^{-2})');
-xlabel('vertical mode j');
+xlabel('vertical mode');
 title('Vertical Mode Spectrum')
 legend('apv','qgpv','error')
 
