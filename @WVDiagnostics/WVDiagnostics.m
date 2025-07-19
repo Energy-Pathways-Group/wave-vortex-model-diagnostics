@@ -1268,14 +1268,16 @@ classdef WVDiagnostics < handle
                 self 
                 options.frequencies = [1.01 1.05 1.2 1.5 2 4 8 16]
                 options.textColor = [.5,.5,.5]
-                options.labelSpacing = 400
+                options.labelSpacing = 600
                 options.lineWidth = 1
             end
             [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
             omegaJK = (omegaN./n)/self.wvt.f;
             set(gca,'layer','top'),
             hold on
-            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j',(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
+            % flipud() and fliplr() help trick clabel into nicer label placement. 
+            % for y-axis, use j+1 so contours line up with pcolor cells.
+            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j',fliplr(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
             clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
         end
 
