@@ -18,11 +18,14 @@ arguments
     options.showForcingFluxes = true;
     options.timeIndices = Inf;
     options.axes {mustBeMember(options.axes,{'jk','j','k'})} = 'jk'
-    options.shouldOverlayWaveFrequencies = true
+    options.shouldOverlayWaveFrequencies = false %true
+    options.shouldOverlayGeostrophicKineticPotentialRatioContours = true
     options.colormap = WVDiagnostics.crameri('-bam')
     options.visible = "on"
     options.overSaturationFactor = 10;
 end
+
+n_size = 17;
 
 wvt = self.wvt;
 forcing_fluxes = self.forcingFluxesTemporalAverage(energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
@@ -60,6 +63,10 @@ for iComponent = 1:length(fluxes)
             line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)           
             if options.shouldOverlayWaveFrequencies
                 self.overlayFrequencyContours;
+            end
+            if options.shouldOverlayGeostrophicKineticPotentialRatioContours
+                % self.overlayGeostrophicKineticPotentialRatioContours;
+                self.overlayGeostrophicKineticPotentialFractionContours;
             end
             clim(ax,colorLimits);
             
@@ -118,18 +125,21 @@ switch options.axes
             if ii <= prod(tl.GridSize)-tl.GridSize(2)
                 nexttile(ii)
                 %xticklabels([])
-                set(gca,'XTickLabels',[],'FontSize',n_size)
+                % set(gca,'XTickLabels',[],'FontSize',n_size)
+                set(gca,'XTickLabels',[])
             end
             if ~(mod(ii,tl.GridSize(2))==1)
                 nexttile(ii)
                 %yticklabels([])
-                set(gca,'YTickLabels',[],'FontSize',n_size)
+                % set(gca,'YTickLabels',[],'FontSize',n_size)
+                set(gca,'YTickLabels',[])
             end
            if (mod(ii,tl.GridSize(2))==1)
                 nexttile(ii)
                 set(gca,'YTick',[0 5 10 15])
-                set(gca,'YTickLabels',get(gca,'ytick'),'FontSize',n_size)
-                set(gca,'fontname','times')
+                % set(gca,'YTickLabels',get(gca,'ytick'),'FontSize',n_size)
+                set(gca,'YTickLabels',get(gca,'ytick'))
+                % set(gca,'fontname','times')
            end
         end
 end
