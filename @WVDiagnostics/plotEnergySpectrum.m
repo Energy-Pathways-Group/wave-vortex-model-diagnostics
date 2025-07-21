@@ -83,7 +83,7 @@ set(gca,'XScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
 colormap(axIGW, self.cmocean('dense'));
 ylabel('vertical mode')
-title('internal gravity wave')
+title('Internal Gravity Wave')
 xlabel('wavelength (km)')
 text(radialWavelength(1),max(wvt.j)*1.05,'inertial','FontWeight','bold')
 line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)
@@ -99,11 +99,12 @@ set(gca,'XScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
 colormap(axGEO, self.cmocean('dense'));
 set(gca,'YTickLabel',[]);
-title('geostrophic')
+title('Geostrophic')
 xlabel('wavelength (km)')
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
 line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)
 
+self.overlayGeostrophicKineticPotentialFractionContours
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 
 % plot vertical mode spectrum

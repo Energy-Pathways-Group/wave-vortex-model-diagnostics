@@ -59,7 +59,13 @@ for iComponent = 1:length(fluxes)
             set(gca,'XDir','reverse')
             set(gca,'XScale','log')
             colormap(ax, options.colormap)
-            text(radialWavelength(1)*.95,0.5,'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            if options.energyReservoir==EnergyReservoir.total
+                text(radialWavelength(1)*.95,0.5,{'MDA','Inertial'},'FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            elseif options.energyReservoir==EnergyReservoir.geostrophic_mda
+                text(radialWavelength(1)*.95,0.5,'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            elseif options.energyReservoir==EnergyReservoir.wave
+                text(radialWavelength(1)*.95,0.5,'Inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            end
             line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)           
             if options.shouldOverlayWaveFrequencies
                 self.overlayFrequencyContours;

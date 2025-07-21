@@ -77,19 +77,21 @@ if options.title ~= "none"
     title(tl, options.title, 'Interpreter', 'none')
 end
 
-% plot theavailable potential enstrophy
+% plot the available potential enstrophy
 val = log10((TZ_APV_j_kR).');
 axIGW = nexttile;
 pcolor(radialWavelength,wvt.j,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
 ylabel('vertical mode')
-title('apv')
+title('APV')
 xlabel('wavelength (km)')
 colormap(axIGW, self.cmocean('dense'));
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
 line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
 clim(options.clim)
+self.overlayGeostrophicKineticPotentialFractionContours
+
 
 % plot the geostrophic enstrophy
 val = log10((TZ_A0_j_kR).');
@@ -98,13 +100,14 @@ pcolor(radialWavelength,wvt.j,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
 set(gca,'YTickLabel',[]);
-title('qgpv')
+title('QGPV')
 xlabel('wavelength (km)')
 colormap(axGEO, self.cmocean('dense'));
 text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
 line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
 clim(options.clim)
 
+self.overlayGeostrophicKineticPotentialFractionContours
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 
 % plot vertical mode spectrum
