@@ -164,6 +164,8 @@ classdef WVDiagnostics < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         S_f = spectrumWithFgTransform(self,f)
+        S_f = spectrumWithGgTransform(self,f)
+        S_f = crossSpectrumWithGgTransform(self,phi,gamma)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
