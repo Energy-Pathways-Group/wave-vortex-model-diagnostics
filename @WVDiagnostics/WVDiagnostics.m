@@ -94,7 +94,8 @@ classdef WVDiagnostics < handle
             % - Topic: Dependent property getter
             % - Declaration: t = get.j(self)
             % - Returns t: j indices from diagnostics file
-            t = self.diagfile.readVariables('j');
+            % t = self.diagfile.readVariables('j');
+            t = self.wvt.j;
         end
 
         function t = get.kRadial(self)
@@ -105,7 +106,8 @@ classdef WVDiagnostics < handle
             % - Topic: Dependent property getter
             % - Declaration: t = get.kRadial(self)
             % - Returns t: kRadial indices from diagnostics file
-            t = self.diagfile.readVariables('kRadial');
+            % t = self.diagfile.readVariables('kRadial');
+            t = self.wvt.kRadial;
         end
 
         function t = get.t_wv(self)
@@ -154,6 +156,14 @@ classdef WVDiagnostics < handle
         end
 
         createDiagnosticsFile(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Spectra
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        S_f = spectrumWithFgTransform(self,f)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
