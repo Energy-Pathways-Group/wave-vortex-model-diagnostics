@@ -26,6 +26,7 @@ classdef WVDiagnostics < handle
         t_wv
         j
         kRadial
+        kPseudoRadial
     end
 
     properties (SetObservable)
@@ -110,6 +111,19 @@ classdef WVDiagnostics < handle
             t = self.wvt.kRadial;
         end
 
+        function kPseudoRadial = get.kPseudoRadial(self)
+            jWavenumber = 1./sqrt(self.wvt.Lr2);
+            jWavenumber(1) = 0; % barotropic mode is a mean?
+            [kj,kr] = ndgrid(jWavenumber,self.wvt.kRadial);
+            Kh = sqrt(kj.^2 + kr.^2);
+            allKs = unique(reshape(abs(Kh),[],1),'sorted');
+            deltaK = max(diff(allKs));
+            kAxis_ = 0:deltaK:(max(allKs)+deltaK/2);
+
+            % Thi is the final output axis for wavenumber
+            kPseudoRadial = reshape(kAxis_,[],1);
+        end
+
         function t = get.t_wv(self)
             % Get time vector from the model output file
             %
@@ -156,6 +170,7 @@ classdef WVDiagnostics < handle
         end
 
         createDiagnosticsFile(self,options)
+        [varargout] = transformToPseudoRadialWavenumber(self,varargin); 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %

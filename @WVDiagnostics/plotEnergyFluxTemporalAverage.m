@@ -17,7 +17,8 @@ arguments
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
     options.showForcingFluxes = true;
     options.timeIndices = Inf;
-    options.axes {mustBeMember(options.axes,{'jk','j','k'})} = 'jk'
+    options.axes {mustBeMember(options.axes,{'jk','j','k','k-pseudo-isotropic'})} = 'jk'
+    options.filter = @(v) v;
     options.shouldOverlayWaveFrequencies = false %true
     options.shouldOverlayGeostrophicKineticPotentialRatioContours = true
     options.colormap = WVDiagnostics.crameri('-bam')
@@ -42,7 +43,12 @@ if options.axes == "jk"
 end
 
 % create radial wavelength vector
-radialWavelength = 2*pi./wvt.kRadial/1000;
+switch options.axes
+    case "k-pseudo-isotropic"
+        radialWavelength = 2*pi./self.kPseudoRadial/1000;
+    otherwise
+        radialWavelength = 2*pi./wvt.kRadial/1000;
+end
 radialWavelength(1) = 1.5*radialWavelength(2);
 
 fig = figure(Visible=options.visible);
@@ -55,9 +61,10 @@ for iComponent = 1:length(fluxes)
         case "jk"
             % % % pcolor(ax,options.energyReservoir.kFromKRadial(wvt.kRadial),wvt.j,val), shading flat
             % % % self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
-            pcolor(ax,radialWavelength,wvt.j,val), shading flat
+            pcolor(ax,radialWavelength,wvt.j,options.filter(val)), shading flat
             set(gca,'XDir','reverse')
             set(gca,'XScale','log')
+            set(gca,'YScale','log')
             colormap(ax, options.colormap)
             if options.energyReservoir==EnergyReservoir.total
                 text(radialWavelength(1)*.95,0.5,{'MDA','Inertial'},'FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
@@ -78,15 +85,21 @@ for iComponent = 1:length(fluxes)
             
         case "j"
             plot(wvt.j,zeros(size(wvt.j)),LineWidth=2,Color=0*[1 1 1]), hold on
-            plot(ax,wvt.j,sum(val,2))
+            plot(ax,wvt.j,options.filter(sum(val,2)))
         case "k"
             % % % plot(options.energyReservoir.kFromKRadial(wvt.kRadial),zeros(size(wvt.kRadial)),LineWidth=2,Color=0*[1 1 1]), hold on
             % % % plot(ax,wvt.kRadial,sum(val,1))
             % % % self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
             plot(radialWavelength,zeros(size(radialWavelength)),LineWidth=2,Color=0*[1 1 1]), hold on
-            plot(ax,radialWavelength,sum(val,1))
+            plot(ax,radialWavelength,options.filter(sum(val,1)))
             set(gca,'XDir','reverse')
-            set(gca,'XScale','log')       
+            set(gca,'XScale','log')
+        case "k-pseudo-isotropic"
+            v = self.transformToPseudoRadialWavenumber(val);
+            plot(radialWavelength,zeros(size(radialWavelength)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,radialWavelength,options.filter(v))
+            set(gca,'XDir','reverse')
+            set(gca,'XScale','log')
     end
     title(ax,fluxes(iComponent).fancyName + " (" + string(sum(val(:))) + " " + self.flux_scale_units + ")" )
 end
@@ -107,6 +120,10 @@ switch options.axes
         % kR plot options
         ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
         xlabel(tl,'wavelength (km)')
+    case "k-pseudo-isotropic"
+        % kR plot options
+        ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
+        xlabel(tl,'pseudo-wavelength (km)')
 end
 
 % remove redundant labels
