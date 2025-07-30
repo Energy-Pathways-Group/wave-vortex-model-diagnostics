@@ -10,6 +10,8 @@ function fig = plotEnergyFluxTemporalAverage(self,options)
 % - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
 % - Parameter options.timeIndices: indices for time averaging (default: Inf)
 % - Parameter options.visible: figure visibility (default: "on")
+% - Parameter options.fluxGroups: Cell array of row indices indicating fluxes to sum. Check fluxes.name to see indices. (Default: []. Example: {5,[2,3,4],6,[7,8,9]};)
+% - Parameter options.simpleName: Cell array of simple name strings for fluxGroups. (Default: []. Example: {"forcing","damping","g\nablag","g\nablaw+w\nablag+w\nablaw"};)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics
@@ -24,6 +26,8 @@ arguments
     options.colormap = WVDiagnostics.crameri('-bam')
     options.visible = "on"
     options.overSaturationFactor = 10;
+    options.fluxGroups = [];
+    options.simpleName = [];
 end
 
 n_size = 17;
@@ -37,9 +41,32 @@ else
     fluxes = inertial_fluxes;
 end
 
+% Custom combination and ordering of fluxes for plotting
+% Use fluxes.name to see all fluxes, or plot them all un-grouped. Specify
+% indices of fluxes to group.
+% General idea: all forcing, dominant triad, all other triads, all damping 
+if ~isempty(options.fluxGroups)
+    fluxesGrouped = struct;
+    for g = 1:numel(options.fluxGroups)
+        fluxesGrouped(g).name = cat(2,fluxes(options.fluxGroups{g}).name);
+        fluxesGrouped(g).fancyName = cat(2,fluxes(options.fluxGroups{g}).fancyName);
+        fluxesGrouped(g).simpleName = options.simpleName{g};
+        fluxesGrouped(g).(options.energyReservoir.name) = sum( cat(3, fluxes(options.fluxGroups{g}).(options.energyReservoir.name)), 3);
+    end
+    % replace fluxes with fluxesGrouped
+    fluxes = fluxesGrouped;
+end
+
+% set color limits 
 if options.axes == "jk"
-    colorLimits = max(arrayfun( @(v) max(abs(v.(options.energyReservoir.name)(:))), fluxes))*[-1 1]/options.overSaturationFactor;
-    colorLimits = colorLimits/self.flux_scale;
+    if isscalar(options.overSaturationFactor)
+        colorLimits = max(arrayfun( @(v) max(abs(v.(options.energyReservoir.name)(:))), fluxes))*[-1 1]/options.overSaturationFactor;
+        colorLimits = colorLimits/self.flux_scale;
+    elseif length(options.overSaturationFactor)==2
+        colorLimits = options.overSaturationFactor;
+    else
+        error("options.overSaturationFactor should be length 1 (overSaturationFactor) or length 2 (colormap limits).")
+    end
 end
 
 % create radial wavelength vector
@@ -101,7 +128,11 @@ for iComponent = 1:length(fluxes)
             set(gca,'XDir','reverse')
             set(gca,'XScale','log')
     end
-    title(ax,fluxes(iComponent).fancyName + " (" + string(sum(val(:))) + " " + self.flux_scale_units + ")" )
+    if isempty(options.simpleName)
+        title(ax,fluxes(iComponent).fancyName + " (" + string(sum(val(:))) + " " + self.flux_scale_units + ")" )
+    else
+        title(ax,fluxes(iComponent).simpleName + " (" + string(sum(val(:))) + " " + self.flux_scale_units + ")" )
+    end
 end
 
 switch options.axes
@@ -157,13 +188,13 @@ switch options.axes
                 % set(gca,'YTickLabels',[],'FontSize',n_size)
                 set(gca,'YTickLabels',[])
             end
-           if (mod(ii,tl.GridSize(2))==1)
+            if (mod(ii,tl.GridSize(2))==1)
                 nexttile(ii)
-                set(gca,'YTick',[0 5 10 15])
+                % set(gca,'YTick',[0 5 10 15])
                 % set(gca,'YTickLabels',get(gca,'ytick'),'FontSize',n_size)
                 set(gca,'YTickLabels',get(gca,'ytick'))
                 % set(gca,'fontname','times')
-           end
+            end
         end
 end
 
