@@ -19,7 +19,7 @@ arguments
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
     options.showForcingFluxes = true;
     options.timeIndices = Inf;
-    options.axes {mustBeMember(options.axes,{'jk','j','k','k-pseudo-isotropic'})} = 'jk'
+    options.axes {mustBeMember(options.axes,{'jk','j','k','k-pseudo-isotropic','omega'})} = 'jk'
     options.filter = @(v) v;
     options.shouldOverlayWaveFrequencies = false %true
     options.shouldOverlayGeostrophicKineticPotentialRatioContours = true
@@ -131,6 +131,12 @@ for iComponent = 1:length(fluxes)
             plot(ax,radialWavelength,options.filter(v))
             set(gca,'XDir','reverse')
             set(gca,'XScale','log')
+        case "omega"
+            omegaAxis = self.omegaAxis/self.wvt.f;
+            v = self.transformToOmegaAxis(val);
+            plot(omegaAxis,zeros(size(omegaAxis)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,omegaAxis,options.filter(v))
+            set(gca,'XScale','log')
     end
     if isempty(options.simpleName)
         title(ax,fluxes(iComponent).fancyName + " (" + string(sum(val(:))) + " " + self.flux_scale_units + ")" )
@@ -159,6 +165,10 @@ switch options.axes
         % kR plot options
         ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
         xlabel(tl,'pseudo-wavelength (km)')
+    case "omega"
+        % kR plot options
+        ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
+        xlabel(tl,'frequency (f)')
 end
 
 % remove redundant labels

@@ -27,6 +27,7 @@ classdef WVDiagnostics < handle
         j
         kRadial
         kPseudoRadial
+        omegaAxis
     end
 
     properties (SetObservable)
@@ -124,6 +125,13 @@ classdef WVDiagnostics < handle
             kPseudoRadial = reshape(kAxis_,[],1);
         end
 
+        function omega = get.omegaAxis(self)
+            omega=self.wvt.Omega(2:end,:);
+            omegaj1=omega(1,:);
+            dOmega=max(diff(sort(omegaj1(:))));
+            omega=min(omega(:)):dOmega:max(omega(:));
+        end
+
         function t = get.t_wv(self)
             % Get time vector from the model output file
             %
@@ -173,6 +181,7 @@ classdef WVDiagnostics < handle
         [varargout] = transformToPseudoRadialWavenumber(self,energyReservoir,varargin);
         [varargout] = transformToPseudoRadialWavenumberA0(self,varargin);
         [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)  
+        [varargout] = transformToOmegaAxis(self,varargin)   
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
