@@ -67,6 +67,10 @@ linesTemp = lines;
 radialWavelength = 2*pi./wvt.kRadial/1000;
 radialWavelength(1) = 1.5*radialWavelength(2);
 
+% create j vector for log y-axis.
+jForLogAxis = wvt.j;
+jForLogAxis(1) = 0.75;
+
 % create figure
 fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
 set(gcf,'PaperPositionMode','auto')
@@ -77,32 +81,34 @@ title(tl,'Energy Spectrum')
 % plot the wave energy
 val = log10(TE_Apm_j_kR);
 axIGW = nexttile;
-pcolor(radialWavelength,wvt.j,val), shading flat
+pcolor(radialWavelength,jForLogAxis,val), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
+set(gca,'YScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
 colormap(axIGW, self.cmocean('dense'));
 ylabel('vertical mode')
 title('Internal Gravity Wave')
 xlabel('wavelength (km)')
-text(radialWavelength(1),max(wvt.j)*1.05,'inertial','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)
+text(radialWavelength(1),max(jForLogAxis),'inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1)
 
 self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
 % plot the geostrophic energy
 val = log10(TE_A0_j_kR);
 axGEO = nexttile;
-pcolor(radialWavelength,wvt.j,val), shading flat
+pcolor(radialWavelength,jForLogAxis,val), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
+set(gca,'YScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
 colormap(axGEO, self.cmocean('dense'));
 set(gca,'YTickLabel',[]);
 title('Geostrophic')
 xlabel('wavelength (km)')
-text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)
+text(radialWavelength(1),max(jForLogAxis),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1)
 
 self.overlayGeostrophicKineticPotentialFractionContours
 self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])

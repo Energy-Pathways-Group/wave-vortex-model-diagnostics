@@ -78,6 +78,10 @@ switch options.axes
 end
 radialWavelength(1) = 1.5*radialWavelength(2);
 
+% create j vector for log y-axis.
+jForLogAxis = wvt.j;
+jForLogAxis(1) = 0.75;
+
 fig = figure(Visible=options.visible);
 tl = tiledlayout(fig,"flow",TileSpacing='tight');
 
@@ -88,19 +92,19 @@ for iComponent = 1:length(fluxes)
         case "jk"
             % % % pcolor(ax,options.energyReservoir.kFromKRadial(wvt.kRadial),wvt.j,val), shading flat
             % % % self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
-            pcolor(ax,radialWavelength,wvt.j,options.filter(val)), shading flat
+            pcolor(ax,radialWavelength,jForLogAxis,options.filter(val)), shading flat
             set(gca,'XDir','reverse')
             set(gca,'XScale','log')
             set(gca,'YScale','log')
             colormap(ax, options.colormap)
             if options.energyReservoir==EnergyReservoir.total
-                text(radialWavelength(1)*.95,0.5,{'MDA','Inertial'},'FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+                text(radialWavelength(1)*.95,jForLogAxis(1),{'MDA','Inertial'},'FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
             elseif options.energyReservoir==EnergyReservoir.geostrophic_mda
-                text(radialWavelength(1)*.95,0.5,'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+                text(radialWavelength(1)*.95,jForLogAxis(1),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
             elseif options.energyReservoir==EnergyReservoir.wave
-                text(radialWavelength(1)*.95,0.5,'Inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+                text(radialWavelength(1)*.95,jForLogAxis(1),'Inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
             end
-            line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1)           
+            line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1)           
             if options.shouldOverlayWaveFrequencies
                 self.overlayFrequencyContours;
             end

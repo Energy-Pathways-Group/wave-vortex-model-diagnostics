@@ -63,6 +63,10 @@ TZ_Error_j = sum(TZ_Error_j_kR,2);
 radialWavelength = 2*pi./wvt.kRadial/1000;
 radialWavelength(1) = 1.5*radialWavelength(2);
 
+% create j vector for log y-axis.
+jForLogAxis = wvt.j;
+jForLogAxis(1) = 0.75;
+
 if ~isfield(options,"figureHandle")
     fig = figure('Units', 'points', 'Position', [50 50 700 500],'Visible',options.visible);
     set(gcf,'PaperPositionMode','auto')
@@ -80,15 +84,16 @@ end
 % plot the available potential enstrophy
 val = log10((TZ_APV_j_kR).');
 axIGW = nexttile;
-pcolor(radialWavelength,wvt.j,val.'), shading flat
+pcolor(radialWavelength,jForLogAxis,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
+set(gca,'YScale','log')
 ylabel('vertical mode')
 title('APV')
 xlabel('wavelength (km)')
 colormap(axIGW, self.cmocean('dense'));
-text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
+text(radialWavelength(1),max(jForLogAxis),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1.5)
 clim(options.clim)
 self.overlayGeostrophicKineticPotentialFractionContours
 
@@ -96,15 +101,16 @@ self.overlayGeostrophicKineticPotentialFractionContours
 % plot the geostrophic enstrophy
 val = log10((TZ_A0_j_kR).');
 axGEO = nexttile;
-pcolor(radialWavelength,wvt.j,val.'), shading flat
+pcolor(radialWavelength,jForLogAxis,val.'), shading flat
 set(gca,'XDir','reverse')
 set(gca,'XScale','log')
+set(gca,'YScale','log')
 set(gca,'YTickLabel',[]);
 title('QGPV')
 xlabel('wavelength (km)')
 colormap(axGEO, self.cmocean('dense'));
-text(radialWavelength(1),max(wvt.j)*1.05,'MDA','FontWeight','bold')
-line([radialWavelength(2),radialWavelength(2)],[min(wvt.j),max(wvt.j)],'Color','k','LineWidth',1.5)
+text(radialWavelength(1),max(jForLogAxis),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1.5)
 clim(options.clim)
 
 self.overlayGeostrophicKineticPotentialFractionContours
