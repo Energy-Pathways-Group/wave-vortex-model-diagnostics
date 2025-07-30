@@ -123,7 +123,7 @@ cb.Label.Interpreter = 'latex';
 ax = nexttile(tl,2);
 val = zeta_z_g(:,:,end)/wvt.f;
 pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
-hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:'); % add line for x-z section
+hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
 title("surface vorticity")
 % title("geostrophic surface vorticity")
 axis square
@@ -138,7 +138,7 @@ clim(ax, zeta_limits);
 ax = nexttile(tl,nColumns+2);
 val = zeta_z_w(:,:,end)/wvt.f;
 pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
-hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:'); % add line for x-z section
+hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
 % title("surface vorticity")
 % title("wave surface vorticity")
 axis square
@@ -190,6 +190,7 @@ if options.shouldShowEnergySpectra
     % v = round(sqrt(wvt.Lr2(1:2:end))./1000*10)/10;
     % [C,h] = contour(wvt.kRadial,wvt.j',deformationJK,v,'LineWidth',1,'Color',textColor);
     % clabel(C,h,v,'Color',textColor,'LabelSpacing',400)
+    % hold off
 
     % self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 
@@ -221,6 +222,7 @@ if options.shouldShowEnergySpectra
     v = [1.01 1.05 1.2 1.5 2 4 8 16];
     [C,h] = contour(wvt.kRadial(2:end),wvt.j',(omegaJK(:,2:end)),v,'LineWidth',1,'Color',textColor);
     clabel(C,h,v,'Color',textColor,'LabelSpacing',400)
+    hold off
 end
 % % % self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
