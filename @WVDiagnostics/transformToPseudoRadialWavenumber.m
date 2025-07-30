@@ -1,4 +1,4 @@
-function [varargout] = transformToPseudoRadialWavenumber(self,varargin)     
+function [varargout] = transformToPseudoRadialWavenumber(self,energyReservoir,varargin)     
 % transforms in the from (j,kRadial) to kPseudoRadial
 %
 % Sums all the variance/energy in radial bins `kPseudoRadial`.
@@ -9,39 +9,28 @@ function [varargout] = transformToPseudoRadialWavenumber(self,varargin)
 % - Returns varargout: variables with dimensions $$(kRadial)$$ or $$(kRadial,j)$$
 
 % Thi is the final output axis for wavenumber
-
-wvt = self.wvt;
-
-jWavenumber = 1./sqrt(wvt.Lr2);
-jWavenumber(1) = 0; % barotropic mode is a mean?
-% idx = find(wvt.kRadial<jWavenumber(2));
-% kPseudoRadial = cat(1,wvt.kRadial(idx),jWavenumber(2:end));
-% kPseudoRadial = jWavenumber;
-[kj,kr] = ndgrid(jWavenumber,wvt.kRadial);
-Kh = sqrt(kj.^2 + kr.^2);
-
-k = self.kPseudoRadial;
-dk = k(2)-k(1);
-
-nK = length(k);
-
 varargout = cell(size(varargin));
-spectralMatrixSize = [wvt.Nj length(wvt.kRadial)];
-for iVar=1:length(varargin)
-    if size(varargin{iVar},2) ~= spectralMatrixSize(2)
-        error('The input matrix must be of size [Nj NkRadial]');
-    end
-    
-    varargout{iVar} = zeros([nK 1]);
-end
-
-totalIndices = false(size(Kh));
-for iK = 1:1:nK
-    indicesForK = k(iK)-dk/2 <= Kh & Kh < k(iK)+dk/2;
-    for iVar=1:length(varargin)
-        varargout{iVar}(iK) =  sum(varargin{iVar}(indicesForK));
-    end
-    totalIndices = totalIndices | indicesForK;
+switch energyReservoir
+    case EnergyReservoir.geostrophic_kinetic
+    case EnergyReservoir.geostrophic_kinetic_mda
+    case EnergyReservoir.geostrophic_potential
+    case EnergyReservoir.geostrophic_potential_mda
+    case EnergyReservoir.geostrophic
+    case EnergyReservoir.mda
+    case EnergyReservoir.geostrophic_mda
+        varargout{:} = self.transformToPseudoRadialWavenumberA0(varargin{:});
+    case EnergyReservoir.igw
+    case EnergyReservoir.io
+    case EnergyReservoir.wave
+        varargout{:} = self.transformToPseudoRadialWavenumberApm(varargin{:});
+    case EnergyReservoir.total
+        if self.wvt.isHydrostatic
+            varargout{:} = self.transformToPseudoRadialWavenumberA0(varargin{:});
+        else
+            error("The total energy cannot be combined in this way for a non-hydrostatic simulation.");
+        end
+    otherwise
+        error("unknown energy reservoir");
 end
 
 end

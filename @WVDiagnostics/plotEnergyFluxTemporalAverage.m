@@ -126,7 +126,7 @@ for iComponent = 1:length(fluxes)
             set(gca,'XDir','reverse')
             set(gca,'XScale','log')
         case "k-pseudo-isotropic"
-            v = self.transformToPseudoRadialWavenumber(val);
+            v = self.transformToPseudoRadialWavenumber(options.energyReservoir,val);
             plot(radialWavelength,zeros(size(radialWavelength)),LineWidth=2,Color=0*[1 1 1]), hold on
             plot(ax,radialWavelength,options.filter(v))
             set(gca,'XDir','reverse')

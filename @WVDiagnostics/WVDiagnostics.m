@@ -170,7 +170,9 @@ classdef WVDiagnostics < handle
         end
 
         createDiagnosticsFile(self,options)
-        [varargout] = transformToPseudoRadialWavenumber(self,varargin); 
+        [varargout] = transformToPseudoRadialWavenumber(self,energyReservoir,varargin);
+        [varargout] = transformToPseudoRadialWavenumberA0(self,varargin);
+        [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)  
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
