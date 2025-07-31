@@ -118,7 +118,8 @@ classdef WVDiagnostics < handle
             [kj,kr] = ndgrid(jWavenumber,self.wvt.kRadial);
             Kh = sqrt(kj.^2 + kr.^2);
             allKs = unique(reshape(abs(Kh),[],1),'sorted');
-            deltaK = max(diff(allKs));
+            % deltaK = max(diff(allKs));
+            deltaK = jWavenumber(2);
             kAxis_ = 0:deltaK:(max(allKs)+deltaK/2);
 
             % Thi is the final output axis for wavenumber
