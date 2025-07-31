@@ -233,7 +233,13 @@ for timeIndex = 1:length(timeIndices)
     EnergyByComponent{"KE_g"}.setValueAlongDimensionAtIndex(wvt.geostrophicKineticEnergy,'t',outputIndex);
     EnergyByComponent{"PE_g"}.setValueAlongDimensionAtIndex(wvt.geostrophicPotentialEnergy,'t',outputIndex);
     [u,v,ape,apv] = wvt.variableWithName('u','v','ape','apv');
-    ke = (u.^2 + v.^2)/2;
+    if isa(wvt,"WVTransformHydrostatic")
+        ke = (u.^2 + v.^2)/2;
+    elseif isa(wvt,"WVTransformBoussinesq")
+        ke = (u.^2 + v.^2 + w.^2)/2;
+    else
+        error("Transform not yet supported.");
+    end
     variable_ke.setValueAlongDimensionAtIndex(int_vol(ke),'t',outputIndex);
     variable_pe.setValueAlongDimensionAtIndex(int_vol(shiftdim(wvt.N2,-2).*wvt.eta.*wvt.eta/2),'t',outputIndex);
     variable_ape.setValueAlongDimensionAtIndex(int_vol(ape),'t',outputIndex);
