@@ -11,8 +11,12 @@ function [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)
 % Thi is the final output axis for wavenumber
 
 wvt = self.wvt;
-
-[hN,n] = wvt.transformToRadialWavenumber(wvt.h_pm,ones(size(wvt.h_pm)));
+if isa(wvt,"WVTransformHydrostatic")
+    h_pm = repmat(wvt.h_pm,[1 wvt.Nkl]);
+else
+    h_pm = wvt.h_pm;
+end
+[hN,n] = wvt.transformToRadialWavenumber(h_pm,ones(size(h_pm)));
 h_kj = (hN./n);
 
 kj = wvt.f ./ sqrt( wvt.g * h_kj);
