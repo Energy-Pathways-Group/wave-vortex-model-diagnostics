@@ -1395,12 +1395,36 @@ classdef WVDiagnostics < handle
         cmap = cmocean(ColormapName,varargin)
         cmap = crameri(ColormapName,varargin)
 
+        [x, t] = CosineTransformBack( f, xbar, varargin )
+        [xbar, f] = CosineTransformForward( t, x, varargin )
+        [x, t] = SineTransformBack( f, xbar, varargin )
+
         function iTimeChanged(~,eventData)
             wvd = eventData.AffectedObject;
             wvd.wvt.initFromNetCDFFile(wvd.wvfile,iTime=wvd.iTime);
         end
 
+        function [X,Y,U,V] = PoissonFlowFromFlux(x,y,flux)
+            % We will treat the first dimension as `x' and the second
+            % dimension as `y'. This means that the flux in the usual form,
+            % which is j by kRadial, might need to be transposed to get
+            % what you want.
+            %
+            % [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvt.kRadial,jWavenumber,flux.');
+            % quiver(X,Y,10*U,10*V,'off',Color=0*[1 1 1])
 
+            [X,Y] = ndgrid(x,y);
+            [flux_bar, f_alpha] = CosineTransformForward( x, flux, 1 );
+            [flux_bar2, f_beta] = CosineTransformForward( y, flux_bar, 2 );
+            [ALPHA,BETA] = ndgrid(f_alpha,f_beta);
+            D = -((2*pi*ALPHA).^2 + (2*pi*BETA).^2);
+            D(1,1) = Inf;
+            UFactor = 2*pi*ALPHA./D;
+            VFactor = 2*pi*BETA./D;
+            tmp = CosineTransformBack(f_beta,UFactor.*flux_bar2,2);
+            U = SineTransformBack(f_alpha(2:end-1,:),tmp(2:end-1,:),1);
+            V = CosineTransformBack(f_alpha,SineTransformBack(f_beta(2:end-1),VFactor(:,2:end-1).*flux_bar2(:,2:end-1),2),1);
+        end
 
         function bool = areEnergyReservoirsComplete(reservoirs)
             bool = all(sum([reservoirs.vectorContents],2)==1);
