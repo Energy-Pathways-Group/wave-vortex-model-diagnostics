@@ -1059,7 +1059,9 @@ classdef WVDiagnostics < handle
                 filter_space = @(v) mean(v(:,:,options.timeIndices),3);
             end
             enstrophy_fluxes = self.enstrophyFluxes;
-            enstrophy_fluxes.Z0 = filter_space(enstrophy_fluxes.Z0);
+            for iForce=1:length(enstrophy_fluxes)
+                enstrophy_fluxes(iForce).Z0 = filter_space(enstrophy_fluxes(iForce).Z0);
+            end
         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
