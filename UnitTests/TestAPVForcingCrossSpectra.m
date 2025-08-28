@@ -1,5 +1,5 @@
-% basedir = "/Users/Shared/CimRuns_June2025/output/";
-basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
+basedir = "/Users/Shared/CimRuns_June2025/output/";
+% basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 % basedir = "/Volumes/Samsung_T7/CimRuns_June2025/output/";
 % basedir = '/Users/cwortham/Documents/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns/output/';
 % basedir = '/Volumes/SanDiskExtremePro/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns_June2025_v2/output/';
@@ -34,7 +34,7 @@ int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 forcingNames = wvt.forcingNames;
 
 %%
-indices = 51;
+indices = 251;
 Z2_qgpv_t = zeros(length(indices),1);
 Z2_t = zeros(length(indices),1);
 iIndex = 1;
@@ -50,6 +50,12 @@ end
 % wvt.initFromNetCDFFile(ncfile,iTime=indices(iIndex));
 F = wvt.fluxForForcing();
 
+prefactorK = 2*ones(1,wvt.Nkl); prefactorK(1) = 1;
+prefactorJ = wvt.h_0; prefactorJ(1) = wvt.Lz;
+prefactor = prefactorJ * prefactorK;
+
+figure
+tl = tiledlayout(2,1,TileSpacing="compact");
 fprintf("Enstrophy forcing:\n");
 enstrophyScale = wvt.f*wvt.f/(86400*365);
 eta_true = wvt.eta_true;
@@ -79,6 +85,15 @@ for iForce=1:1%length(forcingNames)
     end
     Z2_qgpv_t(iIndex) = sum(Z(:))/enstrophyScale;
 
+    nexttile(tl,1)
+    % S_f_R = wvt.transformToRadialWavenumber(Z);
+    S_f_R = wvt.transformToPseudoRadialWavenumberA0(wvt.transformToRadialWavenumber( Z) );
+    if iForce == 1
+        plot(wvt.kPseudoRadial,cumsum(S_f_R)/enstrophyScale,Color=0*[1 1 1],LineWidth=2), hold on
+    else
+        plot(wvt.kPseudoRadial,cumsum(S_f_R)/enstrophyScale)
+    end
+
     % F_pv = wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(Feta);
     % Z2 = wvt.qgpv .* F_pv;
     % if isscalar(indices)
@@ -106,10 +121,98 @@ for iForce=1:1%length(forcingNames)
 
     Z2_t(iIndex) = int_vol(Z2)/enstrophyScale;
 
-    S_f = wvd.crossSpectrumWithFgTransform(FZ,wvt.apv);
+    % S_f = wvd.crossSpectrumWithFgTransform(FZ,wvt.apv);
+
+    phi_bar = wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(wvt.apv));
+    gamma_bar = wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(FZ));
+    S_f = prefactor .* real(phi_bar .* conj(gamma_bar));
+
+    nexttile(tl,2)
+    % S_f_R = wvt.transformToRadialWavenumber(S_f);
+    S_f_jK = wvt.transformToRadialWavenumber( S_f);
+    S_f_R = wvt.transformToPseudoRadialWavenumberA0( S_f_jK );
+    if iForce == 1
+        plot(wvt.kPseudoRadial,cumsum(S_f_R)/enstrophyScale,Color=0*[1 1 1],LineWidth=2), hold on
+    else
+        plot(wvt.kPseudoRadial,cumsum(S_f_R)/enstrophyScale)
+    end
 
     if isscalar(indices)
         fprintf("Total nonlinear enstrophy for " + forcingNames(iForce) + " forcing: " + int_vol(Z2)/enstrophyScale + " (" + sum(S_f(:))/enstrophyScale + ")\n");
     end
     
 end
+nexttile(tl,1);
+plot(wvt.kPseudoRadial,zeros(size(wvt.kPseudoRadial)),Color=0*[1 1 1],LineWidth=1)
+xlog
+nexttile(tl,2);
+plot(wvt.kPseudoRadial,zeros(size(wvt.kPseudoRadial)),Color=0*[1 1 1],LineWidth=1)
+xlog
+legend(forcingNames)
+
+%%
+
+flux = S_f_jK;
+
+jWavenumber = 1./sqrt(wvt.Lr2);
+jWavenumber(1) = 0; % barotropic mode is a mean?
+[X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvt.kRadial,jWavenumber,flux.');
+
+figure, jpcolor(wvt.kRadial,jWavenumber,flux); shading flat;
+colormap(WVDiagnostics.crameri('-bam'))
+clim(max(abs(S_f_jK(:)))*[-1 1])
+colorbar("eastoutside")
+hold on,
+quiver(X,Y,10*U,10*V,Color=0*[1 1 1])
+xlim([0 5e-4])
+ylim([0 5e-4])
+
+%%
+figure
+flux = wvt.transformToRadialWavenumber(Z);
+jpcolor(wvt.kRadial,jWavenumber,flux); shading flat;
+colormap(WVDiagnostics.crameri('-bam'))
+clim(max(abs(S_f_jK(:)))*[-1 1])
+colorbar("eastoutside")
+xlim([0 5e-4])
+ylim([0 5e-4])
+
+%%
+
+radialWavelength = 2*pi./wvt.kRadial/1000;
+radialWavelength(1) = 1.5*radialWavelength(2);
+
+verticalWavelength = 2*pi./jWavenumber/1000;
+verticalWavelength(1) = 1.5*verticalWavelength(2);
+
+figure
+ax1 =axes; 
+pcolor(ax1,radialWavelength,verticalWavelength,flux); shading flat;
+xscale("log"), yscale("log")
+set(gca,'XDir','reverse'), set(gca,'YDir','reverse')
+colormap(WVDiagnostics.crameri('-bam')), 
+clim(max(abs(S_f_jK(:)))*[-1 1])
+
+
+
+%%
+
+% check K only transform
+a = squeeze(mean(mean(wvt.apv .* wvt.apv,1),2));
+b = squeeze(sum(sum(fft2(wvt.apv) .* conj(fft2(wvt.apv)),1),2))/(wvt.Nx*wvt.Ny)^2;
+c = sum(prefactorK.*(wvt.transformFromSpatialDomainWithFourier(wvt.apv).*conj(wvt.transformFromSpatialDomainWithFourier(wvt.apv))),2);
+
+sum(wvt.z_int .* b)
+
+% check J only transform
+apv_zxy = reshape(shiftdim(wvt.apv,2),wvt.Nz,[]);
+aa = prefactorJ.* mean( ((wvt.PF0*apv_zxy)./wvt.P0).^2 ,2);
+sum(aa)
+
+% check combined transform
+phi_bar = wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(wvt.apv));
+S_f = prefactor .* real(phi_bar .* conj(phi_bar));
+sum(S_f(:))
+
+S_f = wvd.crossSpectrumWithFgTransform(wvt.apv,wvt.apv);
+sum(S_f(:))
