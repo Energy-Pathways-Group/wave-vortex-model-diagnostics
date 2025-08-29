@@ -177,7 +177,7 @@ else
         EnergyFlux{forcingNames(i)}.PE0 = diagfile.addVariable("PE0_" + name,dimensionNames,type="double",isComplex=false);
         EnstrophyFlux{forcingNames(i)} = diagfile.addVariable("Z0_" + name,dimensionNames,type="double",isComplex=false);
         EnergyFluxTrue{forcingNames(i)} = diagfile.addVariable("E_" + name,"t",type="double",isComplex=false);
-        EnstrophyFluxTrue{forcingNames(i)} = diagfile.addVariable("Z_" + name,"t",type="double",isComplex=false);
+        EnstrophyFluxTrue{forcingNames(i)} = diagfile.addVariable("Z_" + name,dimensionNames,type="double",isComplex=false);
     end
 
     % 3. Triads
@@ -285,12 +285,15 @@ for timeIndex = 1:length(timeIndices)
             G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*Feta;
         end
 
-        Z_NL = - wvt.zeta_x .* wvt.diffX(G_eta) - wvt.zeta_y .* wvt.diffY(G_eta)- wvt.zeta_z .* wvt.diffZG(G_eta);
-        Z_NL = Z_NL - wvt.diffX(wvt.eta_true) .* DF_x - wvt.diffY(wvt.eta_true) .* DF_y - wvt.diffZG(wvt.eta_true) .* DF_z;
-        Z_density = wvt.apv .* (wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta) + Z_NL);
+        FZ_L = wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta);
+        FZ_NL = - wvt.zeta_x .* wvt.diffX(G_eta) - wvt.zeta_y .* wvt.diffY(G_eta)- wvt.zeta_z .* wvt.diffZG(G_eta);
+        FZ_NL = FZ_NL - wvt.diffX(wvt.eta_true) .* DF_x - wvt.diffY(wvt.eta_true) .* DF_y - wvt.diffZG(wvt.eta_true) .* DF_z;
+        FZ = FZ_L + FZ_NL;
+        Z_density = wvt.crossSpectrumWithFgTransform(wvt.apv, FZ);
+        Z_jk = wvt.transformToRadialWavenumber( Z_density);
 
         EnergyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(int_vol(F_density),'t',outputIndex);
-        EnstrophyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(int_vol(Z_density),'t',outputIndex);
+        EnstrophyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(Z_jk,'t',outputIndex);
 
         EnergyFlux{forcingNames(i)}.Ep.setValueAlongDimensionAtIndex(Ep_jk,'t',outputIndex);
         EnergyFlux{forcingNames(i)}.Em.setValueAlongDimensionAtIndex(Em_jk,'t',outputIndex);
