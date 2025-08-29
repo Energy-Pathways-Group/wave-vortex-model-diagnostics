@@ -1,5 +1,5 @@
-basedir = "/Users/Shared/CimRuns_June2025/output/";
-% basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
+% basedir = "/Users/Shared/CimRuns_June2025/output/";
+basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 % basedir = "/Volumes/Samsung_T7/CimRuns_June2025/output/";
 % basedir = '/Users/cwortham/Documents/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns/output/';
 % basedir = '/Volumes/SanDiskExtremePro/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns_June2025_v2/output/';
@@ -10,11 +10,6 @@ wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") +
 
 % wvt = wvd.wvt;
 % ncfile = wvd.wvfile;
-
-%%
-
-
-%%
 
 options.shouldMeasureAntialiasingFlux = true;
 
@@ -50,49 +45,65 @@ end
 % wvt.initFromNetCDFFile(ncfile,iTime=indices(iIndex));
 F = wvt.fluxForForcing();
 
-prefactorK = 2*ones(1,wvt.Nkl); prefactorK(1) = 1;
-prefactorJ = wvt.h_0; prefactorJ(1) = wvt.Lz;
-prefactor = prefactorJ * prefactorK;
-
-figure
-tl = tiledlayout(2,1,TileSpacing="compact");
-fprintf("Enstrophy forcing:\n");
-enstrophyScale = wvt.f*wvt.f/(86400*365);
+figure; tl = tiledlayout(2,1,TileSpacing="compact");
+fprintf("Energy forcing:\n");
+energyScale = wvd.flux_scale;
 eta_true = wvt.eta_true;
-for iForce=1:1%length(forcingNames)
+for iForce=1:length(forcingNames)
+
+    [Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(F{forcingNames(iForce)}.Fp,F{forcingNames(iForce)}.Fm,F{forcingNames(iForce)}.F0);
     if isa(wvt,"WVTransformHydrostatic")
         [Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(iForce));
-        if forcingNames(iForce) == "nonlinear advection"
-            Fu = Fu + wvt.f*wvt.v;
-            Fv = Fv - wvt.f*wvt.u;
-        end
-        DF_x = - wvt.diffZF(Fv); % w_y - v_z
-        DF_y = wvt.diffZF(Fu);  % u_z - w_x
-        DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
+        F_density = wvt.u .* Fu + wvt.v .* Fv+ wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+
+        S_energy = wvt.crossSpectrumWithFgTransform(wvt.u,Fu);
+        S_energy = S_energy + wvt.crossSpectrumWithFgTransform(wvt.v,Fv);
+        S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.eta_true,Feta);
     else
         [Fu,Fv,Fw,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(iForce));
-        if forcingNames(iForce) == "nonlinear advection"
-            Fu = Fu + wvt.f*wvt.v;
-            Fv = Fv - wvt.f*wvt.u;
-        end
-        DF_x = wvt.diffY(Fw) - wvt.diffZF(Fv); % w_y - v_z
-        DF_y = wvt.diffZF(Fu) - wvt.diffX(Fw);  % u_z - w_x
-        DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
+        F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
     end
-    Z = 2*wvt.A0_TZ_factor.*real( F{forcingNames(iForce)}.F0 .* conj(wvt.A0) );
+    if forcingNames(iForce) == "nonlinear advection"
+        F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
+        S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.w,wvt.eta_true-wvt.eta);
+    end
+
+    E_jk = wvt.transformToRadialWavenumber(Ep+Em+E0);
     if isscalar(indices)
-        fprintf("Total quadratic enstrophy for " + forcingNames(iForce) + " forcing: " + sum(Z(:))/enstrophyScale + "\n");
+        fprintf("Total quadratic energy for " + forcingNames(iForce) + " forcing: " + sum(E_jk(:))/energyScale + "\n");
     end
-    Z2_qgpv_t(iIndex) = sum(Z(:))/enstrophyScale;
+
+    E = int_vol(F_density);
+    if isscalar(indices)
+        fprintf("Total nonlinear energy for " + forcingNames(iForce) + " forcing: " + E/energyScale + " (" + sum(S_energy(:))/energyScale + ")\n");
+    end
 
     nexttile(tl,1)
-    % S_f_R = wvt.transformToRadialWavenumber(Z);
-    Z0_k = wvt.transformToPseudoRadialWavenumberA0(wvt.transformToRadialWavenumber( Z) );
+    E_k = wvt.transformToPseudoRadialWavenumberA0(E_jk);
     if iForce == 1
-        plot(wvt.kPseudoRadial,cumsum(Z0_k)/enstrophyScale,Color=0*[1 1 1],LineWidth=2), hold on
+        plot(wvt.kPseudoRadial,cumsum(E_k)/energyScale,Color=0*[1 1 1],LineWidth=2), hold on
     else
-        plot(wvt.kPseudoRadial,cumsum(Z0_k)/enstrophyScale)
+        plot(wvt.kPseudoRadial,cumsum(E_k)/energyScale)
     end
+
+    nexttile(tl,2)
+    % S_f_R = wvt.transformToRadialWavenumber(S_f);
+    S_jk = wvt.transformToRadialWavenumber( S_energy);
+    S_k = wvt.transformToPseudoRadialWavenumberA0( S_jk );
+    if iForce == 1
+        plot(wvt.kPseudoRadial,cumsum(S_k)/energyScale,Color=0*[1 1 1],LineWidth=2), hold on
+        dE = E_k-S_k;
+    else
+        plot(wvt.kPseudoRadial,cumsum(S_k)/energyScale)
+    end
+    
+
+    % 
+    % Z2_qgpv_t(iIndex) = sum(Z(:))/energyScale;
+    % 
+    % nexttile(tl,1)
+    % % S_f_R = wvt.transformToRadialWavenumber(Z);
+    
 
     % F_pv = wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(Feta);
     % Z2 = wvt.qgpv .* F_pv;
@@ -105,56 +116,57 @@ for iForce=1:1%length(forcingNames)
     % zeta_x = wvt.diffY(wvt.w) - wvt.diffZF(wvt.v); % w_y - v_z
     % zeta_y = wvt.diffZF(wvt.u) - wvt.diffX(wvt.w);  % u_z - w_x
     % zeta_z = wvt.diffX(wvt.v) - wvt.diffY(wvt.u);  % v_x - u_y
-
-    if forcingNames(iForce) == "nonlinear advection"
-        G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*(Feta + wvt.w);
-        % G_eta = (-wvt.u .* wvt.diffX(eta_true) - wvt.v .* wvt.diffY(eta_true) - wvt.w .* (wvt.diffZG(eta_true) - 1));
-    else
-        G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*Feta;
-    end
-    % G_eta = Feta;
-    FZ_L = wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta);
-    FZ_NL = - wvt.zeta_x .* wvt.diffX(G_eta) - wvt.zeta_y .* wvt.diffY(G_eta)- wvt.zeta_z .* wvt.diffZG(G_eta);
-    FZ_NL = FZ_NL - wvt.diffX(eta_true) .* DF_x - wvt.diffY(eta_true) .* DF_y - wvt.diffZG(eta_true) .* DF_z;
-    FZ = FZ_L + FZ_NL;
-    Z2 = wvt.apv .* FZ;
-
-    Z2_t(iIndex) = int_vol(Z2)/enstrophyScale;
-
-    % S_f = wvd.crossSpectrumWithFgTransform(FZ,wvt.apv);
-
-    phi_bar = wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(wvt.apv));
-    gamma_bar = wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(FZ));
-    S_f = prefactor .* real(phi_bar .* conj(gamma_bar));
-
-    nexttile(tl,2)
-    % S_f_R = wvt.transformToRadialWavenumber(S_f);
-    Z_jk = wvt.transformToRadialWavenumber( S_f);
-    Z_k = wvt.transformToPseudoRadialWavenumberA0( Z_jk );
-    if iForce == 1
-        plot(wvt.kPseudoRadial,cumsum(Z_k)/enstrophyScale,Color=0*[1 1 1],LineWidth=2), hold on
-        dZ = Z_k-Z0_k;
-    else
-        plot(wvt.kPseudoRadial,cumsum(Z_k)/enstrophyScale)
-    end
-
-    if isscalar(indices)
-        fprintf("Total nonlinear enstrophy for " + forcingNames(iForce) + " forcing: " + int_vol(Z2)/enstrophyScale + " (" + sum(S_f(:))/enstrophyScale + ")\n");
-    end
-    
+    % 
+    % if forcingNames(iForce) == "nonlinear advection"
+    %     G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*(Feta + wvt.w);
+    %     % G_eta = (-wvt.u .* wvt.diffX(eta_true) - wvt.v .* wvt.diffY(eta_true) - wvt.w .* (wvt.diffZG(eta_true) - 1));
+    % else
+    %     G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*Feta;
+    % end
+    % % G_eta = Feta;
+    % FZ_L = wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta);
+    % FZ_NL = - wvt.zeta_x .* wvt.diffX(G_eta) - wvt.zeta_y .* wvt.diffY(G_eta)- wvt.zeta_z .* wvt.diffZG(G_eta);
+    % FZ_NL = FZ_NL - wvt.diffX(eta_true) .* DF_x - wvt.diffY(eta_true) .* DF_y - wvt.diffZG(eta_true) .* DF_z;
+    % FZ = FZ_L + FZ_NL;
+    % Z2 = wvt.apv .* FZ;
+    % 
+    % Z2_t(iIndex) = int_vol(Z2)/energyScale;
+    % 
+    % % S_f = wvd.crossSpectrumWithFgTransform(FZ,wvt.apv);
+    % 
+    % phi_bar = wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(wvt.apv));
+    % gamma_bar = wvt.transformFromSpatialDomainWithFg(wvt.transformFromSpatialDomainWithFourier(FZ));
+    % S_f = prefactor .* real(phi_bar .* conj(gamma_bar));
+    % 
+    % nexttile(tl,2)
+    % % S_f_R = wvt.transformToRadialWavenumber(S_f);
+    % S_f_jK = wvt.transformToRadialWavenumber( S_f);
+    % S_f_R = wvt.transformToPseudoRadialWavenumberA0( S_f_jK );
+    % if iForce == 1
+    %     plot(wvt.kPseudoRadial,cumsum(S_f_R)/energyScale,Color=0*[1 1 1],LineWidth=2), hold on
+    % else
+    %     plot(wvt.kPseudoRadial,cumsum(S_f_R)/energyScale)
+    % end
+    % 
+    % if isscalar(indices)
+    %     fprintf("Total nonlinear enstrophy for " + forcingNames(iForce) + " forcing: " + int_vol(Z2)/energyScale + " (" + sum(S_f(:))/energyScale + ")\n");
+    % end
+    % 
 end
+
 nexttile(tl,1);
 plot(wvt.kPseudoRadial,zeros(size(wvt.kPseudoRadial)),Color=0*[1 1 1],LineWidth=1)
 xlog
 nexttile(tl,2);
 plot(wvt.kPseudoRadial,zeros(size(wvt.kPseudoRadial)),Color=0*[1 1 1],LineWidth=1)
-plot(wvt.kPseudoRadial,cumsum(dZ)/enstrophyScale,Color=0*[1 1 1],LineWidth=1,LineStyle="--")
+plot(wvt.kPseudoRadial,dE/energyScale,Color=0*[1 1 1],LineWidth=1,LineStyle="--")
 xlog
 legend(forcingNames)
 
+return
 %%
 
-flux = Z_jk;
+flux = S_jk;
 
 jWavenumber = 1./sqrt(wvt.Lr2);
 jWavenumber(1) = 0; % barotropic mode is a mean?
@@ -162,7 +174,7 @@ jWavenumber(1) = 0; % barotropic mode is a mean?
 
 figure, jpcolor(wvt.kRadial,jWavenumber,flux); shading flat;
 colormap(WVDiagnostics.crameri('-bam'))
-clim(max(abs(Z_k(:)))*[-1 1])
+clim(max(abs(S_jk(:)))*[-1 1])
 colorbar("eastoutside")
 hold on,
 quiver(X,Y,10*U,10*V,Color=0*[1 1 1])
@@ -174,7 +186,7 @@ figure
 flux = wvt.transformToRadialWavenumber(Z);
 jpcolor(wvt.kRadial,jWavenumber,flux); shading flat;
 colormap(WVDiagnostics.crameri('-bam'))
-clim(max(abs(S_f_jK(:)))*[-1 1])
+clim(max(abs(S_jk(:)))*[-1 1])
 colorbar("eastoutside")
 xlim([0 5e-4])
 ylim([0 5e-4])
@@ -193,7 +205,7 @@ pcolor(ax1,radialWavelength,verticalWavelength,flux); shading flat;
 xscale("log"), yscale("log")
 set(gca,'XDir','reverse'), set(gca,'YDir','reverse')
 colormap(WVDiagnostics.crameri('-bam')), 
-clim(max(abs(S_f_jK(:)))*[-1 1])
+clim(max(abs(S_jk(:)))*[-1 1])
 
 
 

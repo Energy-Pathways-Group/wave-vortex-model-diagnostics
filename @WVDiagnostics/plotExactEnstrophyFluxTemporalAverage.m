@@ -1,0 +1,189 @@
+function fig = plotExactEnstrophyFluxTemporalAverage(self,options)
+% Plot the wave/geostrophic energy spectra at a given time
+%
+% Makes a nice multiplanel plot of the wave and geostrophic spectra at a
+% given time.
+%
+% - Topic: Figures (over time)
+% - Declaration: fig = plotEnergySpectrum(self,options)
+% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
+% - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
+% - Parameter options.timeIndices: indices for time averaging (default: Inf)
+% - Parameter options.visible: figure visibility (default: "on")
+% - Parameter options.fluxGroups: Cell array of row indices indicating fluxes to sum. Check fluxes.name to see indices. (Default: []. Example: {5,[2,3,4],6,[7,8,9]};)
+% - Parameter options.simpleName: Cell array of simple name strings for fluxGroups. (Default: []. Example: {"forcing","damping","g\nablag","g\nablaw+w\nablag+w\nablaw"};)
+% - Returns fig: handle to the generated figure
+arguments
+    self WVDiagnostics
+    options.showForcingFluxes = true;
+    options.timeIndices = Inf;
+    options.axes {mustBeMember(options.axes,{'jk','j','k','k-pseudo-isotropic'})} = 'jk'
+    options.filter = @(v) v;
+    options.colormap = WVDiagnostics.crameri('-bam')
+    options.visible = "on"
+    options.overSaturationFactor = 10;
+    options.simpleName = [];
+end
+
+fluxes = self.exactEnstrophyFluxesTemporalAverage(timeIndices=options.timeIndices);
+
+wvt = self.wvt;
+
+% set color limits 
+if options.axes == "jk"
+    if isscalar(options.overSaturationFactor)
+        colorLimits = max(arrayfun( @(v) max(abs(v.Z0(:))), fluxes))*[-1 1]/options.overSaturationFactor;
+        colorLimits = colorLimits/self.z_flux_scale;
+    elseif length(options.overSaturationFactor)==2
+        colorLimits = options.overSaturationFactor;
+    else
+        error("options.overSaturationFactor should be length 1 (overSaturationFactor) or length 2 (colormap limits).")
+    end
+end
+
+% create radial wavelength vector
+switch options.axes
+    case "k-pseudo-isotropic"
+        radialWavelength = 2*pi./self.kPseudoRadial/1000;
+    otherwise
+        radialWavelength = 2*pi./self.kRadial/1000;
+end
+radialWavelength(1) = 1.5*radialWavelength(2);
+
+% create j vector for log y-axis.
+jForLogAxis = self.j;
+jForLogAxis(1) = 0.75;
+
+fig = figure(Visible=options.visible);
+tl = tiledlayout(fig,"flow",TileSpacing='tight');
+
+for iComponent = 1:length(fluxes)
+    val = fluxes(iComponent).Z0/self.z_flux_scale;
+    ax = nexttile(tl);
+    switch options.axes
+        case "jk"
+            % % % pcolor(ax,options.energyReservoir.kFromKRadial(wvt.kRadial),wvt.j,val), shading flat
+            % % % self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
+            pcolor(ax,radialWavelength,jForLogAxis,options.filter(val)), shading flat
+            set(gca,'XDir','reverse')
+            set(gca,'XScale','log')
+            set(gca,'YScale','log')
+            colormap(ax, options.colormap)
+            % if options.energyReservoir==EnergyReservoir.total
+            %     text(radialWavelength(1)*.95,jForLogAxis(1),{'MDA','Inertial'},'FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            % elseif options.energyReservoir==EnergyReservoir.geostrophic_mda
+            %     text(radialWavelength(1)*.95,jForLogAxis(1),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            % elseif options.energyReservoir==EnergyReservoir.wave
+            %     text(radialWavelength(1)*.95,jForLogAxis(1),'Inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            % end
+            line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1)           
+
+            clim(ax,colorLimits);
+            
+        case "j"
+            plot(wvt.j,zeros(size(wvt.j)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,wvt.j,options.filter(sum(val,2)))
+        case "k"
+            % % % plot(options.energyReservoir.kFromKRadial(wvt.kRadial),zeros(size(wvt.kRadial)),LineWidth=2,Color=0*[1 1 1]), hold on
+            % % % plot(ax,wvt.kRadial,sum(val,1))
+            % % % self.setLogWavelengthXAxis(num_ticks=6,roundToNearest=5)
+            plot(radialWavelength,zeros(size(radialWavelength)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,radialWavelength,options.filter(sum(val,1)))
+            set(gca,'XDir','reverse')
+            set(gca,'XScale','log')
+        case "k-pseudo-isotropic"
+            v = self.transformToPseudoRadialWavenumberA0(val);
+            plot(radialWavelength,zeros(size(radialWavelength)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,radialWavelength,options.filter(v))
+            set(gca,'XDir','reverse')
+            set(gca,'XScale','log')
+        case "omega"
+            omegaAxis = self.omegaAxis/self.wvt.f;
+            v = self.transformToOmegaAxis(val);
+            plot(omegaAxis,zeros(size(omegaAxis)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,omegaAxis,options.filter(v))
+            set(gca,'XScale','log')
+    end
+    if isempty(options.simpleName)
+        title(ax,fluxes(iComponent).fancyName + " (" + string(sum(val(:))) + " " + self.z_flux_scale_units + ")" )
+    else
+        title(ax,fluxes(iComponent).simpleName + " (" + string(sum(val(:))) + " " + self.z_flux_scale_units + ")" )
+    end
+end
+
+switch options.axes
+    case "jk"
+        % jkR plot labels
+        xlabel(tl,'wavelength (km)')
+        ylabel(tl,"vertical mode")
+        cb = colorbar;
+        cb.Layout.Tile = 'east';
+        cb.Label.String = "energy flux (" + self.z_flux_scale_units + ")";
+    case "j"
+        % j plot options
+        ylabel(tl,"energy flux (" + self.z_flux_scale_units + ")")
+        xlabel(tl, 'vertical mode')
+    case "k"
+        % kR plot options
+        ylabel(tl,"energy flux (" + self.z_flux_scale_units + ")")
+        xlabel(tl,'wavelength (km)')
+    case "k-pseudo-isotropic"
+        % kR plot options
+        ylabel(tl,"energy flux (" + self.z_flux_scale_units + ")")
+        xlabel(tl,'pseudo-wavelength (km)')
+    case "omega"
+        % kR plot options
+        ylabel(tl,"energy flux (" + self.z_flux_scale_units + ")")
+        xlabel(tl,'frequency (f)')
+end
+
+% remove redundant labels
+% switch options.axes
+%     case "jk"
+%         for ii=1:tilenum(ax) %prod(tl_jkR.GridSize)
+%             if ii <= prod(tl.GridSize)-tl.GridSize(2)
+%                 nexttile(ii)
+%                 xticklabels([])
+%             end
+%             if ~(mod(ii,tl.GridSize(2))==1)
+%                 nexttile(ii)
+%                 yticklabels([])
+%             end
+%         end
+% end
+
+
+switch options.axes
+    case "jk"
+        for ii=1:tilenum(ax) %prod(tl_jkR.GridSize)
+            if ii <= prod(tl.GridSize)-tl.GridSize(2)
+                nexttile(ii)
+                %xticklabels([])
+                % set(gca,'XTickLabels',[],'FontSize',n_size)
+                set(gca,'XTickLabels',[])
+            end
+            if ~(mod(ii,tl.GridSize(2))==1)
+                nexttile(ii)
+                %yticklabels([])
+                % set(gca,'YTickLabels',[],'FontSize',n_size)
+                set(gca,'YTickLabels',[])
+            end
+            if (mod(ii,tl.GridSize(2))==1)
+                nexttile(ii)
+                % set(gca,'YTick',[0 5 10 15])
+                % set(gca,'YTickLabels',get(gca,'ytick'),'FontSize',n_size)
+                set(gca,'YTickLabels',get(gca,'ytick'))
+                % set(gca,'fontname','times')
+            end
+        end
+end
+
+
+if isinf(options.timeIndices)
+    options.timeIndices = 1:length(self.t_diag);
+end
+minDay = string(round(self.t_diag(min(options.timeIndices))/86400));
+maxDay = string(round(self.t_diag(max(options.timeIndices))/86400));
+title(tl,"available potential enstrophy flux, day " + minDay + "-" + maxDay)
+
+end

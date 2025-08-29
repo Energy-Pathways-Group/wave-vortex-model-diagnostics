@@ -97,7 +97,11 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.j(self)
             % - Returns t: j indices from diagnostics file
             % t = self.diagfile.readVariables('j');
-            t = self.wvt.j;
+            if ~isempty(self.diagfile)
+                t = self.diagfile.readVariables('j');
+            else
+                t = self.wvt.j;
+            end
         end
 
         function t = get.kRadial(self)
@@ -109,13 +113,17 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.kRadial(self)
             % - Returns t: kRadial indices from diagnostics file
             % t = self.diagfile.readVariables('kRadial');
-            t = self.wvt.kRadial;
+            if ~isempty(self.diagfile)
+                t = self.diagfile.readVariables('kRadial');
+            else
+                t = self.wvt.kRadial;
+            end
         end
 
         function kPseudoRadial = get.kPseudoRadial(self)
             jWavenumber = 1./sqrt(self.wvt.Lr2);
             jWavenumber(1) = 0; % barotropic mode is a mean?
-            [kj,kr] = ndgrid(jWavenumber,self.wvt.kRadial);
+            [kj,kr] = ndgrid(jWavenumber,self.kRadial);
             Kh = sqrt(kj.^2 + kr.^2);
             allKs = unique(reshape(abs(Kh),[],1),'sorted');
             deltaK = max(diff(allKs));
@@ -420,7 +428,7 @@ classdef WVDiagnostics < handle
                 options.timeIndices = Inf;
                 options.visible = "on"
                 options.filter = @(v) v;
-                options.shouldShowNonlinearAdvection = false
+                options.shouldShowNonlinearAdvection = true
                 options.shouldShowTotal = true
                 options.shouldShowDtEnstrophy = true
             end
@@ -537,6 +545,8 @@ classdef WVDiagnostics < handle
 
         end
 
+        fig = plotExactEnstrophyFluxTemporalAverage(self,options)
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Figures (spatial temporal average, from diagnostics file)
@@ -786,6 +796,41 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+        function enstrophy_fluxes = exactEnstrophyFluxes(self)
+            % Return the enstrophy flux from the forcing terms
+            %
+            % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial t].
+            %
+            % - Topic: Core function — spatial temporal
+            % - Declaration: forcing_fluxes = forcingFluxes(options)
+            % - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total].
+            % - Returns forcing_fluxes: an array of structs
+            arguments
+                self WVDiagnostics
+            end
+            forcingNames = self.wvt.forcingNames;
+            nForcings = length(forcingNames);
+            if self.diagfile.hasVariableWithName("Z_antialias_filter")
+                nForcings = nForcings + 1;
+            end
+            enstrophy_fluxes(nForcings) = struct("name","placeholder");
+
+            for iForce=1:length(forcingNames)
+                name = replace(forcingNames(iForce),"-","_");
+                name = replace(name," ","_");
+
+                enstrophy_fluxes(iForce).name = name;
+                enstrophy_fluxes(iForce).fancyName = forcingNames(iForce);
+                enstrophy_fluxes(iForce).Z0 = self.diagfile.readVariables("Z_" + name);
+            end
+
+            if self.diagfile.hasVariableWithName("Z_antialias_filter")
+                enstrophy_fluxes(iForce+1).name = "antialias_filter";
+                enstrophy_fluxes(iForce+1).fancyName = "antialias filter";
+                enstrophy_fluxes(iForce+1).Z0 = self.diagfile.readVariables("Z_antialias_filter");
+            end
+        end
+
         function [forcing_fluxes, t] = exactForcingFluxesOverTime(self,options)
             % Compute exact forcing fluxes over time
             %
@@ -833,28 +878,13 @@ classdef WVDiagnostics < handle
                 options.timeIndices = Inf;
             end
             if isinf(options.timeIndices)
-                filter_space = @(v) v;
+                filter_space = @(v) reshape( sum(sum(v,1),2), [], 1);
             else
-                filter_space = @(v) v(options.timeIndices);
+                filter_space = @(v) reshape( sum(sum(v(:,:,options.timeIndices),1),2), [], 1);
             end
-            forcingNames = self.wvt.forcingNames;
-            nForcings = length(forcingNames);
-            if self.diagfile.hasVariableWithName("Z_antialias_filter")
-                nForcings = nForcings + 1;
-            end
-            forcing_fluxes(nForcings) = struct("name","placeholder");
-
-            for iForce=1:length(forcingNames)
-                name = replace(forcingNames(iForce),"-","_");
-                name = replace(name," ","_");
-                forcing_fluxes(iForce).name = name;
-                forcing_fluxes(iForce).fancyName = forcingNames(iForce);
-                forcing_fluxes(iForce).Z0 = filter_space(self.diagfile.readVariables("Z_" + name));
-            end
-            if self.diagfile.hasVariableWithName("Z_antialias_filter")
-                forcing_fluxes(iForce+1).name = "antialias_filter";
-                forcing_fluxes(iForce+1).fancyName = "antialias filter";
-                forcing_fluxes(iForce+1).Z0 = filter_space(self.diagfile.readVariables("Z_antialias_filter"));
+            forcing_fluxes = self.exactEnstrophyFluxes();
+            for iForce=1:length(forcing_fluxes)
+                forcing_fluxes(iForce).Z0 = filter_space(forcing_fluxes(iForce).Z0);
             end
 
             t = self.t_diag;
@@ -1060,6 +1090,31 @@ classdef WVDiagnostics < handle
                 filter_space = @(v) mean(v(:,:,options.timeIndices),3);
             end
             enstrophy_fluxes = self.enstrophyFluxes;
+            for iForce=1:length(enstrophy_fluxes)
+                enstrophy_fluxes(iForce).Z0 = filter_space(enstrophy_fluxes(iForce).Z0);
+            end
+        end
+
+        function enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
+            % Compute temporally averaged enstrophy fluxes
+            %
+            % Returns the temporally averaged enstrophy fluxes from external forcing for each reservoir.
+            %
+            % - Topic: Fluxes in space, [j kRadial]
+            % - Declaration: enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
+            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
+            % - Returns enstrophy_fluxes: struct array with averaged fluxes
+            arguments
+                self WVDiagnostics
+                options.timeIndices = Inf;
+            end
+
+            if isinf(options.timeIndices)
+                filter_space = @(v) mean(v,3);
+            else
+                filter_space = @(v) mean(v(:,:,options.timeIndices),3);
+            end
+            enstrophy_fluxes = self.exactEnstrophyFluxes;
             for iForce=1:length(enstrophy_fluxes)
                 enstrophy_fluxes(iForce).Z0 = filter_space(enstrophy_fluxes(iForce).Z0);
             end
