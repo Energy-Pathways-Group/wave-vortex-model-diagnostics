@@ -135,6 +135,9 @@ else
         diagfile.addDimension(dimAnnotation.name,wvt.(dimAnnotation.name),attributes=dimAnnotation.attributes);
     end
 
+    varAnnotation = wvt.propertyAnnotationWithName('Lr2');
+    diagfile.addVariable(varAnnotation.name,varAnnotation.dimensions,wvt.Lr2,isComplex=varAnnotation.isComplex,attributes=varAnnotation.attributes );
+
     varAnnotation = wvt.propertyAnnotationWithName('t');
     varAnnotation.attributes('units') = varAnnotation.units;
     varAnnotation.attributes('long_name') = varAnnotation.description;
@@ -176,7 +179,7 @@ else
         EnergyFlux{forcingNames(i)}.KE0 = diagfile.addVariable("KE0_" + name,dimensionNames,type="double",isComplex=false);
         EnergyFlux{forcingNames(i)}.PE0 = diagfile.addVariable("PE0_" + name,dimensionNames,type="double",isComplex=false);
         EnstrophyFlux{forcingNames(i)} = diagfile.addVariable("Z0_" + name,dimensionNames,type="double",isComplex=false);
-        EnergyFluxTrue{forcingNames(i)} = diagfile.addVariable("E_" + name,"t",type="double",isComplex=false);
+        EnergyFluxTrue{forcingNames(i)} = diagfile.addVariable("E_" + name,dimensionNames,type="double",isComplex=false);
         EnstrophyFluxTrue{forcingNames(i)} = diagfile.addVariable("Z_" + name,dimensionNames,type="double",isComplex=false);
     end
 
@@ -254,7 +257,11 @@ for timeIndex = 1:length(timeIndices)
         [Ep_jk,Em_jk,KE0_jk,PE0_jk] = wvt.transformToRadialWavenumber(Ep,Em,KE0,PE0);
         if isa(wvt,"WVTransformHydrostatic")
             [Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
-            F_density = wvt.u .* Fu + wvt.v .* Fv+ wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+            % F_density = wvt.u .* Fu + wvt.v .* Fv+ wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+
+            S_energy = wvt.crossSpectrumWithFgTransform(wvt.u,Fu);
+            S_energy = S_energy + wvt.crossSpectrumWithFgTransform(wvt.v,Fv);
+            S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.eta_true,Feta);
 
             if forcingNames(i) == "nonlinear advection"
                 Fu = Fu + wvt.f*wvt.v;
@@ -265,7 +272,12 @@ for timeIndex = 1:length(timeIndices)
             DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
         elseif isa(wvt,"WVTransformBoussinesq")
             [Fu,Fv,Fw,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
-            F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+            % F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+
+            S_energy = wvt.crossSpectrumWithFgTransform(wvt.u,Fu);
+            S_energy = S_energy + wvt.crossSpectrumWithFgTransform(wvt.v,Fv);
+            S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.w./wvt.N2Function(wvt.Z),Fw);
+            S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.eta_true,Feta);
 
             if forcingNames(i) == "nonlinear advection"
                 Fu = Fu + wvt.f*wvt.v;
@@ -279,7 +291,8 @@ for timeIndex = 1:length(timeIndices)
         end
 
         if forcingNames(i) == "nonlinear advection"
-            F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
+            % F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
+            S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.w,wvt.eta_true-wvt.eta);
             G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*(Feta + wvt.w);
         else
             G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*Feta;
@@ -292,7 +305,8 @@ for timeIndex = 1:length(timeIndices)
         Z_density = wvt.crossSpectrumWithFgTransform(wvt.apv, FZ);
         Z_jk = wvt.transformToRadialWavenumber( Z_density);
 
-        EnergyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(int_vol(F_density),'t',outputIndex);
+        S_jk = wvt.transformToRadialWavenumber( S_energy);
+        EnergyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(S_jk,'t',outputIndex);
         EnstrophyFluxTrue{forcingNames(i)}.setValueAlongDimensionAtIndex(Z_jk,'t',outputIndex);
 
         EnergyFlux{forcingNames(i)}.Ep.setValueAlongDimensionAtIndex(Ep_jk,'t',outputIndex);

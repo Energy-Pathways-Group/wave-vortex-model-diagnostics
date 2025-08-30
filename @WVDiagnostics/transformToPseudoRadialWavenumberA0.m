@@ -10,14 +10,12 @@ function [varargout] = transformToPseudoRadialWavenumberA0(self,varargin)
 
 % Thi is the final output axis for wavenumber
 
-wvt = self.wvt;
-
-jWavenumber = 1./sqrt(wvt.Lr2);
+jWavenumber = 1./sqrt(self.Lr2);
 jWavenumber(1) = 0; % barotropic mode is a mean?
 % idx = find(wvt.kRadial<jWavenumber(2));
 % kPseudoRadial = cat(1,wvt.kRadial(idx),jWavenumber(2:end));
 % kPseudoRadial = jWavenumber;
-[kj,kr] = ndgrid(jWavenumber,wvt.kRadial);
+[kj,kr] = ndgrid(jWavenumber,self.kRadial);
 Kh = sqrt(kj.^2 + kr.^2);
 
 k = self.kPseudoRadial;
@@ -26,7 +24,7 @@ dk = k(2)-k(1);
 nK = length(k);
 
 varargout = cell(size(varargin));
-spectralMatrixSize = [wvt.Nj length(wvt.kRadial)];
+spectralMatrixSize = [length(self.j) length(self.kRadial)];
 for iVar=1:length(varargin)
     if size(varargin{iVar},2) ~= spectralMatrixSize(2)
         error('The input matrix must be of size [Nj NkRadial]');

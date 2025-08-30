@@ -46,7 +46,7 @@ end
 F = wvt.fluxForForcing();
 
 figure; tl = tiledlayout(2,1,TileSpacing="compact");
-fprintf("Energy forcing:\n");
+fprintf("Enstrophy forcing:\n");
 energyScale = wvd.flux_scale;
 eta_true = wvt.eta_true;
 for iForce=1:length(forcingNames)

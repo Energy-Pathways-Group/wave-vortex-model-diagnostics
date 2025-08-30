@@ -25,9 +25,11 @@ classdef WVDiagnostics < handle
         t_diag
         t_wv
         j
+        jWavenumber
         kRadial
         kPseudoRadial
         omegaAxis
+        Lr2
     end
 
     properties (SetObservable)
@@ -120,29 +122,36 @@ classdef WVDiagnostics < handle
             end
         end
 
-        function kPseudoRadial = get.kPseudoRadial(self)
-            jWavenumber = 1./sqrt(self.wvt.Lr2);
+        function t = get.Lr2(self)
+            % Hydrostatic deformation radius squared
+            %
+            % Reads the 'Lr2' variable from the diagnostics file if it
+            % exists, or from the wvt if not
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.Lr2(self)
+            % - Returns t: kRadial indices from diagnostics file
+            % t = self.diagfile.readVariables('kRadial');
+            if ~isempty(self.diagfile)
+                t = self.diagfile.readVariables('Lr2');
+            else
+                t = self.wvt.Lr2;
+            end
+        end
+
+        function jWavenumber = get.jWavenumber(self)
+            jWavenumber = 1./sqrt(self.Lr2);
             jWavenumber(1) = 0; % barotropic mode is a mean?
-            [kj,kr] = ndgrid(jWavenumber,self.kRadial);
+        end
+
+        function kPseudoRadial = get.kPseudoRadial(self)
+            [kj,kr] = ndgrid(self.jWavenumber,self.kRadial);
             Kh = sqrt(kj.^2 + kr.^2);
             allKs = unique(reshape(abs(Kh),[],1),'sorted');
             deltaK = max(diff(allKs));
-            % deltaK = jWavenumber(2); % this gives too-coarse spacing
-            % kAxis_ = 0:deltaK:(max(allKs)+deltaK/2);
-            kAxis_ = linspace(0,(max(allKs)+deltaK/2),200); % easy control of wavenumber spacing
-
-            % tried log spacing... too many points at long wavelength
-            % kAxis_ = logspace(log10(deltaK),log10(max(allKs)+deltaK/2),150); % easy control of wavenumber spacing
-            % kAxis_ = [0,kAxis_];
-
-            % tried 1/wavelength spacing... too many points at long wavelength
-            % lambdaMax = 2*self.wvt.Lx;
-            % lambdaMin = 2*pi/(max(allKs)+deltaK/2);
-            % Nlambda = 20;
-            % lambdaAxis = linspace(lambdaMax,lambdaMin,Nlambda);
-            % kAxis_ = 2*pi./lambdaAxis;
-
-            % Thi is the final output axis for wavenumber
+            kAxis_ = 0:deltaK:(max(allKs)+deltaK/2);
+            % This choices of axis spacing ensures that there will be no
+            % gaps in the resulting spectrum.
             kPseudoRadial = reshape(kAxis_,[],1);
         end
 
@@ -545,7 +554,7 @@ classdef WVDiagnostics < handle
 
         end
 
-        fig = plotExactEnstrophyFluxTemporalAverage(self,options)
+        fig = plotEnstrophyFluxTemporalAverage(self,options)
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
