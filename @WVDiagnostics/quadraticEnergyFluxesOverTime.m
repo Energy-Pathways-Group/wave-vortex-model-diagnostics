@@ -19,10 +19,6 @@ else
     filter_space = @(v) reshape( sum(sum(v(:,:,options.timeIndices),1),2), [], 1);
 end
 forcing_fluxes = self.quadraticEnergyFluxes(energyReservoirs=options.energyReservoirs);
-exact_forcing_fluxes = self.exactForcingFluxesOverTime();
-for iForce=1:length(forcing_fluxes)
-    forcing_fluxes(iForce).te = reshape(exact_forcing_fluxes(iForce).te,1,1,[]);
-end
 
 forcing_fluxes = self.filterFluxesForReservoir(forcing_fluxes,filter=filter_space);
 t = self.t_diag;

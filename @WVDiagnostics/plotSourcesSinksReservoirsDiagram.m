@@ -26,8 +26,8 @@ arguments
     options.title = "Energy Pathways";
     options.visible = "on"
 end
-forcing_fluxes = self.forcingFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
-exact_forcing_fluxes = self.exactForcingFluxesSpatialTemporalAverage(timeIndices=options.timeIndices);
+forcing_fluxes = self.quadraticEnergyFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+exact_forcing_fluxes = self.exactEnergyFluxesSpatialTemporalAverage(timeIndices=options.timeIndices);
 
 col = configureDictionary("string","cell");
 col{"source"} = [191 191 250]/255;
@@ -151,7 +151,7 @@ sources = sources_sorted;
 
 inertial_arrows = Arrow.empty(0,0);
 if length(reservoirs.keys) == 2
-    inertial_fluxes = self.inertialFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+    inertial_fluxes = self.quadraticEnergyTriadFluxesSpatialTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
     mag_geo = sum([inertial_fluxes(:).te_gmda])/self.flux_scale;
     mag_wave = sum([inertial_fluxes(:).te_wave])/self.flux_scale;

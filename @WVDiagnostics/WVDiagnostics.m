@@ -626,117 +626,18 @@ classdef WVDiagnostics < handle
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Flux averages, scalar
+        % Flux averages, scalar [1 1]
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        function forcing_fluxes = forcingFluxesSpatialTemporalAverage(self,options)
-            % Compute spatial-temporal average of forcing fluxes
-            %
-            % Returns the spatial-temporal average of energy fluxes from external forcing for each reservoir.
-            %
-            % - Topic: Flux averages, scalar
-            % - Declaration: forcing_fluxes = forcingFluxesSpatialTemporalAverage(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
-            % - Returns forcing_fluxes: struct array with averaged fluxes
-            arguments
-                self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.timeIndices = Inf;
-            end
+        energy_fluxes = exactEnergyFluxesSpatialTemporalAverage(self,options)
+        enstrophy_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
 
-            forcing_fluxes = self.filterFluxesForReservoir(self.quadraticEnergyFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices),filter=@(v) mean(v));
-        end
+        forcing_fluxes = quadraticEnergyFluxesSpatialTemporalAverage(self,options)
+        inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
 
-        function forcing_fluxes = exactForcingFluxesSpatialTemporalAverage(self,options)
-            % Compute spatial-temporal average of the exact forcing fluxes
-            %
-            % Returns the spatial-temporal average of the exact energy fluxes from external forcing
-            %
-            % - Topic: Flux averages, scalar
-            % - Declaration: forcing_fluxes = exactForcingFluxesSpatialTemporalAverage(self,options)
-            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
-            % - Returns forcing_fluxes: struct array with averaged fluxes
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-            end
-
-            forcing_fluxes = self.exactForcingFluxesOverTime(timeIndices=options.timeIndices);
-            for iForce = 1:length(forcing_fluxes)
-                forcing_fluxes(iForce).te = mean(forcing_fluxes(iForce).te);
-            end
-        end
-
-
-        function enstrophy_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
-            % Compute spatial-temporal average of the exact enstrophy fluxes
-            %
-            % Returns the spatial-temporal average of the exact enstrophy fluxes from external forcing
-            %
-            % - Topic: Flux averages, scalar
-            % - Declaration: forcing_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
-            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
-            % - Returns forcing_fluxes: struct array with averaged fluxes
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-            end
-
-            enstrophy_fluxes = self.exactEnstrophyFluxesOverTime(timeIndices=options.timeIndices);
-            for iForce = 1:length(enstrophy_fluxes)
-                enstrophy_fluxes(iForce).Z0 = mean(enstrophy_fluxes(iForce).Z0);
-            end
-        end
-
-        function enstrophy_fluxes = enstrophyFluxesSpatialTemporalAverage(self,options)
-            % Compute spatial-temporal average of the qgpv enstrophy fluxes
-            %
-            % Returns the spatial-temporal average of the qgpv enstrophy fluxes from external forcing
-            %
-            % - Topic: Flux averages, scalar
-            % - Declaration: forcing_fluxes = enstrophyFluxesSpatialTemporalAverage(self,options)
-            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
-            % - Returns forcing_fluxes: struct array with averaged fluxes
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-            end
-
-            enstrophy_fluxes = self.quadraticEnstrophyFluxesOverTime(timeIndices=options.timeIndices);
-            for iForce = 1:length(enstrophy_fluxes)
-                enstrophy_fluxes(iForce).Z0 = mean(enstrophy_fluxes(iForce).Z0);
-            end
-        end
-
-        % quadraticEnstrophyFluxesOverTime
-
-        function inertial_fluxes = inertialFluxesSpatialTemporalAverage(self,options)
-            % Compute spatial-temporal average of inertial fluxes
-            %
-            % Returns the spatial-temporal average of energy fluxes due to inertial interactions for each reservoir.
-            %
-            % - Topic: Flux averages, scalar
-            % - Declaration: inertial_fluxes = inertialFluxesSpatialTemporalAverage(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.timeIndices: indices for time averaging (default: Inf)
-            % - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
-            % - Returns inertial_fluxes: struct array with averaged fluxes
-            arguments
-                self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.timeIndices = Inf;
-                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
-            end
-
-            if isinf(options.timeIndices)
-                filter_space = @(v) sum(sum(mean(v,3),1),2);
-            else
-                filter_space = @(v) sum(sum(mean(v(:,:,options.timeIndices),3),1),2);
-            end
-            inertial_fluxes = self.filterFluxesForReservoir(self.quadraticEnergyTriadFluxes(energyReservoirs=options.energyReservoirs,triadComponents=options.triadComponents),filter=filter_space);
-        end
+        enstrophy_fluxes = quadraticEnstrophyFluxesSpatialTemporalAverage(self,options)
+        
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -744,8 +645,8 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        enstrophy_fluxes = exactEnstrophyFluxes(self)
         energy_fluxes = exactEnergyFluxes(self)
+        enstrophy_fluxes = exactEnstrophyFluxes(self)
 
         forcing_fluxes = quadraticEnergyFluxes(self,options)
         inertial_fluxes = quadraticEnergyTriadFluxes(self,options)

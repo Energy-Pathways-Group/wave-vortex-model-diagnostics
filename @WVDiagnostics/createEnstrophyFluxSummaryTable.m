@@ -23,7 +23,7 @@ arguments
 end
 
 enstrophy_fluxes = self.exactEnstrophyFluxesSpatialTemporalAverage(timeIndices=options.timeIndices);
-enstrophy_fluxes_qgpv = self.enstrophyFluxesSpatialTemporalAverage(timeIndices=options.timeIndices);
+enstrophy_fluxes_qgpv = self.quadraticEnstrophyFluxesSpatialTemporalAverage(timeIndices=options.timeIndices);
 
 [Z_quadratic, t] = self.enstrophyQGPVOverTime(timeIndices=options.timeIndices);
 [Z_apv, ~] = self.enstrophyAPVOverTime(timeIndices=options.timeIndices);
