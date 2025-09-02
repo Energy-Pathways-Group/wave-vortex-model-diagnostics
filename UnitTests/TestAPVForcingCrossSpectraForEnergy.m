@@ -4,8 +4,8 @@ basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 % basedir = '/Users/cwortham/Documents/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns/output/';
 % basedir = '/Volumes/SanDiskExtremePro/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns_June2025_v2/output/';
 
-runNumber=9; runName = "non-hydrostatic: geostrophic + waves";
-wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
+runNumber=18; runName = "non-hydrostatic: geostrophic + waves";
+wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
 % wvd = WVDiagnostics(basedir + getRunParameters(runNumber) + ".nc");
 
 % wvt = wvd.wvt;
@@ -29,7 +29,7 @@ int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 forcingNames = wvt.forcingNames;
 
 %%
-indices = 251;
+indices = 983;
 Z2_qgpv_t = zeros(length(indices),1);
 Z2_t = zeros(length(indices),1);
 iIndex = 1;
@@ -46,9 +46,11 @@ end
 F = wvt.fluxForForcing();
 
 figure; tl = tiledlayout(2,1,TileSpacing="compact");
-fprintf("Enstrophy forcing:\n");
+fprintf("Energy forcing:\n");
 energyScale = wvd.flux_scale;
 eta_true = wvt.eta_true;
+totalQuadratic = 0;
+totalExact = 0;
 for iForce=1:length(forcingNames)
 
     [Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(F{forcingNames(iForce)}.Fp,F{forcingNames(iForce)}.Fm,F{forcingNames(iForce)}.F0);
@@ -62,6 +64,11 @@ for iForce=1:length(forcingNames)
     else
         [Fu,Fv,Fw,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(iForce));
         F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
+
+        S_energy = wvt.crossSpectrumWithFgTransform(wvt.u,Fu);
+        S_energy = S_energy + wvt.crossSpectrumWithFgTransform(wvt.v,Fv);
+        S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.w./wvt.N2Function(wvt.Z),Fw);
+        S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.eta_true,Feta);
     end
     if forcingNames(iForce) == "nonlinear advection"
         F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
@@ -70,11 +77,13 @@ for iForce=1:length(forcingNames)
 
     E_jk = wvt.transformToRadialWavenumber(Ep+Em+E0);
     if isscalar(indices)
+        totalQuadratic = totalQuadratic + sum(E_jk(:))/energyScale;
         fprintf("Total quadratic energy for " + forcingNames(iForce) + " forcing: " + sum(E_jk(:))/energyScale + "\n");
     end
 
     E = int_vol(F_density);
     if isscalar(indices)
+        totalExact = totalExact + E/energyScale;
         fprintf("Total nonlinear energy for " + forcingNames(iForce) + " forcing: " + E/energyScale + " (" + sum(S_energy(:))/energyScale + ")\n");
     end
 
@@ -153,6 +162,9 @@ for iForce=1:length(forcingNames)
     % end
     % 
 end
+
+fprintf("Total quadratic energy for all forcing: " + totalQuadratic + "\n");
+fprintf("Total nonlinear energy for all forcing: " + totalExact + "\n");
 
 nexttile(tl,1);
 plot(wvt.kPseudoRadial,zeros(size(wvt.kPseudoRadial)),Color=0*[1 1 1],LineWidth=1)

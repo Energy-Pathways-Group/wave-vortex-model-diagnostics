@@ -94,7 +94,16 @@ else
     outputIndexOffset = 0;
     if options.shouldMeasureAntialiasingFlux
         [wvt_lowres, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
-        wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
+        if isa(wvt_lowres,"WVTransformBoussinesq")
+            if exist(self.wvaapath,"file")
+                wvt = WVTransform.waveVortexTransformFromFile(self.wvaapath,iTime=Inf);
+            else
+                wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
+                wvt.writeToFile(self.wvaapath);
+            end
+        else
+            wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
+        end
     else
         [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
     end

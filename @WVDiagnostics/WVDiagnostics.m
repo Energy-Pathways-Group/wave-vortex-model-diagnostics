@@ -4,6 +4,7 @@ classdef WVDiagnostics < handle
     properties
         wvpath
         diagpath
+        wvaapath
         wvfile
         diagfile
         wvt
@@ -73,6 +74,13 @@ classdef WVDiagnostics < handle
             else
                 warning("No diagnostics file found. Some functionality will not be available.")
             end
+
+            if ~isempty(fpath)
+                self.wvaapath = fullfile(fpath,strcat(fname,"-wvt-aa.nc"));
+            else
+                self.wvaapath= fullfile(pwd,strcat(fname,"-wvt-aa.nc"));
+            end
+
             self.zscale = self.wvt.f^2;
             self.z_flux_scale = self.zscale/(86400*365);
 
