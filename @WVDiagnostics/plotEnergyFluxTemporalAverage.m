@@ -33,8 +33,8 @@ end
 n_size = 17;
 
 wvt = self.wvt;
-forcing_fluxes = self.forcingFluxesTemporalAverage(energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
-inertial_fluxes = self.inertialFluxesTemporalAverage(triadComponents=options.triadComponents,energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
+forcing_fluxes = self.quadraticEnergyFluxesTemporalAverage(energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
+inertial_fluxes = self.quadraticEnergyTriadFluxesTemporalAverage(triadComponents=options.triadComponents,energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
 if options.showForcingFluxes
     fluxes = cat(2,forcing_fluxes,inertial_fluxes);
 else

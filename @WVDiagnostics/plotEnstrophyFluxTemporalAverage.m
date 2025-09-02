@@ -28,7 +28,7 @@ end
 if options.approximation == "exact"
     fluxes = self.exactEnstrophyFluxesTemporalAverage(timeIndices=options.timeIndices);
 else
-    fluxes = self.enstrophyFluxesTemporalAverage(timeIndices=options.timeIndices);
+    fluxes = self.quadraticEnstrophyFluxesTemporalAverage(timeIndices=options.timeIndices);
 end
 
 % set color limits 
