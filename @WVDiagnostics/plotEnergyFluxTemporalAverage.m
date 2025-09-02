@@ -15,11 +15,12 @@ function fig = plotEnergyFluxTemporalAverage(self,options)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics
+    options.approximation {mustBeMember(options.approximation,{'quadratic','exact'})} = 'exact'
     options.energyReservoir = EnergyReservoir.total;
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
     options.showForcingFluxes = true;
     options.timeIndices = Inf;
-    options.axes {mustBeMember(options.axes,{'jk','j','k','k-pseudo-isotropic','omega'})} = 'jk'
+    options.axes {mustBeMember(options.axes,{'jk','j','jWavenumber','k','k-pseudo-isotropic','omega'})} = 'jk'
     options.filter = @(v) v;
     options.shouldOverlayWaveFrequencies = false %true
     options.shouldOverlayGeostrophicKineticPotentialRatioContours = true
@@ -30,15 +31,17 @@ arguments
     options.simpleName = [];
 end
 
-n_size = 17;
-
 wvt = self.wvt;
-forcing_fluxes = self.quadraticEnergyFluxesTemporalAverage(energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
-inertial_fluxes = self.quadraticEnergyTriadFluxesTemporalAverage(triadComponents=options.triadComponents,energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
-if options.showForcingFluxes
-    fluxes = cat(2,forcing_fluxes,inertial_fluxes);
+if options.approximation == "exact"
+    fluxes = self.exactEnergyFluxesTemporalAverage(timeIndices=options.timeIndices);
 else
-    fluxes = inertial_fluxes;
+    forcing_fluxes = self.quadraticEnergyFluxesTemporalAverage(energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
+    inertial_fluxes = self.quadraticEnergyTriadFluxesTemporalAverage(triadComponents=options.triadComponents,energyReservoirs=options.energyReservoir,timeIndices=options.timeIndices);
+    if options.showForcingFluxes
+        fluxes = cat(2,forcing_fluxes,inertial_fluxes);
+    else
+        fluxes = inertial_fluxes;
+    end
 end
 
 % Custom combination and ordering of fluxes for plotting
@@ -74,7 +77,7 @@ switch options.axes
     case "k-pseudo-isotropic"
         radialWavelength = 2*pi./self.kPseudoRadial/1000;
     otherwise
-        radialWavelength = 2*pi./wvt.kRadial/1000;
+        radialWavelength = 2*pi./sekf.kRadial/1000;
 end
 radialWavelength(1) = 1.5*radialWavelength(2);
 
@@ -86,7 +89,11 @@ fig = figure(Visible=options.visible);
 tl = tiledlayout(fig,"flow",TileSpacing='tight');
 
 for iComponent = 1:length(fluxes)
-    val = fluxes(iComponent).(options.energyReservoir.name)/self.flux_scale;
+    if options.approximation == "exact"
+        val = fluxes(iComponent).te/self.flux_scale;
+    else
+        val = fluxes(iComponent).(options.energyReservoir.name)/self.flux_scale;
+    end
     ax = nexttile(tl);
     switch options.axes
         case "jk"
@@ -97,19 +104,21 @@ for iComponent = 1:length(fluxes)
             set(gca,'XScale','log')
             set(gca,'YScale','log')
             colormap(ax, options.colormap)
-            if options.energyReservoir==EnergyReservoir.total
-                text(radialWavelength(1)*.95,jForLogAxis(1),{'MDA','Inertial'},'FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
-            elseif options.energyReservoir==EnergyReservoir.geostrophic_mda
-                text(radialWavelength(1)*.95,jForLogAxis(1),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
-            elseif options.energyReservoir==EnergyReservoir.wave
-                text(radialWavelength(1)*.95,jForLogAxis(1),'Inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+            if options.approximation == "exact"
+            else
+                if options.energyReservoir==EnergyReservoir.total
+                    text(radialWavelength(1)*.95,jForLogAxis(1),{'MDA','Inertial'},'FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+                elseif options.energyReservoir==EnergyReservoir.geostrophic_mda
+                    text(radialWavelength(1)*.95,jForLogAxis(1),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+                elseif options.energyReservoir==EnergyReservoir.wave
+                    text(radialWavelength(1)*.95,jForLogAxis(1),'Inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+                end
             end
             line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1)           
             if options.shouldOverlayWaveFrequencies
                 self.overlayFrequencyContours;
             end
             if options.shouldOverlayGeostrophicKineticPotentialRatioContours
-                % self.overlayGeostrophicKineticPotentialRatioContours;
                 self.overlayGeostrophicKineticPotentialFractionContours;
             end
             clim(ax,colorLimits);
@@ -117,6 +126,14 @@ for iComponent = 1:length(fluxes)
         case "j"
             plot(wvt.j,zeros(size(wvt.j)),LineWidth=2,Color=0*[1 1 1]), hold on
             plot(ax,wvt.j,options.filter(sum(val,2)))
+        case "jWavenumber"
+            jWavelength = 2*pi./self.jWavenumber/1000;
+            jWavelength(1) = 1.5*jWavelength(2);
+            plot(jWavelength,zeros(size(self.j)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,jWavelength,options.filter(sum(val,2)))
+            set(gca,'XDir','reverse')
+            set(gca,'XScale','log')
+            xlim([jWavelength(end) jWavelength(1)])
         case "k"
             % % % plot(options.energyReservoir.kFromKRadial(wvt.kRadial),zeros(size(wvt.kRadial)),LineWidth=2,Color=0*[1 1 1]), hold on
             % % % plot(ax,wvt.kRadial,sum(val,1))
@@ -157,6 +174,10 @@ switch options.axes
         % j plot options
         ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
         xlabel(tl, 'vertical mode')
+    case "jWavenumber"
+        % kR plot options
+        ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
+        xlabel(tl,'radius of deformation (km)')
     case "k"
         % kR plot options
         ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
@@ -170,22 +191,6 @@ switch options.axes
         ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
         xlabel(tl,'frequency (f)')
 end
-
-% remove redundant labels
-% switch options.axes
-%     case "jk"
-%         for ii=1:tilenum(ax) %prod(tl_jkR.GridSize)
-%             if ii <= prod(tl.GridSize)-tl.GridSize(2)
-%                 nexttile(ii)
-%                 xticklabels([])
-%             end
-%             if ~(mod(ii,tl.GridSize(2))==1)
-%                 nexttile(ii)
-%                 yticklabels([])
-%             end
-%         end
-% end
-
 
 switch options.axes
     case "jk"
@@ -218,6 +223,10 @@ if isinf(options.timeIndices)
 end
 minDay = string(round(self.t_diag(min(options.timeIndices))/86400));
 maxDay = string(round(self.t_diag(max(options.timeIndices))/86400));
-title(tl,"energy flux into " + options.energyReservoir.fancyName + " energy, day " + minDay + "-" + maxDay)
+if options.approximation == "exact"
+    title(tl,"exact energy flux, day " + minDay + "-" + maxDay)
+else
+    title(tl,"quadratic energy flux into " + options.energyReservoir.fancyName + " energy, day " + minDay + "-" + maxDay)
+end
 
 end
