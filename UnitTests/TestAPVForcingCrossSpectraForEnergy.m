@@ -5,7 +5,7 @@ basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 % basedir = '/Volumes/SanDiskExtremePro/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns_June2025_v2/output/';
 
 runNumber=18; runName = "non-hydrostatic: geostrophic + waves";
-wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
+wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
 % wvd = WVDiagnostics(basedir + getRunParameters(runNumber) + ".nc");
 
 % wvt = wvd.wvt;

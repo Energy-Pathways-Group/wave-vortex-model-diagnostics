@@ -47,6 +47,9 @@ second_term = wvd.crossSpectrumWithFgTransform(p_nm(Z) - p_nm(Z - eta_true),ones
 spectrum = first_term + second_term;
 sum(spectrum(:))
 
+int_vol(wvt.g*eta_true.*rho_nm(Z - eta_true)) - sum(first_term(:))
+int_vol(p_nm(Z) - p_nm(Z - eta_true)) - sum(second_term(:))
+
 %%
 alt_first_term = 0.5*wvd.crossSpectrumWithGgTransform(eta_true.*wvt.N2Function(Z-eta_true)./wvt.N2Function(Z),eta_true);
 sum(alt_first_term(:))
