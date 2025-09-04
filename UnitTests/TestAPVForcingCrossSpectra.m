@@ -5,7 +5,7 @@ basedir = "/Users/Shared/CimRuns_June2025/output/";
 % basedir = '/Volumes/SanDiskExtremePro/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns_June2025_v2/output/';
 
 runNumber=9; runName = "non-hydrostatic: geostrophic + waves";
-wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
+wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
 % wvd = WVDiagnostics(basedir + getRunParameters(runNumber) + ".nc");
 
 % wvt = wvd.wvt;
@@ -34,7 +34,7 @@ int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 forcingNames = wvt.forcingNames;
 
 %%
-indices = 251;
+indices = 2851;
 Z2_qgpv_t = zeros(length(indices),1);
 Z2_t = zeros(length(indices),1);
 iIndex = 1;
@@ -106,11 +106,18 @@ for iForce=1:1%length(forcingNames)
     % zeta_y = wvt.diffZF(wvt.u) - wvt.diffX(wvt.w);  % u_z - w_x
     % zeta_z = wvt.diffX(wvt.v) - wvt.diffY(wvt.u);  % v_x - u_y
 
+    % rho_nm = chebfun( @(z) interp1(wvt.z,wvt.rho_nm,z,'spline'),[min(wvt.z) max(wvt.z)],'splitting','on');
+    % N2 = (-wvt.g/wvt.rho0)*diff(rho_nm);
+    N2 = wvt.N2Function;
+
     if forcingNames(iForce) == "nonlinear advection"
-        G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*(Feta + wvt.w);
+        % G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*(Feta + wvt.w);
+        G_eta = (wvt.N2Function(wvt.Z)./N2(wvt.Z - eta_true)).*(Feta + wvt.w);
+
         % G_eta = (-wvt.u .* wvt.diffX(eta_true) - wvt.v .* wvt.diffY(eta_true) - wvt.w .* (wvt.diffZG(eta_true) - 1));
     else
-        G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*Feta;
+        % G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - eta_true)).*Feta;
+        G_eta = (wvt.N2Function(wvt.Z)./N2(wvt.Z - eta_true)).*Feta;
     end
     % G_eta = Feta;
     FZ_L = wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta);
@@ -152,6 +159,7 @@ plot(wvt.kPseudoRadial,cumsum(dZ)/enstrophyScale,Color=0*[1 1 1],LineWidth=1,Lin
 xlog
 legend(forcingNames)
 
+return
 %%
 
 flux = Z_jk;

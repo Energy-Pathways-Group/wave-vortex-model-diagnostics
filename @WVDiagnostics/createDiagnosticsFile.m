@@ -260,6 +260,8 @@ for timeIndex = 1:length(timeIndices)
     variable_apv.setValueAlongDimensionAtIndex(0.5*int_vol(apv.*apv),'t',outputIndex);
 
     % 2. Forcing fluxes
+    rho_nm = wvt.chebfunForZArray(wvt.rho_nm);
+    N2 = (-wvt.g/wvt.rho0)*diff(rho_nm);
     F = wvt.fluxForForcing();
     for i=1:length(forcingNames)
         [Ep,Em,KE0,PE0] = wvt.energyFluxFromNonlinearFlux(F{forcingNames(i)}.Fp,F{forcingNames(i)}.Fm,F{forcingNames(i)}.F0);
@@ -302,9 +304,9 @@ for timeIndex = 1:length(timeIndices)
         if forcingNames(i) == "nonlinear advection"
             % F_density = F_density + wvt.w .* shiftdim(wvt.N2,-2) .* (wvt.eta_true-wvt.eta);
             S_energy = S_energy + wvt.crossSpectrumWithGgTransform(wvt.w,wvt.eta_true-wvt.eta);
-            G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*(Feta + wvt.w);
+            G_eta = (wvt.N2Function(wvt.Z)./N2(wvt.Z - wvt.eta_true)).*(Feta + wvt.w);
         else
-            G_eta = (wvt.N2Function(wvt.Z)./wvt.N2Function(wvt.Z - wvt.eta_true)).*Feta;
+            G_eta = (wvt.N2Function(wvt.Z)./N2(wvt.Z - wvt.eta_true)).*Feta;
         end
 
         FZ_L = wvt.diffX(Fv) - wvt.diffY(Fu) - wvt.f*wvt.diffZG(G_eta);

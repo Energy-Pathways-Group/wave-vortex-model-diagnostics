@@ -77,12 +77,12 @@ switch options.axes
     case "k-pseudo-isotropic"
         radialWavelength = 2*pi./self.kPseudoRadial/1000;
     otherwise
-        radialWavelength = 2*pi./sekf.kRadial/1000;
+        radialWavelength = 2*pi./self.kRadial/1000;
 end
 radialWavelength(1) = 1.5*radialWavelength(2);
 
 % create j vector for log y-axis.
-jForLogAxis = wvt.j;
+jForLogAxis = self.j;
 jForLogAxis(1) = 0.75;
 
 fig = figure(Visible=options.visible);
@@ -124,8 +124,8 @@ for iComponent = 1:length(fluxes)
             clim(ax,colorLimits);
             
         case "j"
-            plot(wvt.j,zeros(size(wvt.j)),LineWidth=2,Color=0*[1 1 1]), hold on
-            plot(ax,wvt.j,options.filter(sum(val,2)))
+            plot(self.j,zeros(size(self.j)),LineWidth=2,Color=0*[1 1 1]), hold on
+            plot(ax,self.j,options.filter(sum(val,2)))
         case "jWavenumber"
             jWavelength = 2*pi./self.jWavenumber/1000;
             jWavelength(1) = 1.5*jWavelength(2);

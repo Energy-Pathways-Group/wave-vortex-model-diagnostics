@@ -2,7 +2,7 @@ basedir = "/Users/Shared/CimRuns_June2025/output/";
 % runNumber=1; runName = "hydrostatic: geostrophic";
 % runNumber=9; runName = "hydrostatic: geostrophic + waves";
 runNumber=18; runName = "non-hydrostatic: geostrophic + waves";
-filepath = basedir + replace(getRunParameters(runNumber),"256","512") + ".nc";
+filepath = basedir + replace(getRunParameters(runNumber),"256","256") + ".nc";
 wvd = WVDiagnostics(filepath);
 
 [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(filepath);

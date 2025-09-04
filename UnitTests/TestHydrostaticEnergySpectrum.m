@@ -28,14 +28,11 @@ int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 [u,v,ape,apv] = wvt.variableWithName('u','v','ape','apv');
 ke = (u.^2 + v.^2)/2;
 int_vol(ke + ape) - sum(E(:))
-int_vol(ape) - sum(0.5*N2(:))
+int_vol(ape) - sum(sum(0.5*N2(:,2:end)))
+int_vol(ape) - sum(sum(0.5*N2(:,2:end)))
 
 %%
-if isa(wvt.rhoFunction,'chebfun')
-    rho_nm = wvt.rhoFunction/wvt.rho0 - 1;
-else
-    rho_nm = chebfun(wvt.rhoFunction,[min(wvt.z) max(wvt.z)],'splitting','on')/wvt.rho0 - 1;
-end
+rho_nm = wvt.chebfunForZArray(wvt.rho_nm)/wvt.rho0 - 1;
 p_nm = - wvt.g * cumsum(rho_nm);
 p_nm = p_nm - p_nm(0);
 eta_true = wvt.eta_true;
@@ -49,6 +46,11 @@ sum(spectrum(:))
 
 int_vol(wvt.g*eta_true.*rho_nm(Z - eta_true)) - sum(first_term(:))
 int_vol(p_nm(Z) - p_nm(Z - eta_true)) - sum(second_term(:))
+
+%%
+S_jk = wvt.transformToRadialWavenumber(spectrum);
+figure
+plot(wvt.kRadial,sum(S_jk,1))
 
 %%
 alt_first_term = 0.5*wvd.crossSpectrumWithGgTransform(eta_true.*wvt.N2Function(Z-eta_true)./wvt.N2Function(Z),eta_true);
