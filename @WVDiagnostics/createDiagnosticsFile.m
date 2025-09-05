@@ -221,7 +221,6 @@ integrationLastInformWallTime = datetime('now');
 integrationLastInformLoopNumber = 1;
 integrationInformTime = 10;
 disp("Starting loop");
-profile on
 for timeIndex = 1:length(timeIndices)
     deltaWallTime = datetime('now')-integrationLastInformWallTime;
     if ( seconds(deltaWallTime) > integrationInformTime)
@@ -364,6 +363,5 @@ for timeIndex = 1:length(timeIndices)
         end
     end
 end
-profile viewer
 fprintf("\n");
 end
