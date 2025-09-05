@@ -305,119 +305,18 @@ classdef WVDiagnostics < handle
 
         fig = plotEnergyFluxTemporalAverage(self,options)
         
-        fig = plotEnstrophyOverTime(self,options)
-
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Figures (over time, from diagnostics file)
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+        fig = plotEnstrophyOverTime(self,options)
         fig = plotEnergyOverTime(self,options)
 
-        function fig = plotForcingFluxOverTime(self,options)
-            % Plot forcing flux for each reservoir over time
-            %
-            % Plots the energy flux into each reservoir from external forcing as a function of time.
-            %
-            % - Topic: Figures (over time)
-            % - Declaration: fig = plotForcingFluxOverTime(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.visible: figure visibility (default: "on")
-            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
-            % - Returns fig: handle to the generated figure
-            arguments
-                self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
-                options.timeIndices = Inf;
-                options.visible = "on"
-                options.filter = @(v) v;
-            end
-            [forcing_fluxes, t] = self.quadraticEnergyFluxesOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+        fig = plotEnergyFluxOverTime(self,options)
 
-            fig = figure(Visible=options.visible);
-            tl = tiledlayout(length(options.energyReservoirs),1,TileSpacing="compact");
-            for iReservoir = 1:length(options.energyReservoirs)
-                nexttile(tl);
-                for iForce = 1:length(forcing_fluxes)
-                    plot(t/self.tscale,options.filter(forcing_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/self.flux_scale)), hold on
-                end
-                legend(forcing_fluxes.fancyName)
-
-                fancyName = options.energyReservoirs(iReservoir).fancyName;
-                xlabel("time (" + self.tscale_units + ")")
-                ylabel("flux into " + fancyName + " (" + self.flux_scale_units + ")")
-                xlim([min(t) max(t)]/self.tscale);
-            end
-        end
-
-        function fig = plotExactForcingFluxOverTime(self,options)
-            % Plot forcing flux for each reservoir over time
-            %
-            % Plots the energy flux into each reservoir from external forcing as a function of time.
-            %
-            % - Topic: Figures (over time)
-            % - Declaration: fig = plotForcingFluxOverTime(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.visible: figure visibility (default: "on")
-            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
-            % - Returns fig: handle to the generated figure
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-                options.visible = "on"
-                options.filter = @(v) v;
-            end
-            [forcing_fluxes, t] = self.exactForcingFluxesOverTime(timeIndices=options.timeIndices);
-
-            fig = figure(Visible=options.visible);
-            tl = tiledlayout(1,1,TileSpacing="compact");
-            for iForce = 1:length(forcing_fluxes)
-                plot(t/self.tscale,options.filter(forcing_fluxes(iForce).te/self.flux_scale)), hold on
-            end
-            legend(forcing_fluxes.fancyName)
-
-            xlabel("time (" + self.tscale_units + ")")
-            ylabel("flux (" + self.flux_scale_units + ")")
-            xlim([min(t) max(t)]/self.tscale);
-        end
-
-        function fig = plotInertialFluxOverTime(self,options)
-            % Plot inertial flux for each reservoir over time
-            %
-            % Plots the energy flux between reservoirs due to inertial interactions as a function of time.
-            %
-            % - Topic: Figures (over time)
-            % - Declaration: fig = plotInertialFluxOverTime(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.visible: figure visibility (default: "on")
-            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
-            % - Returns fig: handle to the generated figure
-            arguments
-                self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave];
-                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
-                options.timeIndices = Inf;
-                options.visible = "on"
-                options.filter = @(v) v;
-            end
-            [inertial_fluxes,t] = self.quadraticEnergyTriadFluxesOverTime(triadComponents=options.triadComponents,energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
-
-            fig = figure(Visible=options.visible);
-            tl = tiledlayout(length(options.energyReservoirs),1,TileSpacing="compact");
-            for iReservoir = 1:length(options.energyReservoirs)
-                nexttile(tl);
-                for iForce = 1:length(inertial_fluxes)
-                    plot(t/self.tscale,options.filter(inertial_fluxes(iForce).(options.energyReservoirs(iReservoir).name)/self.flux_scale)), hold on
-                end
-                legend(inertial_fluxes.fancyName)
-
-                fancyName = options.energyReservoirs(iReservoir).fancyName;
-                xlabel("time (" + self.tscale_units + ")")
-                ylabel("flux into " + fancyName + " (" + self.flux_scale_units + ")")
-                xlim([min(t) max(t)]/self.tscale);
-            end
-        end
+        fig = plotEnergyTriadFluxOverTime(self,options)
 
         function fig = plotExactEnstrophyFluxOverTime(self,options)
             % Plot forcing flux for each reservoir over time

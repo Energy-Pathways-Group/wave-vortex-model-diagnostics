@@ -63,7 +63,11 @@ end
 % set color limits 
 if options.axes == "jk"
     if isscalar(options.overSaturationFactor)
-        colorLimits = max(arrayfun( @(v) max(abs(v.(options.energyReservoir.name)(:))), fluxes))*[-1 1]/options.overSaturationFactor;
+        if options.approximation == "exact"
+            colorLimits = max(arrayfun( @(v) max(abs(v.te(:))), fluxes))*[-1 1]/options.overSaturationFactor;            
+        else
+            colorLimits = max(arrayfun( @(v) max(abs(v.(options.energyReservoir.name)(:))), fluxes))*[-1 1]/options.overSaturationFactor;
+        end
         colorLimits = colorLimits/self.flux_scale;
     elseif length(options.overSaturationFactor)==2
         colorLimits = options.overSaturationFactor;

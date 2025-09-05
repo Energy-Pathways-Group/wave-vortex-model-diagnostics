@@ -1,3 +1,9 @@
+basedir = "/Users/Shared/CimRuns_June2025/output/";
+basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
+
+runNumber=9;
+wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
+
 wvt_lowres = wvd.wvt;
 wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
 dimensionNames = ["j","kRadial"];
