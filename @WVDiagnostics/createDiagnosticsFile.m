@@ -148,6 +148,12 @@ else
     varAnnotation = wvt.propertyAnnotationWithName('Lr2');
     diagfile.addVariable(varAnnotation.name,varAnnotation.dimensions,wvt.Lr2,isComplex=varAnnotation.isComplex,attributes=varAnnotation.attributes );
 
+    [omegaN,n,hke_jk,pe_jk] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)),wvt.A0_KE_factor,wvt.A0_PE_factor);
+    omegaJK = (omegaN./n);
+    diagfile.addVariable("omega_axis",dimensionNames,omegaJK,isComplex=false);
+    diagfile.addVariable("geo_hke_axis",dimensionNames,hke_jk,isComplex=false);
+    diagfile.addVariable("geo_pe_axis",dimensionNames,pe_jk,isComplex=false);
+
     varAnnotation = wvt.propertyAnnotationWithName('t');
     varAnnotation.attributes('units') = varAnnotation.units;
     varAnnotation.attributes('long_name') = varAnnotation.description;

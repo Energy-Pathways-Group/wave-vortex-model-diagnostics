@@ -31,6 +31,9 @@ classdef WVDiagnostics < handle
         kPseudoRadial
         omegaAxis
         Lr2
+        omega_jk
+        geo_hke_jk
+        geo_pe_jk
     end
 
     properties (SetObservable)
@@ -144,6 +147,55 @@ classdef WVDiagnostics < handle
                 t = self.diagfile.readVariables('Lr2');
             else
                 t = self.wvt.Lr2;
+            end
+        end
+
+        function t = get.omega_jk(self)
+            % Wave frequency omega in jk space
+            %
+            % Reads the 'omega_jk' variable from the diagnostics file if it
+            % exists, or from the wvt if not
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.omega_jk(self)
+            % - Returns t: omega_jk matrix from diagnostics file
+            if ~isempty(self.diagfile)
+                t = self.diagfile.readVariables('omega_jk');
+            else
+                [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
+                t = (omegaN./n);
+            end
+        end
+
+        function t = get.geo_hke_jk(self)
+            % Geostrophic kinetic energy in jk space
+            %
+            % Reads the 'geo_hke_jk' variable from the diagnostics file if it
+            % exists, or from the wvt if not
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.geo_hke_jk(self)
+            % - Returns t: geo_hke_jk matrix from diagnostics file
+            if ~isempty(self.diagfile)
+                t = self.diagfile.readVariables('geo_hke_jk');
+            else
+                t = self.wvt.transformToRadialWavenumber(self.wvt.A0_KE_factor);
+            end
+        end
+
+        function t = get.geo_pe_jk(self)
+            % Geostrophic potential energy in jk space
+            %
+            % Reads the 'geo_pe_jk' variable from the diagnostics file if it
+            % exists, or from the wvt if not
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.geo_pe_jk(self)
+            % - Returns t: geo_pe_jk matrix from diagnostics file
+            if ~isempty(self.diagfile)
+                t = self.diagfile.readVariables('geo_pe_jk');
+            else
+                t = self.wvt.transformToRadialWavenumber(self.wvt.A0_PE_factor);
             end
         end
 
@@ -735,8 +787,7 @@ classdef WVDiagnostics < handle
                 options.labelSpacing = 600
                 options.lineWidth = 1
             end
-            [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
-            omegaJK = (omegaN./n)/self.wvt.f;
+            omegaJK = self.omega_jk;
             set(gca,'layer','top'),
             hold on
             % flipud() and fliplr() help trick clabel into nicer label placement. 
@@ -753,8 +804,8 @@ classdef WVDiagnostics < handle
                 options.labelSpacing = 400
                 options.lineWidth = 1
             end
-            hke = self.wvt.transformToRadialWavenumber( self.wvt.A0_KE_factor );
-            pe = self.wvt.transformToRadialWavenumber( self.wvt.A0_PE_factor );
+            hke = self.geo_hke_jk;
+            pe = self.geo_pe_jk;
             ratio = log10(hke./pe);
             set(gca,'layer','top'),
             hold on
@@ -773,8 +824,8 @@ classdef WVDiagnostics < handle
                 options.labelSpacing = 600
                 options.lineWidth = 1
             end
-            hke = self.wvt.transformToRadialWavenumber( self.wvt.A0_KE_factor );
-            pe = self.wvt.transformToRadialWavenumber( self.wvt.A0_PE_factor );
+            hke = self.geo_hke_jk;
+            pe = self.geo_pe_jk;
             fraction = hke./(hke+pe);
             set(gca,'layer','top'),
             hold on          
