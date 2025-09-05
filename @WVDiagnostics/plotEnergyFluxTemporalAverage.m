@@ -31,6 +31,10 @@ arguments
     options.simpleName = [];
 end
 
+if ~any( options.energyReservoir == [EnergyReservoir.geostrophic_mda,EnergyReservoir.wave,EnergyReservoir.total] )
+    error('The energy reservoir must either geostrophic_mda, wave, or total.');
+end
+
 wvt = self.wvt;
 if options.approximation == "exact"
     fluxes = self.exactEnergyFluxesTemporalAverage(timeIndices=options.timeIndices);

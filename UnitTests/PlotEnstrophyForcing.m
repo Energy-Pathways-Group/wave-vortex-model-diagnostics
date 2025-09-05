@@ -4,8 +4,8 @@
 % misdiagnosing the amount of enstrophy at small scales.
 wvd = WVDiagnostics("run9_icR_iner07_tide014_lat32_geo0065_N0052_hydrostatic_res256.nc");
 
-[Z_quadratic, t] = wvd.enstrophyQGPVOverTime();
-[Z_apv, ~] = wvd.enstrophyAPVOverTime();
+[Z_quadratic, t] = wvd.quadraticEnstrophyOverTime();
+[Z_apv, ~] = wvd.exactEnstrophyOverTime();
 
 %%
 summed_exact = zeros(size(Z_apv));

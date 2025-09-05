@@ -38,7 +38,7 @@ col{"te_wave"} = [205 253 197]/255;
 col{"sink"} = [245 194 193]/255;
 
 reservoirs = configureDictionary("string","Box");
-[reservoirEnergy, t] = self.energyOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+[reservoirEnergy, t] = self.quadraticEnergyOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 for iReservoir = 1:length(options.energyReservoirs)
     name = options.energyReservoirs(iReservoir).name;
     if name == "te_quadratic"

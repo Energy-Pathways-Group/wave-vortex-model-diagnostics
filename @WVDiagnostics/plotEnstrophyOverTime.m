@@ -12,8 +12,8 @@ arguments
     options.visible = "on"
     options.timeIndices = Inf;
 end
-[Z_quadratic, t] = self.enstrophyQGPVOverTime(timeIndices=options.timeIndices);
-[Z_apv, ~] = self.enstrophyAPVOverTime(timeIndices=options.timeIndices);
+[Z_quadratic, t] = self.quadraticEnstrophyOverTime(timeIndices=options.timeIndices);
+[Z_apv, ~] = self.exactEnstrophyOverTime(timeIndices=options.timeIndices);
 
 fig = figure(Visible=options.visible);
 plot(t/self.tscale,Z_quadratic/self.zscale,LineWidth=2), hold on

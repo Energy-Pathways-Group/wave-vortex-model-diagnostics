@@ -41,54 +41,262 @@ classdef WVDiagnostics < handle
     end
 
     methods
-        function self = WVDiagnostics(filename,options)
-            % Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
-            %
-            % - Topic: Constructor
-            % - Declaration: self = WVDiagnostics(filename,options)
-            % - Parameter filename: path to the WVModel output file
-            % - Parameter options.diagnosticsFilePath: (optional) path to the diagnostics file
-            % - Returns self: the constructed WVDiagnostics object
+        createDiagnosticsFile(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures (instantaneous snapshot, from model output)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        fig = plotFluidStateMultipanel(self,options)
+        fig = plotFluidDecompositionMultipanel(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures for Energy
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        fig = plotEnergySpectrum(self,options)
+        fig = plotEnergyOverTime(self,options)
+        fig = plotEnergyFluxOverTime(self,options)
+        fig = plotEnergyTriadFluxOverTime(self,options)
+        fig = plotEnergyFluxTemporalAverage(self,options)
+
+        fig = plotSourcesSinksReservoirsDiagram(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures for Potential Enstrophy
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        fig = plotEnstrophySpectrum(self,options)
+        fig = plotEnstrophyOverTime(self,options)
+        fig = plotEnstrophyFluxOverTime(self,options)
+        fig = plotEnstrophyTriadFluxOverTime(self,options)
+        fig = plotEnstrophyFluxTemporalAverage(self,options)
+
+        tableString = createEnstrophyFluxSummaryTable(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figures (ancillary data, from model output)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        fig = plotMooringRotarySpectrum(self)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Data (over time)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        [energy, t] = exactEnergyOverTime(self, options)
+        [enstrophy, t] = exactEnstrophyOverTime(self, options)
+
+        [reservoirs, t] = quadraticEnergyOverTime(self,options)
+        [enstrophy, t] = quadraticEnstrophyOverTime(self, options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Flux averages, scalar [1 1]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        energy_fluxes = exactEnergyFluxesSpatialTemporalAverage(self,options)
+        enstrophy_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
+
+        forcing_fluxes = quadraticEnergyFluxesSpatialTemporalAverage(self,options)
+        inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
+
+        enstrophy_fluxes = quadraticEnstrophyFluxesSpatialTemporalAverage(self,options)
+        
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Fluxes, [j kRadial t]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        energy_fluxes = exactEnergyFluxes(self)
+        enstrophy_fluxes = exactEnstrophyFluxes(self)
+
+        forcing_fluxes = quadraticEnergyFluxes(self,options)
+        inertial_fluxes = quadraticEnergyTriadFluxes(self,options)
+
+        enstrophy_fluxes = quadraticEnstrophyFluxes(self)
+        inertial_fluxes = quadraticEnstrophyTriadFluxes(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Fluxes over time, [t 1]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        [energy_fluxes, t] = exactEnergyFluxesOverTime(self,options)
+        [enstrophy_fluxes, t] = exactEnstrophyFluxesOverTime(self,options)
+
+        [energy_fluxes,t] = quadraticEnergyFluxesOverTime(self,options)
+        [energy_fluxes,t] = quadraticEnergyTriadFluxesOverTime(self,options)
+
+        [enstrophy_fluxes,t] = quadraticEnstrophyFluxesOverTime(self,options)
+        [enstrophy_fluxes,t] = quadraticEnstrophyTriadFluxesOverTime(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Fluxes in space, [j kRadial]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        energy_fluxes = quadraticEnergyFluxesTemporalAverage(self,options)
+        inertial_fluxes = quadraticEnergyTriadFluxesTemporalAverage(self,options)
+
+        energy_fluxes = exactEnergyFluxesTemporalAverage(self,options)
+
+        enstrophy_fluxes = quadraticEnstrophyFluxesTemporalAverage(self,options)
+        enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Transforms to alternative axes
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        [varargout] = transformToPseudoRadialWavenumber(self,energyReservoir,varargin);
+        [varargout] = transformToPseudoRadialWavenumberA0(self,varargin);
+        [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)  
+        [varargout] = transformToOmegaAxis(self,varargin)   
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Spectra (also implemented in the WVT)
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        S_f = spectrumWithFgTransform(self,f)
+        S_f = spectrumWithGgTransform(self,f)
+        S_f = crossSpectrumWithFgTransform(self,phi,gamma)
+        S_f = crossSpectrumWithGgTransform(self,phi,gamma)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Figure extras
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function setLogWavelengthXAxis(self,options)
             arguments
-                filename
-                options.diagnosticsFilePath
+                self WVDiagnostics
+                options.num_ticks = 6
+                options.roundToNearest = 5
             end
-            self.wvpath = filename;
-
-
-            [self.wvt, self.wvfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=Inf);
-            self.wvt.addOperation(EtaTrueOperation());
-            self.wvt.addOperation(APEOperation(self.wvt));
-            self.wvt.addOperation(APVOperation());
-            self.wvt.addOperation(SpatialForcingOperation(self.wvt));
-
-            [fpath,fname,~] = fileparts(filename);
-            if ~isfield(options,"diagnosticsFilePath")
-                if ~isempty(fpath)
-                    self.diagpath = fullfile(fpath,strcat(fname,"-diagnostics.nc"));
-                else
-                    self.diagpath= fullfile(pwd,strcat(fname,"-diagnostics.nc"));
-                end
-            else
-                self.diagpath = options.diagnosticsFilePath;
-            end
-            if exist(self.diagpath,"file")
-                self.diagfile = NetCDFFile(self.diagpath);
-            else
-                warning("No diagnostics file found. Some functionality will not be available.")
-            end
-
-            if ~isempty(fpath)
-                self.wvaapath = fullfile(fpath,strcat(fname,"-wvt-aa.nc"));
-            else
-                self.wvaapath= fullfile(pwd,strcat(fname,"-wvt-aa.nc"));
-            end
-
-            self.zscale = self.wvt.f^2;
-            self.z_flux_scale = self.zscale/(86400*365);
-
-            addlistener(self,'iTime','PostSet',@WVDiagnostics.iTimeChanged);
+            [labels_x,ticks_x] = self.logWavelengthAxis(num_ticks=options.num_ticks,roundToNearest=options.roundToNearest);
+            xscale('log')
+            xticks(ticks_x)
+            xticklabels(labels_x)
         end
+
+        function [labels, ticks] = logWavelengthAxis(self,options)
+            % To use this:
+            % xticks(ticks_x)
+            % xticklabels(labels_x)
+            arguments
+                self WVDiagnostics
+                options.num_ticks = 6
+                options.roundToNearest = 5
+            end
+            ticks = logspace(log10(self.kRadial(2)),log10(self.kRadial(end)),options.num_ticks);
+            ticks = round(2*pi./(1e3.*ticks)/options.roundToNearest)*options.roundToNearest;
+            labels = cell(length(ticks),1);
+            for i=1:length(ticks)
+                labels{i} = sprintf('%.0f',ticks(i));
+            end
+            ticks = 2*pi./(1e3*ticks);
+        end
+
+        function overlayFrequencyContours(self,options)
+            arguments
+                self 
+                options.frequencies = [1.01 1.05 1.2 1.5 2 4 8 16]
+                options.textColor = [.5,.5,.5]
+                options.labelSpacing = 600
+                options.lineWidth = 1
+            end
+            omegaJK = self.omega_jk;
+            set(gca,'layer','top'),
+            hold on
+            % flipud() and fliplr() help trick clabel into nicer label placement. 
+            % for y-axis, use j+1 so contours line up with pcolor cells.
+            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j',fliplr(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+        end
+
+        function overlayGeostrophicKineticPotentialRatioContours(self,options)
+            arguments
+                self 
+                options.ratios = [-2.5 -2.0 -1.5 -1.0 -0.5 0 0.5 1.0 1.5 2.0 2.5]
+                options.textColor = [.5,.5,.5]
+                options.labelSpacing = 400
+                options.lineWidth = 1
+            end
+            hke = self.geo_hke_jk;
+            pe = self.geo_pe_jk;
+            ratio = log10(hke./pe);
+            set(gca,'layer','top'),
+            hold on
+            % [C,h] = contour(self.kRadial(2:end),self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
+            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(1:end)',(ratio(1:end,2:end)),[-3,3],'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+        end
+
+        function overlayGeostrophicKineticPotentialFractionContours(self,options)
+            arguments
+                self 
+                options.fractions = [.01,.1,.25,.75,.9,.99]
+                options.textColor = [.5,.5,.5]
+                options.labelSpacing = 600
+                options.lineWidth = 1
+            end
+            hke = self.geo_hke_jk;
+            pe = self.geo_pe_jk;
+            fraction = hke./(hke+pe);
+            set(gca,'layer','top'),
+            hold on          
+            % flipud() and fliplr() help trick clabel into nicer label placement. 
+            % for y-axis, use j+1 so contours line up with pcolor cells.
+            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j(1:end)'+1,fliplr(fraction(1:end,2:end)),options.fractions,'LineWidth',options.lineWidth,'Color',options.textColor);
+            clabel(C,h,options.fractions,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),(self.j(1:end)')+1,fliplr(fraction(1:end,2:end)),[.5,.5],'LineWidth',2,'Color',options.textColor);
+            clabel(C,h,.5,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
+        end
+
+        function showRossbyRadiusYAxis(self,options)
+            arguments
+                self 
+                options.textColor = [.5,.5,.5] 
+            end
+            set(gca,'Layer','top','TickLength',[0.015 0.015])
+            % create some nice tick labels to show deformation radius
+            yticksTemp = yticks;
+            ticks_y = sqrt(self.wvt.Lr2)./1000;
+            labels_y = cell(length(yticksTemp),1);
+            for i=1:length(yticksTemp)
+                labels_y{i} = sprintf('%0.1f',ticks_y(yticksTemp(i)+1));
+            end
+            text(.7*min(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',options.textColor,'HorizontalAlignment','center')
+            text(.7*min(xlim),1.1*max(ylim),'L_r (km)','Color',options.textColor,'HorizontalAlignment','center')
+        end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Dependent property implementations
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         function t = get.t_diag(self)
             % Get time vector from the diagnostics file
@@ -267,490 +475,59 @@ classdef WVDiagnostics < handle
             end
         end
 
-        createDiagnosticsFile(self,options)
-        [varargout] = transformToPseudoRadialWavenumber(self,energyReservoir,varargin);
-        [varargout] = transformToPseudoRadialWavenumberA0(self,varargin);
-        [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)  
-        [varargout] = transformToOmegaAxis(self,varargin)   
-
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Spectra
+        % Initialization
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        S_f = spectrumWithFgTransform(self,f)
-        S_f = spectrumWithGgTransform(self,f)
-        S_f = crossSpectrumWithFgTransform(self,phi,gamma)
-        S_f = crossSpectrumWithGgTransform(self,phi,gamma)
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Figures (instantaneous snapshot, from model output)
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        fig = plotFluidStateMultipanel(self,options)
-        fig = plotFluidDecompositionMultipanel(self,options)
-        fig = plotEnstrophySpectrum(self,options)
-        fig = plotEnergySpectrum(self,options)
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Figures (ancillary data, from model output)
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        fig = plotMooringRotarySpectrum(self)
-
-        fig = plotEnergyFluxTemporalAverage(self,options)
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Figures (over time, from diagnostics file)
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        fig = plotEnstrophyOverTime(self,options)
-        fig = plotEnergyOverTime(self,options)
-
-        fig = plotEnergyFluxOverTime(self,options)
-
-        fig = plotEnergyTriadFluxOverTime(self,options)
-
-        function fig = plotExactEnstrophyFluxOverTime(self,options)
-            % Plot forcing flux for each reservoir over time
+        function self = WVDiagnostics(filename,options)
+            % Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
             %
-            % Plots the energy flux into each reservoir from external forcing as a function of time.
-            %
-            % - Topic: Figures (over time)
-            % - Declaration: fig = plotForcingFluxOverTime(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.visible: figure visibility (default: "on")
-            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
-            % - Returns fig: handle to the generated figure
+            % - Topic: Constructor
+            % - Declaration: self = WVDiagnostics(filename,options)
+            % - Parameter filename: path to the WVModel output file
+            % - Parameter options.diagnosticsFilePath: (optional) path to the diagnostics file
+            % - Returns self: the constructed WVDiagnostics object
             arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-                options.visible = "on"
-                options.filter = @(v) v;
-                options.shouldShowNonlinearAdvection = true
-                options.shouldShowTotal = true
-                options.shouldShowDtEnstrophy = true
+                filename
+                options.diagnosticsFilePath
             end
-            [forcing_fluxes, t] = self.exactEnstrophyFluxesOverTime(timeIndices=options.timeIndices);
-            if ~options.shouldShowNonlinearAdvection
-                forcing_fluxes(1) = [];
-            end
+            self.wvpath = filename;
 
-            fig = figure(Visible=options.visible);
-            tl = tiledlayout(1,1,TileSpacing="compact");
-            total = zeros(size(forcing_fluxes(1).Z0));
-            for iForce = 1:length(forcing_fluxes)
-                plot(t/self.tscale,options.filter(forcing_fluxes(iForce).Z0/self.z_flux_scale)), hold on
-                total = total + forcing_fluxes(iForce).Z0;
-            end
-            if options.shouldShowTotal
-                plot(t/self.tscale,options.filter(total/self.z_flux_scale),Color=0*[1 1 1],LineWidth=2), hold on
-                legendValues = cat(1,forcing_fluxes.fancyName,"total");
-            else
-                legendValues = forcing_fluxes.fancyName;
-            end
 
-            if options.shouldShowDtEnstrophy
-                Z_apv = self.enstrophyAPVOverTime(timeIndices=options.timeIndices);
-                t2 = t(2:end) - (t(2)-t(1))/2;
-                dZdt = diff(Z_apv)./diff(t);
-                plot(t2/self.tscale,options.filter(dZdt/self.z_flux_scale),Color=0*[1 1 1],LineWidth=2,LineStyle="--"), hold on
-                legendValues = cat(1,legendValues,"$\frac{d Z}{dt}$");
-            end
+            [self.wvt, self.wvfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=Inf);
+            self.wvt.addOperation(EtaTrueOperation());
+            self.wvt.addOperation(APEOperation(self.wvt));
+            self.wvt.addOperation(APVOperation());
+            self.wvt.addOperation(SpatialForcingOperation(self.wvt));
 
-            legend(legendValues);
-
-            xlabel("time (" + self.tscale_units + ")")
-            ylabel("flux (" + self.z_flux_scale_units + ")")
-            xlim([min(t) max(t)]/self.tscale);
-
-            mean(total/self.z_flux_scale)
-        end
-
-        function fig = plotEnstrophyFluxOverTime(self,options)
-            % Plot forcing flux for each reservoir over time
-            %
-            % Plots the energy flux into each reservoir from external forcing as a function of time.
-            %
-            % Some good filters are:
-            % filter=@(v,t) movmean(v,21);
-            % filter=@(v,t) cumtrapz(t,v)./(t+1)
-            %
-            % - Topic: Figures (over time)
-            % - Declaration: fig = plotForcingFluxOverTime(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.visible: figure visibility (default: "on")
-            % - Parameter options.filter: function handle to filter fluxes (default: @(v,t) v)
-            % - Returns fig: handle to the generated figure
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-                options.visible = "on"
-                options.filter = @(v,t) v;
-                options.shouldShowNonlinearAdvection = false
-            end
-            [forcing_fluxes, t] = self.quadraticEnstrophyFluxesOverTime(timeIndices=options.timeIndices);
-            if ~options.shouldShowNonlinearAdvection
-                forcing_fluxes(1) = [];
-            else
-                forcing_fluxes(1).Z0 = forcing_fluxes(1).Z0;
-            end
-
-            fig = figure(Visible=options.visible);
-            tl = tiledlayout(1,1,TileSpacing="compact");
-
-            for iForce = 1:length(forcing_fluxes)
-                plot(t/self.tscale,options.filter(forcing_fluxes(iForce).Z0/self.z_flux_scale,t)), hold on
-            end
-            legend(forcing_fluxes.fancyName)
-
-            xlabel("time (" + self.tscale_units + ")")
-            ylabel("enstrophy flux (" + self.z_flux_scale_units + ")")
-            xlim([min(t) max(t)]/self.tscale);
-
-        end
-
-        function fig = plotEnstrophyInertialFluxOverTime(self,options)
-            % Plot forcing flux for each reservoir over time
-            %
-            % Plots the energy flux into each reservoir from external forcing as a function of time.
-            %
-            % - Topic: Figures (over time)
-            % - Declaration: fig = plotForcingFluxOverTime(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.visible: figure visibility (default: "on")
-            % - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
-            % - Returns fig: handle to the generated figure
-            arguments
-                self WVDiagnostics
-                options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
-                options.timeIndices = Inf;
-                options.visible = "on"
-                options.filter = @(v,t) v;
-            end
-            [forcing_fluxes, t] = self.quadraticEnstrophyTriadFluxesOverTime(timeIndices=options.timeIndices,triadComponents=options.triadComponents);
-
-            fig = figure(Visible=options.visible);
-            tl = tiledlayout(1,1,TileSpacing="compact");
-
-            for iForce = 1:length(forcing_fluxes)
-                plot(t/self.tscale,options.filter(forcing_fluxes(iForce).Z0/self.z_flux_scale,t)), hold on
-            end
-            legend(forcing_fluxes.fancyName)
-
-            xlabel("time (" + self.tscale_units + ")")
-            ylabel("enstrophy flux (" + self.z_flux_scale_units + ")")
-            xlim([min(t) max(t)]/self.tscale);
-
-        end
-
-        fig = plotEnstrophyFluxTemporalAverage(self,options)
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Figures (spatial temporal average, from diagnostics file)
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        fig = plotSourcesSinksReservoirsDiagram(self,options)
-        
-        tableString = createEnstrophyFluxSummaryTable(self,options)
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Data (over time)
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        function [reservoirs, t] = energyOverTime(self,options)
-            % Compute energy for each reservoir over time
-            %
-            % Returns the energy in each specified reservoir as a function of time.
-            %
-            % - Topic: Figures (over time)
-            % - Declaration: [reservoirs, t] = energyOverTime(self,options)
-            % - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-            % - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
-            % - Parameter options.timeIndices: indices for time selection (default: Inf)
-            % - Returns reservoirs: struct array with energy for each reservoir
-            % - Returns t: time vector
-            arguments
-                self WVDiagnostics
-                options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total] 
-                options.shouldIncludeExactTotalEnergy = false
-                options.timeIndices = Inf;
-            end
-            %% Measure total energy in each reservoir
-            [KE_g,PE_g,E_mda,E_w,E_io,ke,pe_quadratic,ape] =self.diagfile.readVariables('KE_g','PE_g','E_mda','E_w','E_io','ke','pe_quadratic','ape');
-
-            if isinf(options.timeIndices)
-                filter = @(v) v;
-            else
-                filter = @(v) v(options.timeIndices);
-            end
-
-            % we have to preallocated an array of structs
-            clear reservoirs;
-            if options.shouldIncludeExactTotalEnergy
-                reservoirs(length(options.energyReservoirs)+1) = struct("name","placeholder");
-            else
-                reservoirs(length(options.energyReservoirs)) = struct("name","placeholder");
-            end
-            for iReservoir = 1:length(options.energyReservoirs)
-                reservoirs(iReservoir).name = options.energyReservoirs(iReservoir).name;
-                reservoirs(iReservoir).fancyName = options.energyReservoirs(iReservoir).fancyName;
-                switch options.energyReservoirs(iReservoir)
-                    case EnergyReservoir.geostrophic_kinetic
-                        reservoirs(iReservoir).energy = KE_g;
-                    case EnergyReservoir.geostrophic_potential
-                        reservoirs(iReservoir).energy = PE_g;
-                    case EnergyReservoir.geostrophic
-                        reservoirs(iReservoir).energy = KE_g + PE_g;
-                    case EnergyReservoir.mda
-                        reservoirs(iReservoir).energy = E_mda;
-                    case EnergyReservoir.geostrophic_mda
-                        reservoirs(iReservoir).energy = KE_g + PE_g + E_mda;
-                    case EnergyReservoir.igw
-                        reservoirs(iReservoir).energy = E_w;
-                    case EnergyReservoir.io
-                        reservoirs(iReservoir).energy = E_io;
-                    case EnergyReservoir.wave
-                        reservoirs(iReservoir).energy = E_w+E_io;
-                    case EnergyReservoir.total
-                        reservoirs(iReservoir).energy = ke + pe_quadratic;
-                    otherwise
-                        error("unknown energy reservoir");
+            [fpath,fname,~] = fileparts(filename);
+            if ~isfield(options,"diagnosticsFilePath")
+                if ~isempty(fpath)
+                    self.diagpath = fullfile(fpath,strcat(fname,"-diagnostics.nc"));
+                else
+                    self.diagpath= fullfile(pwd,strcat(fname,"-diagnostics.nc"));
                 end
-                reservoirs(iReservoir).energy = filter(reservoirs(iReservoir).energy);
-            end
-            if options.shouldIncludeExactTotalEnergy
-                reservoirs(end).name = "te";
-                reservoirs(end).fancyName = "total";
-                reservoirs(end).energy = ke + ape;
-                reservoirs(end).energy = filter(reservoirs(end).energy);
-            end
-
-            t = filter(self.diagfile.readVariables('t'));
-        end
-
-        function [energy, t] = exactEnergyOverTime(self, options)
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-            end
-            if isinf(options.timeIndices)
-                filter = @(v) v;
             else
-                filter = @(v) v(options.timeIndices);
+                self.diagpath = options.diagnosticsFilePath;
             end
-            [ke,ape] =self.diagfile.readVariables('ke','ape');
-            energy = filter(ke+ape);
-            t = filter(self.diagfile.readVariables('t'));
-        end
-
-        function [enstrophy, t] = enstrophyQGPVOverTime(self, options)
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-            end
-            if isinf(options.timeIndices)
-                filter = @(v) v;
+            if exist(self.diagpath,"file")
+                self.diagfile = NetCDFFile(self.diagpath);
             else
-                filter = @(v) v(options.timeIndices);
+                warning("No diagnostics file found. Some functionality will not be available.")
             end
-            enstrophy = filter(self.diagfile.readVariables('enstrophy_quadratic'));
-            t = filter(self.diagfile.readVariables('t'));
-        end
 
-        function [enstrophy, t] = enstrophyAPVOverTime(self, options)
-            arguments
-                self WVDiagnostics
-                options.timeIndices = Inf;
-            end
-            if isinf(options.timeIndices)
-                filter = @(v) v;
+            if ~isempty(fpath)
+                self.wvaapath = fullfile(fpath,strcat(fname,"-wvt-aa.nc"));
             else
-                filter = @(v) v(options.timeIndices);
+                self.wvaapath= fullfile(pwd,strcat(fname,"-wvt-aa.nc"));
             end
-            enstrophy = filter(self.diagfile.readVariables('enstrophy_apv'));
-            t = filter(self.diagfile.readVariables('t'));
-        end
 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Flux averages, scalar [1 1]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            self.zscale = self.wvt.f^2;
+            self.z_flux_scale = self.zscale/(86400*365);
 
-        energy_fluxes = exactEnergyFluxesSpatialTemporalAverage(self,options)
-        enstrophy_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
-
-        forcing_fluxes = quadraticEnergyFluxesSpatialTemporalAverage(self,options)
-        inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
-
-        enstrophy_fluxes = quadraticEnstrophyFluxesSpatialTemporalAverage(self,options)
-        
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Fluxes, [j kRadial t]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        energy_fluxes = exactEnergyFluxes(self)
-        enstrophy_fluxes = exactEnstrophyFluxes(self)
-
-        forcing_fluxes = quadraticEnergyFluxes(self,options)
-        inertial_fluxes = quadraticEnergyTriadFluxes(self,options)
-
-        enstrophy_fluxes = quadraticEnstrophyFluxes(self)
-        inertial_fluxes = quadraticEnstrophyTriadFluxes(self,options)
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Fluxes over time, [t 1]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        [energy_fluxes, t] = exactEnergyFluxesOverTime(self,options)
-        [enstrophy_fluxes, t] = exactEnstrophyFluxesOverTime(self,options)
-
-        [energy_fluxes,t] = quadraticEnergyFluxesOverTime(self,options)
-        [energy_fluxes,t] = quadraticEnergyTriadFluxesOverTime(self,options)
-
-        [enstrophy_fluxes,t] = quadraticEnstrophyFluxesOverTime(self,options)
-        [enstrophy_fluxes,t] = quadraticEnstrophyTriadFluxesOverTime(self,options)
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Fluxes in space, [j kRadial]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        energy_fluxes = quadraticEnergyFluxesTemporalAverage(self,options)
-        inertial_fluxes = quadraticEnergyTriadFluxesTemporalAverage(self,options)
-
-        energy_fluxes = exactEnergyFluxesTemporalAverage(self,options)
-
-        enstrophy_fluxes = quadraticEnstrophyFluxesTemporalAverage(self,options)
-        enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Figure extras
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        function setLogWavelengthXAxis(self,options)
-            arguments
-                self WVDiagnostics
-                options.num_ticks = 6
-                options.roundToNearest = 5
-            end
-            [labels_x,ticks_x] = self.logWavelengthAxis(num_ticks=options.num_ticks,roundToNearest=options.roundToNearest);
-            xscale('log')
-            xticks(ticks_x)
-            xticklabels(labels_x)
-        end
-
-        function [labels, ticks] = logWavelengthAxis(self,options)
-            % To use this:
-            % xticks(ticks_x)
-            % xticklabels(labels_x)
-            arguments
-                self WVDiagnostics
-                options.num_ticks = 6
-                options.roundToNearest = 5
-            end
-            ticks = logspace(log10(self.kRadial(2)),log10(self.kRadial(end)),options.num_ticks);
-            ticks = round(2*pi./(1e3.*ticks)/options.roundToNearest)*options.roundToNearest;
-            labels = cell(length(ticks),1);
-            for i=1:length(ticks)
-                labels{i} = sprintf('%.0f',ticks(i));
-            end
-            ticks = 2*pi./(1e3*ticks);
-        end
-
-        function overlayFrequencyContours(self,options)
-            arguments
-                self 
-                options.frequencies = [1.01 1.05 1.2 1.5 2 4 8 16]
-                options.textColor = [.5,.5,.5]
-                options.labelSpacing = 600
-                options.lineWidth = 1
-            end
-            omegaJK = self.omega_jk;
-            set(gca,'layer','top'),
-            hold on
-            % flipud() and fliplr() help trick clabel into nicer label placement. 
-            % for y-axis, use j+1 so contours line up with pcolor cells.
-            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j',fliplr(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-        end
-
-        function overlayGeostrophicKineticPotentialRatioContours(self,options)
-            arguments
-                self 
-                options.ratios = [-2.5 -2.0 -1.5 -1.0 -0.5 0 0.5 1.0 1.5 2.0 2.5]
-                options.textColor = [.5,.5,.5]
-                options.labelSpacing = 400
-                options.lineWidth = 1
-            end
-            hke = self.geo_hke_jk;
-            pe = self.geo_pe_jk;
-            ratio = log10(hke./pe);
-            set(gca,'layer','top'),
-            hold on
-            % [C,h] = contour(self.kRadial(2:end),self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
-            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(1:end)',(ratio(1:end,2:end)),[-3,3],'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-        end
-
-        function overlayGeostrophicKineticPotentialFractionContours(self,options)
-            arguments
-                self 
-                options.fractions = [.01,.1,.25,.75,.9,.99]
-                options.textColor = [.5,.5,.5]
-                options.labelSpacing = 600
-                options.lineWidth = 1
-            end
-            hke = self.geo_hke_jk;
-            pe = self.geo_pe_jk;
-            fraction = hke./(hke+pe);
-            set(gca,'layer','top'),
-            hold on          
-            % flipud() and fliplr() help trick clabel into nicer label placement. 
-            % for y-axis, use j+1 so contours line up with pcolor cells.
-            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j(1:end)'+1,fliplr(fraction(1:end,2:end)),options.fractions,'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.fractions,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),(self.j(1:end)')+1,fliplr(fraction(1:end,2:end)),[.5,.5],'LineWidth',2,'Color',options.textColor);
-            clabel(C,h,.5,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-        end
-
-        function showRossbyRadiusYAxis(self,options)
-            arguments
-                self 
-                options.textColor = [.5,.5,.5] 
-            end
-            set(gca,'Layer','top','TickLength',[0.015 0.015])
-            % create some nice tick labels to show deformation radius
-            yticksTemp = yticks;
-            ticks_y = sqrt(self.wvt.Lr2)./1000;
-            labels_y = cell(length(yticksTemp),1);
-            for i=1:length(yticksTemp)
-                labels_y{i} = sprintf('%0.1f',ticks_y(yticksTemp(i)+1));
-            end
-            text(.7*min(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',options.textColor,'HorizontalAlignment','center')
-            text(.7*min(xlim),1.1*max(ylim),'L_r (km)','Color',options.textColor,'HorizontalAlignment','center')
+            addlistener(self,'iTime','PostSet',@WVDiagnostics.iTimeChanged);
         end
     end
 

@@ -16,7 +16,7 @@ arguments
     options.timeIndices = Inf;
     options.visible = "on"
 end
-[reservoirs, t] = self.energyOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy,timeIndices=options.timeIndices);
+[reservoirs, t] = self.quadraticEnergyOverTime(energyReservoirs=options.energyReservoirs,shouldIncludeExactTotalEnergy=options.shouldIncludeExactTotalEnergy,timeIndices=options.timeIndices);
 
 fig = figure(Visible=options.visible);
 
