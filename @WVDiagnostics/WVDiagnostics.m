@@ -52,6 +52,8 @@ classdef WVDiagnostics < handle
         fig = plotFluidStateMultipanel(self,options)
         fig = plotFluidDecompositionMultipanel(self,options)
 
+        fig = plotPotentialEnergySpectrum(self,options)
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Figures for Energy
