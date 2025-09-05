@@ -55,6 +55,7 @@ if exist(self.diagpath,"file") && ~isfield(options,"filename")
     variable_ke = diagfile.variableWithName("ke");
     variable_pe = diagfile.variableWithName("pe_quadratic");
     variable_ape = diagfile.variableWithName("ape");
+    variable_ape_bg = diagfile.variableWithName("ape_bg");
     variable_z = diagfile.variableWithName("enstrophy_quadratic");
     variable_apv = diagfile.variableWithName("enstrophy_apv");
 
@@ -170,6 +171,7 @@ else
     variable_ke = diagfile.addVariable("ke","t",type="double",isComplex=false);
     variable_pe = diagfile.addVariable("pe_quadratic","t",type="double",isComplex=false);
     variable_ape = diagfile.addVariable("ape","t",type="double",isComplex=false);
+    variable_ape_bg = diagfile.addVariable("ape_bg","t",type="double",isComplex=false);
     variable_z = diagfile.addVariable("enstrophy_quadratic","t",type="double",isComplex=false);
     variable_apv = diagfile.addVariable("enstrophy_apv","t",type="double",isComplex=false);
 
@@ -213,6 +215,7 @@ integrationLastInformWallTime = datetime('now');
 integrationLastInformLoopNumber = 1;
 integrationInformTime = 10;
 disp("Starting loop");
+profile on
 for timeIndex = 1:length(timeIndices)
     deltaWallTime = datetime('now')-integrationLastInformWallTime;
     if ( seconds(deltaWallTime) > integrationInformTime)
@@ -235,6 +238,11 @@ for timeIndex = 1:length(timeIndices)
 
     diagfile.variableWithName('t').setValueAlongDimensionAtIndex(wvt.t,'t',outputIndex);
 
+    rho_nm = wvt.chebfunForZArray(wvt.rho_nm);
+    N2 = (-wvt.g/wvt.rho0)*diff(rho_nm);
+    p_nm = (-wvt.g/wvt.rho0)*cumsum(rho_nm-wvt.rho0);
+    p_nm = p_nm - p_nm(0);
+
     % 1. Measures of energy, APV and enstrophy
     for i=1:length(flowComponentNames)
         comp = wvt.flowComponentWithName(flowComponentNames(i));
@@ -256,12 +264,12 @@ for timeIndex = 1:length(timeIndices)
     variable_ke.setValueAlongDimensionAtIndex(int_vol(ke),'t',outputIndex);
     variable_pe.setValueAlongDimensionAtIndex(int_vol(shiftdim(wvt.N2,-2).*wvt.eta.*wvt.eta/2),'t',outputIndex);
     variable_ape.setValueAlongDimensionAtIndex(int_vol(ape),'t',outputIndex);
+    variable_ape_bg.setValueAlongDimensionAtIndex(int_vol(p_nm(wvt.Z-wvt.eta_true)),'t',outputIndex);
     variable_z.setValueAlongDimensionAtIndex(wvt.totalEnstrophy,'t',outputIndex);
     variable_apv.setValueAlongDimensionAtIndex(0.5*int_vol(apv.*apv),'t',outputIndex);
 
     % 2. Forcing fluxes
-    rho_nm = wvt.chebfunForZArray(wvt.rho_nm);
-    N2 = (-wvt.g/wvt.rho0)*diff(rho_nm);
+
     F = wvt.fluxForForcing();
     for i=1:length(forcingNames)
         [Ep,Em,KE0,PE0] = wvt.energyFluxFromNonlinearFlux(F{forcingNames(i)}.Fp,F{forcingNames(i)}.Fm,F{forcingNames(i)}.F0);
@@ -350,5 +358,6 @@ for timeIndex = 1:length(timeIndices)
         end
     end
 end
+profile viewer
 fprintf("\n");
 end
