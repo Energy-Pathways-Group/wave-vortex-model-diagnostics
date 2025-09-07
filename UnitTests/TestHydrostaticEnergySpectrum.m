@@ -3,11 +3,11 @@ basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 
 %%
 runNumber=1; runName = "hydrostatic: geostrophic";
-wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
+wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
 
 %%
 runNumber=9; runName = "hydrostatic: geostrophic + waves";
-wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
+wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
 
 %%
 wvt = wvd.wvt;
@@ -38,6 +38,43 @@ p_nm = p_nm - p_nm(0);
 eta_true = wvt.eta_true;
 Z = wvt.Z;
 int_vol(wvt.g*eta_true.*rho_nm(Z - eta_true) + p_nm(Z) - p_nm(Z - eta_true))
+
+%%
+ape3 = zeros(wvt.spatialMatrixSize);
+N = size(ape3,1)*size(ape3,2);
+for iZ=1:length(wvt.z)
+    zp = wvt.z(iZ);
+    f = chebfun( @(eta) eta*N2t(zp-eta),[zp zp + wvt.Lz],'splitting','on');
+    index_offset = N*(iZ-1);
+    for index=1:N
+        eta = wvt.eta_true(index + index_offset);
+        ape3(index + index_offset) = sum(f,0,eta);
+    end
+end
+% ape3 = shiftdim(ape3,1);
+int_vol(ape3)
+
+%%
+
+N2t = -wvt.g*diff(rho_nm);
+logN2t = log(N2t) - log(N2t(end));
+
+ape2 = 0.5*N2t(wvt.Z).*logN2t(wvt.Z-wvt.eta_true).*wvt.eta_true.*wvt.eta_true;
+int_vol(ape2)
+
+dLogN2t = diff(logN2t);
+
+zp = wvt.z(10);
+f = chebfun( @(eta) eta*eta*dLogN2t(zp-eta),[zp zp + wvt.Lz],'splitting','on');
+
+ape3 = zeros(wvt.spatialMatrixSize);
+for index=1:numel(Z)
+    z = Z(index);
+    eta = eta_true(index);
+    ape3(i) = sum(dLogN2t,0,);
+end
+
+%%
 
 first_term = wvd.crossSpectrumWithGgTransform(wvt.g*eta_true./wvt.N2Function(Z),rho_nm(Z - eta_true));
 second_term = wvd.crossSpectrumWithFgTransform(p_nm(Z) - p_nm(Z - eta_true),ones(size(Z)));
