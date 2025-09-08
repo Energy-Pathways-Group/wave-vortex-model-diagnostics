@@ -1,7 +1,7 @@
 % basedir = "/Users/Shared/CimRuns_June2025/output/";
 basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 
-runNumber=18; runName = "non-hydrostatic: geostrophic + waves";
+runNumber=1; runName = "non-hydrostatic: geostrophic + waves";
 wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
 
 %%
@@ -9,16 +9,52 @@ energy_fluxes = wvd.exactEnergyFluxesTemporalAverage();
 
 
 %%
-flux = energy_fluxes(1).te;
-jWavenumber = 1./sqrt(wvd.Lr2);
-jWavenumber(1) = 0; % barotropic mode is a mean?
-[X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvd.kRadial,jWavenumber,flux.');
+flux = energy_fluxes(1).te/wvd.flux_scale;
 
-figure, jpcolor(wvd.kRadial,jWavenumber,flux); shading flat;
+jWavenumber = 1./sqrt(wvd.Lr2);
+jWavelength = 2*pi./wvd.jWavenumber/1000;
+jWavelength(1) = 1.5*jWavelength(2);
+
+radialWavelength = 2*pi./wvd.kRadial/1000;
+radialWavelength(1) = 1.5*radialWavelength(2);
+
+[X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvd.kRadial,wvd.jWavenumber,flux.');
+
+kRadial = wvd.kRadial;
+kRadial = kRadial + (kRadial(2)-kRadial(1))/2;
+% kRadial(1) = 0.5*wvd.kRadial(2);
+jWavenumber = wvd.jWavenumber;
+jWavenumber = jWavenumber + (jWavenumber(2)-jWavenumber(1))/2;
+
+% jWavenumber(1) = 0.5*wvd.jWavenumber(2);
+
+figure, pcolor(kRadial,jWavenumber,flux); shading flat;
+
+% pbaspect([wvd.jWavenumber(2)/wvd.kRadial(2) 1 1])
+
+% set(gca,'YDir','reverse')
+% set(gca,'XDir','reverse')
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+xlim([kRadial(1) 1.6e-3])
+ylim([jWavenumber(1) 1.6e-3])
+
 colormap(WVDiagnostics.crameri('-bam'))
-clim(max(abs(flux(:)))*[-1 1])
+clim(max(abs(flux(:)))*[-1 1]/100)
 colorbar("eastoutside")
 hold on,
-quiver(X,Y,10*U,10*V,Color=0*[1 1 1])
-% xlim([0 5e-4])
-% ylim([0 5e-4])
+
+%%
+Xaxes = X;
+Xaxes(1,:) = kRadial(1);
+Yaxes = Y;
+Yaxes(:,1) = jWavenumber(1);
+Xaxes = log(Xaxes);
+Yaxes = log(Yaxes);
+
+figure
+scale = 1e6;
+quiver(Xaxes,Yaxes,scale*U./abs(Xaxes),scale*V./abs(Yaxes),"off",Color=0*[1 1 1])
+% quiver(Xaxes,Yaxes,scale*U./abs(Xaxes),scale*V./abs(Yaxes),Color=0*[1 1 1])
+xlim([Xaxes(1,1) log(1.6e-3)])
+ylim([Yaxes(1,1) log(1.6e-3)])
