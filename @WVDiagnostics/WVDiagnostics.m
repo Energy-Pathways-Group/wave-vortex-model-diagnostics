@@ -556,16 +556,16 @@ classdef WVDiagnostics < handle
             % quiver(X,Y,10*U,10*V,'off',Color=0*[1 1 1])
 
             [X,Y] = ndgrid(x,y);
-            [flux_bar, f_alpha] = CosineTransformForward( x, flux, 1 );
-            [flux_bar2, f_beta] = CosineTransformForward( y, flux_bar, 2 );
+            [flux_bar, f_alpha] = WVDiagnostics.CosineTransformForward( x, flux, 1 );
+            [flux_bar2, f_beta] = WVDiagnostics.CosineTransformForward( y, flux_bar, 2 );
             [ALPHA,BETA] = ndgrid(f_alpha,f_beta);
             D = -((2*pi*ALPHA).^2 + (2*pi*BETA).^2);
             D(1,1) = Inf;
             UFactor = 2*pi*ALPHA./D;
             VFactor = 2*pi*BETA./D;
-            tmp = CosineTransformBack(f_beta,UFactor.*flux_bar2,2);
-            U = SineTransformBack(f_alpha(2:end-1,:),tmp(2:end-1,:),1);
-            V = CosineTransformBack(f_alpha,SineTransformBack(f_beta(2:end-1),VFactor(:,2:end-1).*flux_bar2(:,2:end-1),2),1);
+            tmp = WVDiagnostics.CosineTransformBack(f_beta,UFactor.*flux_bar2,2);
+            U = WVDiagnostics.SineTransformBack(f_alpha(2:end-1,:),tmp(2:end-1,:),1);
+            V = WVDiagnostics.CosineTransformBack(f_alpha,WVDiagnostics.SineTransformBack(f_beta(2:end-1),VFactor(:,2:end-1).*flux_bar2(:,2:end-1),2),1);
         end
 
         function bool = areEnergyReservoirsComplete(reservoirs)
