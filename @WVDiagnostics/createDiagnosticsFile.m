@@ -21,6 +21,10 @@ arguments
     options.shouldUseHigherOrderFlux logical = false
 end
 
+if ~(isa(self.wvt,"WVTransformHydrostatic") || isa(self.wvt,"WVTransformBoussinesq") || isa(self.wvt,"WVTransformConstantStratification"))
+    error("Your transformation type is not supported.");
+end
+
 if exist(self.diagpath,"file") && ~isfield(options,"filename")
     [found, idx] = ismember(self.t_diag, self.t_wv);
     if ~all(found)
@@ -257,14 +261,12 @@ for timeIndex = 1:length(timeIndices)
     end
     EnergyByComponent{"KE_g"}.setValueAlongDimensionAtIndex(wvt.geostrophicKineticEnergy,'t',outputIndex);
     EnergyByComponent{"PE_g"}.setValueAlongDimensionAtIndex(wvt.geostrophicPotentialEnergy,'t',outputIndex);
-    if isa(wvt,"WVTransformHydrostatic")
+    if wvt.isHydrostatic
         [u,v,ape,apv] = wvt.variableWithName('u','v','ape','apv');
         ke = (u.^2 + v.^2)/2;
-    elseif isa(wvt,"WVTransformBoussinesq")
+    else
         [u,v,w,ape,apv] = wvt.variableWithName('u','v','w','ape','apv');
         ke = (u.^2 + v.^2 + w.^2)/2;
-    else
-        error("Transform not yet supported.");
     end
     variable_ke.setValueAlongDimensionAtIndex(int_vol(ke),'t',outputIndex);
     variable_pe.setValueAlongDimensionAtIndex(int_vol(shiftdim(wvt.N2,-2).*wvt.eta.*wvt.eta/2),'t',outputIndex);
@@ -279,7 +281,7 @@ for timeIndex = 1:length(timeIndices)
     for i=1:length(forcingNames)
         [Ep,Em,KE0,PE0] = wvt.energyFluxFromNonlinearFlux(F{forcingNames(i)}.Fp,F{forcingNames(i)}.Fm,F{forcingNames(i)}.F0);
         [Ep_jk,Em_jk,KE0_jk,PE0_jk] = wvt.transformToRadialWavenumber(Ep,Em,KE0,PE0);
-        if isa(wvt,"WVTransformHydrostatic")
+        if wvt.isHydrostatic
             [Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             % F_density = wvt.u .* Fu + wvt.v .* Fv+ wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
 
@@ -294,7 +296,7 @@ for timeIndex = 1:length(timeIndices)
             DF_x =  - wvt.diffZF(Fv); % w_y - v_z
             DF_y = wvt.diffZF(Fu);  % u_z - w_x
             DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
-        elseif isa(wvt,"WVTransformBoussinesq")
+        else
             [Fu,Fv,Fw,Feta] = wvt.spatialFluxForForcingWithName(forcingNames(i));
             % F_density = wvt.u .* Fu + wvt.v .* Fv +  wvt.w .* Fw + wvt.eta_true .* shiftdim(wvt.N2,-2) .* Feta;
 
@@ -310,8 +312,6 @@ for timeIndex = 1:length(timeIndices)
             DF_x = wvt.diffY(Fw) - wvt.diffZF(Fv); % w_y - v_z
             DF_y = wvt.diffZF(Fu) - wvt.diffX(Fw);  % u_z - w_x
             DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
-        else
-            error("Transform not yet supported.");
         end
 
         if forcingNames(i) == "nonlinear advection"

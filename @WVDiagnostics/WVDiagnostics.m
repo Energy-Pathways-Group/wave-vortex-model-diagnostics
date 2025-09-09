@@ -183,6 +183,16 @@ classdef WVDiagnostics < handle
         S_f = crossSpectrumWithFgTransform(self,phi,gamma)
         S_f = crossSpectrumWithGgTransform(self,phi,gamma)
 
+        function [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V)
+            logX = log10(X);
+            logY = log10(Y);
+            r = sqrt( (1./log10(X)).^2 + (1./log10(Y)).^2 );
+            % r = 1;
+            theta = atan2(abs(log10(X)),abs(log10(Y)));
+            Uprime = U.*r.*cos(theta);
+            Vprime = V.*r.*sin(theta);
+        end
+        
         function [X,Y,U,V] = PoissonFlowFromFlux(wvd, flux)
             % We will treat the first dimension as `x' and the second
             % dimension as `y'. This means that the flux in the usual form,
@@ -194,46 +204,10 @@ classdef WVDiagnostics < handle
             % For the DCT2/DST2 we use a half-shift grid
             x = wvd.kRadial + (wvd.kRadial(2)-wvd.kRadial(1))/2;
             y = wvd.jWavenumber + (wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
+            [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFluxWithAxes(x,y,flux);
 
-            N = length(x);
-            M = length(y);
-            dk = 1/(2*N*(x(2)-x(1)));
-            dl = 1/(2*M*(y(2)-y(1)));
-
-            k=dk*(0:(N-1)).';
-            l=dl*(0:(M-1)).';
-
-            DCTx = WVDiagnostics.DCT2(N);
-            DCTy = WVDiagnostics.DCT2(M);
-
-            flux_ky = DCTx*flux;
-            flux_kl = shiftdim(DCTy*shiftdim(flux_ky,1),1);
-
-            [K,L] = ndgrid(k,l);
-
-            D = -((2*pi*K).^2 + (2*pi*L).^2);
-            D(1,1) = Inf;
-
-            UFactor = 2*pi*K./D;
-            VFactor = 2*pi*L./D;
-
-            iDCTx = WVDiagnostics.iDCT2(N);
-            iDSTy = WVDiagnostics.iDST2(M);
-            iDSTy = circshift(iDSTy,1,2);
-            iDSTy(:,1) = 0;
-
-            V_xl = iDCTx*(VFactor.*flux_kl);
-            V = shiftdim(iDSTy*shiftdim(V_xl,1),1);
-
-            iDCTy = WVDiagnostics.iDCT2(M);
-            iDSTx = WVDiagnostics.iDST2(N);
-            iDSTx = circshift(iDSTx,1,2);
-            iDSTx(:,1) = 0;
-
-            U_xl = iDSTx*(UFactor.*flux_kl);
-            U = shiftdim(iDCTy*shiftdim(U_xl,1),1);
-            
-            [X,Y] = ndgrid(x,y);
+            U = U/wvd.kRadial(2);
+            V = V/wvd.jWavenumber(2);
         end
 
         function [X,Y,U,V] = PoissonFlowFromFluxType1(wvd, flux)
@@ -660,7 +634,55 @@ classdef WVDiagnostics < handle
             wvd.wvt.initFromNetCDFFile(wvd.wvfile,iTime=wvd.iTime);
         end
 
+        function [X,Y,U,V] = PoissonFlowFromFluxWithAxes(x, y, flux)
+            % We will treat the first dimension as `x' and the second
+            % dimension as `y'. This means that the flux in the usual form,
+            % which is j by kRadial, might need to be transposed to get
+            % what you want.
+            %
+            % [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvt.kRadial,jWavenumber,flux.');
+            % quiver(X,Y,10*U,10*V,'off',Color=0*[1 1 1])
+            % For the DCT2/DST2 we use a half-shift grid
+            N = length(x);
+            M = length(y);
+            dk = 1/(2*N*(x(2)-x(1)));
+            dl = 1/(2*M*(y(2)-y(1)));
 
+            k=dk*(0:(N-1)).';
+            l=dl*(0:(M-1)).';
+
+            DCTx = WVDiagnostics.DCT2(N);
+            DCTy = WVDiagnostics.DCT2(M);
+
+            flux_ky = DCTx*flux;
+            flux_kl = shiftdim(DCTy*shiftdim(flux_ky,1),1);
+
+            [K,L] = ndgrid(k,l);
+
+            D = -((2*pi*K).^2 + (2*pi*L).^2);
+            D(1,1) = Inf;
+
+            UFactor = 2*pi*K./D;
+            VFactor = 2*pi*L./D;
+
+            iDCTx = WVDiagnostics.iDCT2(N);
+            iDSTy = WVDiagnostics.iDST2(M);
+            iDSTy = circshift(iDSTy,1,2);
+            iDSTy(:,1) = 0;
+
+            V_xl = iDCTx*(VFactor.*flux_kl);
+            V = shiftdim(iDSTy*shiftdim(V_xl,1),1);
+
+            iDCTy = WVDiagnostics.iDCT2(M);
+            iDSTx = WVDiagnostics.iDST2(N);
+            iDSTx = circshift(iDSTx,1,2);
+            iDSTx(:,1) = 0;
+
+            U_xl = iDSTx*(UFactor.*flux_kl);
+            U = shiftdim(iDCTy*shiftdim(U_xl,1),1);
+
+            [X,Y] = ndgrid(x,y);
+        end
 
         function [X,Y,U,V] = PoissonFlowFromFluxDCTI(x,y,flux)
             % We will treat the first dimension as `x' and the second
