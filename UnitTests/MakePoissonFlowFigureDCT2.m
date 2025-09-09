@@ -1,58 +1,66 @@
 basedir = "/Users/Shared/CimRuns_June2025/output/";
 % basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 
-runNumber=1; runName = "non-hydrostatic: geostrophic + waves";
+runNumber=9; runName = "non-hydrostatic: geostrophic + waves";
 wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
 
 %%
 energy_fluxes = wvd.exactEnergyFluxesTemporalAverage(timeIndices=51:251);
+enstrophy_fluxes = wvd.exactEnstrophyFluxesTemporalAverage(timeIndices=51:251);
 
+inertial_fluxes = wvd.quadraticEnergyTriadFluxesTemporalAverage(timeIndices=51:251);
+ggg = inertial_fluxes(1).te_gmda;
+wgg = inertial_fluxes(1).te_wave + inertial_fluxes(2).te_gmda + inertial_fluxes(3).te_gmda;
+wwg = inertial_fluxes(2).te_wave + inertial_fluxes(3).te_wave + inertial_fluxes(4).te_gmda;
+www = inertial_fluxes(4).te_wave;
 
 %%
-flux = (energy_fluxes(1).te.')/wvd.flux_scale;
+flux = energy_fluxes(1).te/wvd.flux_scale;
+flux = enstrophy_fluxes(1).Z0/wvd.z_flux_scale;
+flux = www;
 
-% For the DCT2/DST2 we use a half-shift grid
-x = wvd.kRadial + (wvd.kRadial(2)-wvd.kRadial(1))/2;
-y = wvd.jWavenumber + (wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
+[X,Y,U,V] = wvd.PoissonFlowFromFlux(flux.');
+% figure
+% quiver(X,Y,U,V,Color=0*[1 1 1])
 
-N = length(x);
-M = length(y);
-dk = 1/(2*N*(x(2)-x(1)));
-dl = 1/(2*M*(y(2)-y(1)));
 
-k=dk*(0:(N-1)).';
-l=dl*(0:(M-1)).';
+kRadial = wvd.kRadial;
+% kRadial = kRadial + (kRadial(2)-kRadial(1))/2;
+% kRadial(1) = 0.5*wvd.kRadial(2);
+jWavenumber = wvd.jWavenumber;
+% jWavenumber = jWavenumber + (jWavenumber(2)-jWavenumber(1))/2;
 
-DCTx = WVDiagnostics.DCT2(N);
-DCTy = WVDiagnostics.DCT2(M);
+% jWavenumber(1) = 0.5*wvd.jWavenumber(2);
 
-flux_ky = DCTx*flux;
-flux_kl = shiftdim(DCTy*shiftdim(flux_ky,1),1);
+figure, pcolor(kRadial,jWavenumber,flux); shading flat;
 
-[K,L] = ndgrid(k,l);
+% pbaspect([wvd.jWavenumber(2)/wvd.kRadial(2) 1 1])
 
-D = -((2*pi*K).^2 + (2*pi*L).^2);
-D(1,1) = Inf;
+% set(gca,'YDir','reverse')
+% set(gca,'XDir','reverse')
+% set(gca,'XScale','log')
+% set(gca,'YScale','log')
+xlim([kRadial(1) 1.6e-3])
+ylim([jWavenumber(1) 1.6e-3])
 
-UFactor = 2*pi*K./D;
-VFactor = 2*pi*L./D;
+colormap(WVDiagnostics.crameri('-bam'))
+clim(max(abs(flux(:)))*[-1 1]/2)
+colorbar("eastoutside")
+hold on,
+quiver(X,Y,U,V,Color=0*[1 1 1])
 
-iDCTx = WVDiagnostics.iDCT2(N);
-iDSTy = WVDiagnostics.iDST2(M);
-iDSTy = circshift(iDSTy,1,2);
-iDSTy(:,1) = 0;
+%%
+figure
+plot(wvd.kRadial,cumsum(squeeze(sum(flux,1)))), hold on
+plot(wvd.kRadial,-(squeeze(sum(U/wvd.kRadial(2),2))))
 
-V_xl = iDCTx*(VFactor.*flux_kl);
-V = shiftdim(iDSTy*shiftdim(V_xl,1),1);
+%%
+figure
+plot(wvd.jWavenumber,cumsum(squeeze(sum(flux,2)))), hold on
+plot(wvd.jWavenumber,-(squeeze(sum(U/wvd.jWavenumber(2),1))))
 
-iDCTy = WVDiagnostics.iDCT2(M);
-iDSTx = WVDiagnostics.iDST2(N);
-iDSTx = circshift(iDSTx,1,2);
-iDSTx(:,1) = 0;
+%%
 
-U_xl = iDSTx*(UFactor.*flux_kl);
-U = shiftdim(iDCTy*shiftdim(U_xl,1),1);
-
-[X,Y] = ndgrid(x,y);
+[X,Y,U,V] = wvd.PoissonFlowFromFluxType1(flux.');
 figure
 quiver(X,Y,U,V,Color=0*[1 1 1])

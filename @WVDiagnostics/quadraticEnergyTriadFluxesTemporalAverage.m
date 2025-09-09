@@ -11,7 +11,7 @@ function inertial_fluxes = quadraticEnergyTriadFluxesTemporalAverage(self,option
 % - Returns inertial_fluxes: an array of structs
 arguments
     self WVDiagnostics
-    options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+    options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total];
     options.timeIndices = Inf;
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
 end

@@ -18,7 +18,7 @@ jWavelength(1) = 1.5*jWavelength(2);
 radialWavelength = 2*pi./wvd.kRadial/1000;
 radialWavelength(1) = 1.5*radialWavelength(2);
 
-[X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvd.kRadial,wvd.jWavenumber,flux.');
+[X,Y,U,V] = WVDiagnostics.PoissonFlowFromFluxDCTI(wvd.kRadial,wvd.jWavenumber,flux.');
 
 kRadial = wvd.kRadial;
 kRadial = kRadial + (kRadial(2)-kRadial(1))/2;
@@ -34,8 +34,8 @@ figure, pcolor(kRadial,jWavenumber,flux); shading flat;
 
 % set(gca,'YDir','reverse')
 % set(gca,'XDir','reverse')
-set(gca,'XScale','log')
-set(gca,'YScale','log')
+% set(gca,'XScale','log')
+% set(gca,'YScale','log')
 xlim([kRadial(1) 1.6e-3])
 ylim([jWavenumber(1) 1.6e-3])
 
@@ -43,6 +43,7 @@ colormap(WVDiagnostics.crameri('-bam'))
 clim(max(abs(flux(:)))*[-1 1]/100)
 colorbar("eastoutside")
 hold on,
+quiver(X,Y,U,V,Color=0*[1 1 1])
 
 %%
 Xaxes = X;
@@ -74,7 +75,7 @@ kRadial_zero_pad = cat(1,0,wvd.kRadial+dk,wvd.kRadial(end)+2*dk);
 dj = wvd.jWavenumber(2)-wvd.jWavenumber(1);
 j_zero_pad = cat(1,0,wvd.jWavenumber+dj,wvd.jWavenumber(end)+2*dj);
 
-[X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(kRadial_zero_pad,j_zero_pad,flux_zero_pad.');
+[X,Y,U,V] = WVDiagnostics.PoissonFlowFromFluxDCTI(kRadial_zero_pad,j_zero_pad,flux_zero_pad.');
 figure
 quiver(X,Y,U,V,Color=0*[1 1 1])
 
