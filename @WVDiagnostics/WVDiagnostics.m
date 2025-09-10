@@ -192,7 +192,7 @@ classdef WVDiagnostics < handle
             Uprime = U.*r.*cos(theta);
             Vprime = V.*r.*sin(theta);
         end
-        
+
         function [X,Y,U,V] = PoissonFlowFromFlux(wvd, flux)
             % We will treat the first dimension as `x' and the second
             % dimension as `y'. This means that the flux in the usual form,
@@ -448,7 +448,7 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.omega_jk(self)
             % - Returns t: omega_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('omega_jk');
+                t = self.diagfile.readVariables('omega_axis');
             else
                 [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
                 t = (omegaN./n);
@@ -465,7 +465,7 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.geo_hke_jk(self)
             % - Returns t: geo_hke_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('geo_hke_jk');
+                t = self.diagfile.readVariables('geo_hke_axis');
             else
                 t = self.wvt.transformToRadialWavenumber(self.wvt.A0_KE_factor);
             end
@@ -481,7 +481,7 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.geo_pe_jk(self)
             % - Returns t: geo_pe_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('geo_pe_jk');
+                t = self.diagfile.readVariables('geo_pe_axis');
             else
                 t = self.wvt.transformToRadialWavenumber(self.wvt.A0_PE_factor);
             end
