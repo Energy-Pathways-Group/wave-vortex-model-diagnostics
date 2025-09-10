@@ -24,8 +24,11 @@ flux = www/wvd.flux_scale;
 
 kRadial = wvd.kRadial;
 jWavenumber = wvd.jWavenumber;
-figure, pcolor(kRadial,jWavenumber,flux); shading flat;
+figure
+tiledlayout(2,2)
+nexttile
 
+pcolor(kRadial,jWavenumber,flux); shading flat;
 xlim([kRadial(1) 1.6e-3])
 ylim([jWavenumber(1) 1.6e-3])
 
@@ -35,32 +38,34 @@ colorbar("eastoutside")
 hold on,
 quiver(X,Y,U,V,Color=0*[1 1 1])
 
-%% Now use log axes
+% Now use log axes
 
 [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V);
 
-figure
-tiledlayout(1,2)
+% figure
+% tiledlayout(1,2)
 nexttile
 scale = 2;
 quiver(logX,logY,scale*Uprime,scale*Vprime,"off",Color=0*[1 1 1]);
 nexttile
 quiver(X,Y,U,V,Color=0*[1 1 1])
 
-%% Now for something completely different
+% Now for something completely different
 N = 30;
 xLinLog = linspace(min(logX(:)),max(logX(:)),N);
-yLinLog = linspace(min(logY(:)),max(logY(:)),N);
+yLinLog = linspace(min(logY(:)),max(logY(:)),N/2);
 [XLinLog,YLinLog] = ndgrid(xLinLog,yLinLog);
-fluxLinLog = interpn(logX,logY,flux.',XLinLog,YLinLog);
-figure, pcolor(XLinLog,YLinLog,fluxLinLog); shading flat; colormap(WVDiagnostics.crameri('-bam'))
-clim(max(abs(flux(:)))*[-1 1]/2)
+fluxLinLog = interpn(logX,logY,(flux.'),XLinLog,YLinLog);
+ULinLog = interpn(logX,logY,Uprime,XLinLog,YLinLog);
+VLinLog = interpn(logX,logY,Vprime,XLinLog,YLinLog);
 
-[Xq,Yq,Uq,Vq] = WVDiagnostics.PoissonFlowFromFluxWithAxes(xLinLog,yLinLog,fluxLinLog);
-hold on,
-quiver(Xq,Yq,Uq,Vq,Color=0*[1 1 1])
+% figure
+nexttile
+pcolor(XLinLog,YLinLog,fluxLinLog); shading flat; colormap(WVDiagnostics.crameri('-bam'))
+clim(max(abs(fluxLinLog(:)))*[-1 1]/2)
+hold on
+quiver(XLinLog,YLinLog,ULinLog,VLinLog,Color=0*[1 1 1])
 
-return
 
 %%
 figure
