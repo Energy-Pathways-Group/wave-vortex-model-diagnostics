@@ -31,6 +31,7 @@ classdef WVDiagnostics < handle
         kPseudoRadial
         omegaAxis
         Lr2
+        Lr2_pm
         omega_jk
         geo_hke_jk
         geo_pe_jk
@@ -435,6 +436,22 @@ classdef WVDiagnostics < handle
                 t = self.diagfile.readVariables('Lr2');
             else
                 t = self.wvt.Lr2;
+            end
+        end
+
+        function t = get.Lr2_pm(self)
+            % Wave deformation radius squared
+            %
+            % Reads the 'Lr2_pm' variable from the diagnostics file if it
+            % exists, or from the wvt if not
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.Lr2_pm(self)
+            % - Returns t: Lr2_pm
+            if ~isempty(self.diagfile)
+                t = self.diagfile.readVariables('Lr2_pm');
+            else
+                t = self.wvt.Lr2_pm;
             end
         end
 

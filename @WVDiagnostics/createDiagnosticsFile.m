@@ -152,11 +152,20 @@ else
     varAnnotation = wvt.propertyAnnotationWithName('Lr2');
     diagfile.addVariable(varAnnotation.name,varAnnotation.dimensions,wvt.Lr2,isComplex=varAnnotation.isComplex,attributes=varAnnotation.attributes );
 
-    [omegaN,n,hke_jk,pe_jk] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)),wvt.A0_KE_factor,wvt.A0_PE_factor);
+    if isa(wvt,"WVTransformHydrostatic")
+        h_pm = repmat(wvt.h_pm,[1 wvt.Nkl]);
+    else
+        h_pm = wvt.h_pm;
+    end
+
+    [omegaN,n,hke_jk,pe_jk,hN] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)),wvt.A0_KE_factor,wvt.A0_PE_factor,h_pm);
     omegaJK = (omegaN./n);
+    h_kj = (hN./n);
+    Lr2_pm = wvt.g * h_kj / wvt.f*wvt.f;
     diagfile.addVariable("omega_axis",dimensionNames,omegaJK,isComplex=false);
     diagfile.addVariable("geo_hke_axis",dimensionNames,hke_jk,isComplex=false);
     diagfile.addVariable("geo_pe_axis",dimensionNames,pe_jk,isComplex=false);
+    diagfile.addVariable("Lr2_pm",dimensionNames,Lr2_pm,isComplex=false);
 
     varAnnotation = wvt.propertyAnnotationWithName('t');
     varAnnotation.attributes('units') = varAnnotation.units;
