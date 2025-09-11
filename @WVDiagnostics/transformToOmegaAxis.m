@@ -10,17 +10,19 @@ function [varargout] = transformToOmegaAxis(self,varargin)
 
 % Thi is the final output axis for wavenumber
 
-wvt = self.wvt;
+% wvt = self.wvt;
+% [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
+% omegaJK = (omegaN./n);
 
-[omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
-omegaJK = (omegaN./n);
+omegaJK = self.omega_jk;
 
 omega = self.omegaAxis;
 dOmega = omega(2)-omega(1);
 nOmega = length(omega);
 
 varargout = cell(size(varargin));
-spectralMatrixSize = [wvt.Nj length(wvt.kRadial)];
+% spectralMatrixSize = [wvt.Nj length(wvt.kRadial)];
+spectralMatrixSize = [length(self.j) length(self.kRadial)];
 for iVar=1:length(varargin)
     if size(varargin{iVar},2) ~= spectralMatrixSize(2)
         error('The input matrix must be of size [Nj NkRadial]');

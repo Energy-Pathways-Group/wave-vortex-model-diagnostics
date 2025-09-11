@@ -476,7 +476,7 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.omega_jk(self)
             % - Returns t: omega_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('omega_axis');
+                t = self.diagfile.readVariables('omega_jk');
             else
                 [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
                 t = (omegaN./n);
