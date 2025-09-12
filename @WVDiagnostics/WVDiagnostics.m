@@ -184,6 +184,180 @@ classdef WVDiagnostics < handle
         S_f = crossSpectrumWithFgTransform(self,phi,gamma)
         S_f = crossSpectrumWithGgTransform(self,phi,gamma)
 
+        function fig = plotPoissonFlowOverPcolor(wvd,options)
+            arguments
+                wvd WVDiagnostics
+                options.visible = "on"
+                options.vectorFlux
+                options.flux
+                options.overSaturationFactor = 2;
+            end
+
+            color_axis_limits = max(abs(options.flux(:)))*[-1 1]/options.overSaturationFactor;
+
+            kRadialShift = wvd.kRadial+(wvd.kRadial(2)-wvd.kRadial(1))/2;
+            jWavenumberShift = wvd.jWavenumber+(wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
+            kRadialShift = cat(1,0,kRadialShift);
+            jWavenumberShift = cat(1,0,jWavenumberShift);
+            [KRadialShift,JWavenumberShift] = ndgrid(kRadialShift,jWavenumberShift);
+            fluxShift = cat(1,options.flux(1,:),options.flux);
+            fluxShift = cat(2,fluxShift(:,1),fluxShift);
+
+            % creates a set of axes where the first point (0,0) is shifted to be
+            % logarithmically the same distance away as points 1 and 2 are from each
+            % other.
+            kAxis = wvd.kRadial;
+            jAxis = wvd.jWavenumber;
+            kAxis(1) = exp(-log(kAxis(3)) + 2*log(kAxis(2)));
+            jAxis(1) = exp(-log(jAxis(3)) + 2*log(jAxis(2)));
+            [KLog,JLog] = ndgrid(log10(kAxis),log10(jAxis));
+
+            N = 500;
+            kLinLog = linspace(min(KLog(:)),max(KLog(:)),N);
+            jLinLog = linspace(min(JLog(:)),max(JLog(:)),N/2);
+            [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
+            fluxLinLog = interpn(KRadialShift,JWavenumberShift,(fluxShift.'),10.^KLinLog,10.^JLinLog,"nearest");
+
+            fig = figure(Units='points',Visible = options.visible);
+            set(gcf,'PaperPositionMode','auto')
+
+            pcolor(KLinLog,JLinLog,fluxLinLog); shading flat;
+            colormap(WVDiagnostics.crameri('-bam'))
+            clim(color_axis_limits)
+            colorbar("eastoutside")
+
+            [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.vectorFlux.');
+            [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
+            % we need two adjustments. First, we need to move the first row and column
+            % half an increment
+            logX(1,:) = log10(kAxis(1)) + (log10(kAxis(2)) - log10(kAxis(1)))/2;
+            logY(:,1) = log10(jAxis(1)) + (log10(jAxis(2)) - log10(jAxis(1)))/2;
+            scale = 1.5;
+            hold on
+            % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],AutoScale="off",LineWidth=2)
+            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale="off",LineWidth=2)
+        end
+
+        function fig = plotPoissonFlowOverContours(wvd,options)
+            arguments
+                wvd WVDiagnostics
+                options.visible = "on"
+                options.inertialFlux
+                options.vectorDensityLinearTransitionWavenumber = Inf
+                options.forcingFlux
+                options.color = [0.9290    0.6940    0.1250]
+                options.overSaturationFactor = 1;
+            end
+            if isnumeric(options.forcingFlux)
+                options.forcingFlux = {options.forcingFlux};
+            end
+            if isnumeric(options.color)
+                options.color = {options.color};
+            end
+
+            kRadialShift = wvd.kRadial+(wvd.kRadial(2)-wvd.kRadial(1))/2;
+            jWavenumberShift = wvd.jWavenumber+(wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
+            kRadialShift = cat(1,0,kRadialShift);
+            jWavenumberShift = cat(1,0,jWavenumberShift);
+            [KRadialShift,JWavenumberShift] = ndgrid(kRadialShift,jWavenumberShift);
+
+
+            % creates a set of axes where the first point (0,0) is shifted to be
+            % logarithmically the same distance away as points 1 and 2 are from each
+            % other.
+            kAxis = wvd.kRadial;
+            jAxis = wvd.jWavenumber;
+            kAxis(1) = exp(-log(kAxis(3)) + 2*log(kAxis(2)));
+            jAxis(1) = exp(-log(jAxis(3)) + 2*log(jAxis(2)));
+            [KLog,JLog] = ndgrid(log10(kAxis),log10(jAxis));
+
+            N = 500;
+            kLinLog = linspace(min(KLog(:)),max(KLog(:)),N);
+            jLinLog = linspace(min(JLog(:)),max(JLog(:)),N/2);
+            [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
+
+
+
+
+            fig = figure(Units='points',Visible = options.visible);
+            set(gcf,'PaperPositionMode','auto')
+
+            filled = true;
+
+            nData = length(options.forcingFlux);
+            ax = gobjects(nData,1);
+
+            for k=1:nData
+                if k == 1 % Create the base axes   
+                    ax(k) = axes;
+                else % Stack new axes on top
+                    ax(k) = axes;
+                    ax(k).Color = 'none';                 % transparent background
+                    ax(k).Position = ax(1).Position;      % match positions
+                    linkaxes([ax(1) ax(k)])               % link panning/zooming
+                end
+
+                forcingFlux = options.forcingFlux{k};
+                fluxShift = cat(1,forcingFlux(1,:),forcingFlux);
+                fluxShift = cat(2,fluxShift(:,1),fluxShift);
+                fluxLinLog = interpn(KRadialShift,JWavenumberShift,(fluxShift.'),10.^KLinLog,10.^JLinLog,"linear");
+
+                color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.overSaturationFactor;
+                cmap = WVDiagnostics.symmetricTintMap(options.color{k});
+                nLevels = 10;
+                maxAbs  = max(abs(forcingFlux(:)));
+                posLevels = linspace(0, maxAbs, nLevels+1);   posLevels(1)  = [];  % strictly positive
+                negLevels = linspace(-maxAbs, 0, nLevels+1);  negLevels(end) = []; % strictly negative
+
+                if filled
+                    % zero out/nan stuff below out contour threshold
+                    fluxLinLogTmp = fluxLinLog;
+                    fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
+                    contourf(KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], 'LineStyle','none'); hold on
+                    contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
+                    contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
+
+                else
+                    contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
+                    contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-',LineWidth=1.0)
+                end
+                colormap(ax(k),cmap)
+                clim(color_axis_limits)
+                ax(k).Color = 'none'; 
+            end
+
+            [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux.');
+            [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
+            % we need two adjustments. First, we need to move the first row and column
+            % half an increment
+            logX(1,:) = log10(kAxis(1)) + (log10(kAxis(2)) - log10(kAxis(1)))/2;
+            logY(:,1) = log10(jAxis(1)) + (log10(jAxis(2)) - log10(jAxis(1)))/2;
+            if ~isinf(options.vectorDensityLinearTransitionWavenumber)
+                cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
+                tmp = logX(:,1);
+                x = tmp(tmp<cutoff);
+                tmp = (logY(1,:)).';
+                y = tmp(tmp<cutoff);
+                if x(end)-x(end-1) > y(end)-y(end-1)
+                    delta = x(end)-x(end-1);
+                else
+                    delta = y(end)-y(end-1);
+                end
+                x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
+                y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
+                [X,Y] = ndgrid(x,y);
+                Uprime= interpn(logX,logY,Uprime,X,Y);
+                Vprime = interpn(logX,logY,Vprime,X,Y);
+
+                logX = X;
+                logY = Y;
+            end
+            scale = 1.5;
+            hold on
+            % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],AutoScale="off",LineWidth=2)
+            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale="on",LineWidth=2)
+        end
+
         function [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
             arguments
                 wvd 
@@ -656,6 +830,45 @@ classdef WVDiagnostics < handle
         matrix = iDCT2(N)
         matrix = DST2(N)
         matrix = iDST2(N)
+
+        function cmap = symmetricTintMap(c,options)
+            %SYMMETRICTINTMAP Colormap going from color -> tinted white -> color
+            %
+            %   c   : 1x3 RGB color in [0 1]
+            %   N   : total number of levels (even recommended)
+            %   tintStrength : fraction of c mixed into white at the center
+            %
+            % Example:
+            %   c = [0.2 0.6 0.8];
+            %   colormap(symmetricTintMap(c,256,0.05)); colorbar
+            arguments
+                c 
+                options.N = 256
+                options.tintStrength = 0.05;
+            end
+
+            N = options.N;
+            tintStrength = options.tintStrength;
+
+            % midpoint color: mostly white with a hint of c
+            c_mid = (1 - tintStrength)*[1 1 1] + tintStrength*c;
+
+            % split N into two halves
+            n1 = floor(N/2);
+            n2 = N - n1;
+
+            % first half: c -> c_mid
+            half1 = [linspace(c(1), c_mid(1), n1)' ...
+                linspace(c(2), c_mid(2), n1)' ...
+                linspace(c(3), c_mid(3), n1)'];
+
+            % second half: c_mid -> c
+            half2 = [linspace(c_mid(1), c(1), n2)' ...
+                linspace(c_mid(2), c(2), n2)' ...
+                linspace(c_mid(3), c(3), n2)'];
+
+            cmap = [half1; half2];
+        end
 
         function iTimeChanged(~,eventData)
             wvd = eventData.AffectedObject;
