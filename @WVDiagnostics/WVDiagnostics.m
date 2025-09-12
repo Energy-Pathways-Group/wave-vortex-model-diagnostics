@@ -407,12 +407,11 @@ classdef WVDiagnostics < handle
             % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],LineWidth=1.0,Alignment="center",MaxHeadSize=0.4)
 
             %% log style ticks
-            Xwl = 2*pi./(10.^kLinLog);
-            Ywl = 2*pi./(10.^jLinLog);
-
-            X = 10.^kLinLog;
-            Y = 10.^jLinLog;
-            h = ax(1);
+            
+            h = gca;
+            % vector for tick labels (wavelength)
+            X = 2*pi./(10.^kLinLog)/1;
+            Y = 2*pi./(10.^jLinLog)/1;
 
             % Major ticks (decades)
             major_x = floor(min(log10(X))):ceil(max(log10(X)));
@@ -426,17 +425,22 @@ classdef WVDiagnostics < handle
             for k = 1:length(major_y)-1
                 minor_y = [minor_y, log10((2:9) * 10^major_y(k))];
             end
+            % convert back to wavenumber and flip
+            major_x_wn = log10(2*pi)-flip(major_x);
+            major_y_wn = log10(2*pi)-flip(major_y);
+            minor_x_wn = log10(2*pi)-flip(minor_x);
+            minor_y_wn = log10(2*pi)-flip(minor_y);
 
             % add major ticks
-            set(h, 'XTick', major_x, 'YTick', major_y);
-            % Set tick labels to 10^x format
-            set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x), major_x, 'UniformOutput', false));
-            set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y), major_y, 'UniformOutput', false));
+            set(h, 'XTick', (major_x_wn), 'YTick', (major_y_wn));
+            % Set tick labels to 10^x format, remembering to flip
+            set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x), flip(major_x), 'UniformOutput', false));
+            set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y), flip(major_y), 'UniformOutput', false));
 
             % add minor ticks
             set(h, 'XMinorTick','on', 'YMinorTick','on')
-            h.XAxis.MinorTickValues = minor_x;
-            h.YAxis.MinorTickValues = minor_y;
+            h.XAxis.MinorTickValues = (minor_x_wn);
+            h.YAxis.MinorTickValues = (minor_y_wn);
 
         end
 
