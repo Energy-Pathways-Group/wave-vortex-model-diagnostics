@@ -334,17 +334,29 @@ classdef WVDiagnostics < handle
             logY(:,1) = log10(jAxis(1)) + (log10(jAxis(2)) - log10(jAxis(1)))/2;
             if ~isinf(options.vectorDensityLinearTransitionWavenumber)
                 cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
-                tmp = logX(:,1);
-                x = tmp(tmp<cutoff);
-                tmp = (logY(1,:)).';
-                y = tmp(tmp<cutoff);
-                if x(end)-x(end-1) > y(end)-y(end-1)
-                    delta = x(end)-x(end-1);
+                if 1
+                    index = find(logY(1,:) > cutoff,1,'first');
+                    delta = logY(1,index+1) - logY(1,index);
+                    y = (logY(1,1:index+1)).';
+
+                    xIndex = find(diff(logX(:,1)) < delta,1,'first');
+                    x = logX(1:xIndex,1);
+                    x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
+                    y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
                 else
-                    delta = y(end)-y(end-1);
+                    tmp = logX(:,1);
+                    x = tmp(tmp<cutoff);
+                    tmp = (logY(1,:)).';
+                    y = tmp(tmp<cutoff);
+                    if x(end)-x(end-1) > y(end)-y(end-1)
+                        delta = x(end)-x(end-1);
+                    else
+                        delta = y(end)-y(end-1);
+                    end
+                    x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
+                    y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
                 end
-                x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
-                y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
+
                 [X,Y] = ndgrid(x,y);
                 Uprime= interpn(logX,logY,Uprime,X,Y);
                 Vprime = interpn(logX,logY,Vprime,X,Y);
@@ -355,7 +367,7 @@ classdef WVDiagnostics < handle
             scale = 1.5;
             hold on
             % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],AutoScale="off",LineWidth=2)
-            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale="on",LineWidth=2)
+            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale="off",LineWidth=1.0)
         end
 
         function [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
