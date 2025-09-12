@@ -195,28 +195,31 @@ classdef WVDiagnostics < handle
 
             color_axis_limits = max(abs(options.flux(:)))*[-1 1]/options.overSaturationFactor;
 
-            kRadialShift = wvd.kRadial+(wvd.kRadial(2)-wvd.kRadial(1))/2;
-            jWavenumberShift = wvd.jWavenumber+(wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
-            kRadialShift = cat(1,0,kRadialShift);
-            jWavenumberShift = cat(1,0,jWavenumberShift);
-            [KRadialShift,JWavenumberShift] = ndgrid(kRadialShift,jWavenumberShift);
-            fluxShift = cat(1,options.flux(1,:),options.flux);
-            fluxShift = cat(2,fluxShift(:,1),fluxShift);
+            % We will pretend the "0" wavenumber is actually evenly spaced
+            % from the nearest two wavenumbers
+            kPseudoLocation = wvd.kRadial;
+            kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
+            jPseudoLocation = wvd.jWavenumber;
+            jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
 
-            % creates a set of axes where the first point (0,0) is shifted to be
-            % logarithmically the same distance away as points 1 and 2 are from each
-            % other.
-            kAxis = wvd.kRadial;
-            jAxis = wvd.jWavenumber;
-            kAxis(1) = exp(-log(kAxis(3)) + 2*log(kAxis(2)));
-            jAxis(1) = exp(-log(jAxis(3)) + 2*log(jAxis(2)));
-            [KLog,JLog] = ndgrid(log10(kAxis),log10(jAxis));
+            % For interpolation to work correctly we need to repeat the
+            % first entry, but properly back at zero
+            kPadded = cat(1,0,kPseudoLocation);
+            jPadded= cat(1,0,jPseudoLocation);
+            [KPadded,JPadded] = ndgrid(kPadded,jPadded);
+            fluxPadded = cat(1,options.flux(1,:),options.flux);
+            fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
+
+            % We will use this axis to display. Widen the box so that it is
+            % the same size as its neighbors.
+            kMin = exp(-1.5*log(wvd.kRadial(3)) + 2.5*log(wvd.kRadial(2)));
+            jMin = exp(-1.5*log(wvd.jWavenumber(3)) + 2.5*log(wvd.jWavenumber(2)));
 
             N = 500;
-            kLinLog = linspace(min(KLog(:)),max(KLog(:)),N);
-            jLinLog = linspace(min(JLog(:)),max(JLog(:)),N/2);
+            kLinLog = linspace(log10(kMin),max(log10(wvd.kRadial(:))),N);
+            jLinLog = linspace(log10(jMin),max(log10(wvd.jWavenumber(:))),N/2);
             [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
-            fluxLinLog = interpn(KRadialShift,JWavenumberShift,(fluxShift.'),10.^KLinLog,10.^JLinLog,"nearest");
+            fluxLinLog = interpn(KPadded,JPadded,(fluxPadded.'),10.^KLinLog,10.^JLinLog,"nearest");
 
             fig = figure(Units='points',Visible = options.visible);
             set(gcf,'PaperPositionMode','auto')
@@ -230,8 +233,8 @@ classdef WVDiagnostics < handle
             [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
             % we need two adjustments. First, we need to move the first row and column
             % half an increment
-            logX(1,:) = log10(kAxis(1)) + (log10(kAxis(2)) - log10(kAxis(1)))/2;
-            logY(:,1) = log10(jAxis(1)) + (log10(jAxis(2)) - log10(jAxis(1)))/2;
+            logX(1,:) = log10(kPseudoLocation(1));
+            logY(:,1) = log10(jPseudoLocation(1));
             scale = 1.5;
             hold on
             % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],AutoScale="off",LineWidth=2)
@@ -247,6 +250,10 @@ classdef WVDiagnostics < handle
                 options.forcingFlux
                 options.color = [0.9290    0.6940    0.1250]
                 options.overSaturationFactor = 1;
+                options.wavelengths = [1,2,5,10,20,50,100,200,500];
+                options.wavelengthColor = [.5,.5,.5];
+                options.labelSpacing = 1000;
+                options.lineWidth = 1;
             end
             if isnumeric(options.forcingFlux)
                 options.forcingFlux = {options.forcingFlux};
@@ -255,29 +262,29 @@ classdef WVDiagnostics < handle
                 options.color = {options.color};
             end
 
-            kRadialShift = wvd.kRadial+(wvd.kRadial(2)-wvd.kRadial(1))/2;
-            jWavenumberShift = wvd.jWavenumber+(wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
-            kRadialShift = cat(1,0,kRadialShift);
-            jWavenumberShift = cat(1,0,jWavenumberShift);
-            [KRadialShift,JWavenumberShift] = ndgrid(kRadialShift,jWavenumberShift);
 
+            % We will pretend the "0" wavenumber is actually evenly spaced
+            % from the nearest two wavenumbers
+            kPseudoLocation = wvd.kRadial;
+            kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
+            jPseudoLocation = wvd.jWavenumber;
+            jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
 
-            % creates a set of axes where the first point (0,0) is shifted to be
-            % logarithmically the same distance away as points 1 and 2 are from each
-            % other.
-            kAxis = wvd.kRadial;
-            jAxis = wvd.jWavenumber;
-            kAxis(1) = exp(-log(kAxis(3)) + 2*log(kAxis(2)));
-            jAxis(1) = exp(-log(jAxis(3)) + 2*log(jAxis(2)));
-            [KLog,JLog] = ndgrid(log10(kAxis),log10(jAxis));
+            % For interpolation to work correctly we need to repeat the
+            % first entry, but properly back at zero
+            kPadded = cat(1,0,kPseudoLocation);
+            jPadded= cat(1,0,jPseudoLocation);
+            [KPadded,JPadded] = ndgrid(kPadded,jPadded);
+
+            % We will use this axis to display. Widen the box so that it is
+            % the same size as its neighbors.
+            kMin = exp(-1.5*log(wvd.kRadial(3)) + 2.5*log(wvd.kRadial(2)));
+            jMin = exp(-1.5*log(wvd.jWavenumber(3)) + 2.5*log(wvd.jWavenumber(2)));
 
             N = 500;
-            kLinLog = linspace(min(KLog(:)),max(KLog(:)),N);
-            jLinLog = linspace(min(JLog(:)),max(JLog(:)),N/2);
+            kLinLog = linspace(log10(kMin),max(log10(wvd.kRadial(:))),N);
+            jLinLog = linspace(log10(jMin),max(log10(wvd.jWavenumber(:))),N/2);
             [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
-
-
-
 
             fig = figure(Units='points',Visible = options.visible);
             set(gcf,'PaperPositionMode','auto')
@@ -298,9 +305,9 @@ classdef WVDiagnostics < handle
                 end
 
                 forcingFlux = options.forcingFlux{k};
-                fluxShift = cat(1,forcingFlux(1,:),forcingFlux);
-                fluxShift = cat(2,fluxShift(:,1),fluxShift);
-                fluxLinLog = interpn(KRadialShift,JWavenumberShift,(fluxShift.'),10.^KLinLog,10.^JLinLog,"linear");
+                fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
+                fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
+                fluxLinLog = interpn(KPadded,JPadded,(fluxPadded.'),10.^KLinLog,10.^JLinLog,"linear");
 
                 color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.overSaturationFactor;
                 cmap = WVDiagnostics.symmetricTintMap(options.color{k});
@@ -314,8 +321,10 @@ classdef WVDiagnostics < handle
                     fluxLinLogTmp = fluxLinLog;
                     fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
                     contourf(KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], 'LineStyle','none'); hold on
+                    % contour(KLinLog, JLinLog, fluxLinLog, negLevels(end)*[1 1], '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
+
                     contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
-                    contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
+                    % contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
 
                 else
                     contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
@@ -323,15 +332,19 @@ classdef WVDiagnostics < handle
                 end
                 colormap(ax(k),cmap)
                 clim(color_axis_limits)
-                ax(k).Color = 'none'; 
+                ax(k).Color = 'none';
+                set(ax(k),'XTickLabel',[]);
+                set(ax(k),'YTickLabel',[]);
+                set(ax(k),'XTick',[]);
+                set(ax(k),'YTick',[]);
             end
 
             [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux.');
             [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
             % we need two adjustments. First, we need to move the first row and column
             % half an increment
-            logX(1,:) = log10(kAxis(1)) + (log10(kAxis(2)) - log10(kAxis(1)))/2;
-            logY(:,1) = log10(jAxis(1)) + (log10(jAxis(2)) - log10(jAxis(1)))/2;
+            logX(1,:) = log10(kPseudoLocation(1));
+            logY(:,1) = log10(jPseudoLocation(1));
             if ~isinf(options.vectorDensityLinearTransitionWavenumber)
                 cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
                 if 1
@@ -364,10 +377,66 @@ classdef WVDiagnostics < handle
                 logX = X;
                 logY = Y;
             end
-            scale = 1.5;
+
+            ax(k+1) = axes;
+            ax(k+1).Color = 'none';                 % transparent background
+            ax(k+1).Position = ax(1).Position;      % match positions
+
+            linkaxes([ax(1) ax(k+1)])               % link panning/zooming
+            kj = 10.^KLinLog; kr = 10.^ JLinLog;
+            Kh = sqrt(kj.^2 + kr.^2);
+            pseudoRadialWavelength = 2*pi./Kh/1000;
+            % pseudoRadialWavelength(pseudoRadialWavelength==Inf) = max(radialWavelength);
+            [C,h] = contour(ax(k+1),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor,'DisplayName','pseudo-wavelength (km)');
+            clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
+            ax(k+1).Color = 'none'; 
+            set(ax(k+1),'XTickLabel',[]);
+            set(ax(k+1),'YTickLabel',[]);
+            set(ax(k+1),'XTick',[]);
+            set(ax(k+1),'YTick',[]);
+            
             hold on
+            Mag = sqrt(Uprime.*Uprime + Vprime.*Vprime);
+            MaxMag = max(Mag(:));
+            Uprime(Mag/MaxMag < 1/20) = NaN;
+            Vprime(Mag/MaxMag < 1/20) = NaN;
             % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],AutoScale="off",LineWidth=2)
-            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale="off",LineWidth=1.0)
+            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment="center",MaxHeadSize=0.8)
+            % scale = 0.5;
+            % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],LineWidth=1.0,Alignment="center",MaxHeadSize=0.4)
+
+            %% log style ticks
+            Xwl = 2*pi./(10.^kLinLog);
+            Ywl = 2*pi./(10.^jLinLog);
+
+            X = 10.^kLinLog;
+            Y = 10.^jLinLog;
+            h = ax(1);
+
+            % Major ticks (decades)
+            major_x = floor(min(log10(X))):ceil(max(log10(X)));
+            major_y = floor(min(log10(Y))):ceil(max(log10(Y)));
+            % Minor ticks (log-spaced between major ticks)
+            minor_x = [];
+            for k = 1:length(major_x)-1
+                minor_x = [minor_x, log10((2:9) * 10^major_x(k))];
+            end
+            minor_y = [];
+            for k = 1:length(major_y)-1
+                minor_y = [minor_y, log10((2:9) * 10^major_y(k))];
+            end
+
+            % add major ticks
+            set(h, 'XTick', major_x, 'YTick', major_y);
+            % Set tick labels to 10^x format
+            set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x), major_x, 'UniformOutput', false));
+            set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y), major_y, 'UniformOutput', false));
+
+            % add minor ticks
+            set(h, 'XMinorTick','on', 'YMinorTick','on')
+            h.XAxis.MinorTickValues = minor_x;
+            h.YAxis.MinorTickValues = minor_y;
+
         end
 
         function [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
@@ -400,8 +469,8 @@ classdef WVDiagnostics < handle
             % [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvt.kRadial,jWavenumber,flux.');
             % quiver(X,Y,10*U,10*V,'off',Color=0*[1 1 1])
             % For the DCT2/DST2 we use a half-shift grid
-            x = wvd.kRadial + (wvd.kRadial(2)-wvd.kRadial(1))/2;
-            y = wvd.jWavenumber + (wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
+            x = wvd.kRadial + 0*(wvd.kRadial(2)-wvd.kRadial(1))/2;
+            y = wvd.jWavenumber + 0*(wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
             [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFluxWithAxes(x,y,flux);
 
             U = U/wvd.kRadial(2);
