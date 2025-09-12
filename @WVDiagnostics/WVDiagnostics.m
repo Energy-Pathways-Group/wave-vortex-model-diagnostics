@@ -748,7 +748,7 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.geo_hke_jk(self)
             % - Returns t: geo_hke_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('geo_hke_axis');
+                t = self.diagfile.readVariables('geo_hke_jk');
             else
                 t = self.wvt.transformToRadialWavenumber(self.wvt.A0_KE_factor);
             end
@@ -764,7 +764,7 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.geo_pe_jk(self)
             % - Returns t: geo_pe_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('geo_pe_axis');
+                t = self.diagfile.readVariables('geo_pe_jk');
             else
                 t = self.wvt.transformToRadialWavenumber(self.wvt.A0_PE_factor);
             end
