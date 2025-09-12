@@ -35,6 +35,7 @@ classdef WVDiagnostics < handle
         omega_jk
         geo_hke_jk
         geo_pe_jk
+        forcingNames
     end
 
     properties (SetObservable)
@@ -803,6 +804,21 @@ classdef WVDiagnostics < handle
             % - Returns t: time vector from wave-vortex file
             t = self.wvfile.readVariables('wave-vortex/t');
         end
+
+        function forcingNames = get.forcingNames(self)
+            % Get names of the forcings
+            %
+            % Reads the 'forcingNames' from the wave-vortex file and adds
+            % in antialiasing if appropriate.
+            %
+            % - Topic: Dependent property getter
+            % - Declaration: t = get.forcingNames(self)
+            % - Returns forcingNames: strings
+            forcingNames = self.wvt.forcingNames;
+            if self.diagfile.hasVariableWithName("Z0_antialias_filter")
+                forcingNames(end+1) = "antialias filter";
+            end
+        end   
 
         function setEnergyUnits(self, units)
             % Set the time and energy scaling and units for plotting and output.

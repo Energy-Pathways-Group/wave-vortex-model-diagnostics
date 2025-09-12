@@ -11,7 +11,7 @@ arguments
     self WVDiagnostics
     options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
 end
-forcingNames = self.wvt.forcingNames;
+forcingNames = self.forcingNames;
 forcing_fluxes(length(forcingNames)) = struct("name","placeholder");
 
 for iForce=1:length(forcingNames)

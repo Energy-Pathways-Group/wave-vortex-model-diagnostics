@@ -11,12 +11,8 @@ function enstrophy_fluxes = exactEnstrophyFluxes(self)
 arguments
     self WVDiagnostics
 end
-forcingNames = self.wvt.forcingNames;
-nForcings = length(forcingNames);
-if self.diagfile.hasVariableWithName("Z_antialias_filter")
-    nForcings = nForcings + 1;
-end
-enstrophy_fluxes(nForcings) = struct("name","placeholder");
+forcingNames = self.forcingNames;
+enstrophy_fluxes(length(forcingNames)) = struct("name","placeholder");
 
 for iForce=1:length(forcingNames)
     name = replace(forcingNames(iForce),"-","_");
@@ -27,9 +23,4 @@ for iForce=1:length(forcingNames)
     enstrophy_fluxes(iForce).Z0 = self.diagfile.readVariables("Z_" + name);
 end
 
-if self.diagfile.hasVariableWithName("Z_antialias_filter")
-    enstrophy_fluxes(iForce+1).name = "antialias_filter";
-    enstrophy_fluxes(iForce+1).fancyName = "antialias filter";
-    enstrophy_fluxes(iForce+1).Z0 = self.diagfile.readVariables("Z_antialias_filter");
-end
 end

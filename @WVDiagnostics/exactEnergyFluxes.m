@@ -10,12 +10,8 @@ function energy_fluxes = exactEnergyFluxes(self)
 arguments
     self WVDiagnostics
 end
-forcingNames = self.wvt.forcingNames;
-nForcings = length(forcingNames);
-if self.diagfile.hasVariableWithName("E_antialias_filter")
-    nForcings = nForcings + 1;
-end
-energy_fluxes(nForcings) = struct("name","placeholder");
+forcingNames = self.forcingNames;
+energy_fluxes(length(forcingNames)) = struct("name","placeholder");
 
 for iForce=1:length(forcingNames)
     name = replace(forcingNames(iForce),"-","_");
@@ -26,9 +22,4 @@ for iForce=1:length(forcingNames)
     energy_fluxes(iForce).te = self.diagfile.readVariables("E_" + name);
 end
 
-if self.diagfile.hasVariableWithName("E_antialias_filter")
-    energy_fluxes(iForce+1).name = "antialias_filter";
-    energy_fluxes(iForce+1).fancyName = "antialias filter";
-    energy_fluxes(iForce+1).te = self.diagfile.readVariables("E_antialias_filter");
-end
 end
