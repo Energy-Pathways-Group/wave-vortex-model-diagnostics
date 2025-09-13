@@ -162,9 +162,9 @@ else
     omegaJK = (omegaN./n);
     h_kj = (hN./n);
     Lr2_pm = wvt.g * h_kj / wvt.f*wvt.f;
-    diagfile.addVariable("omega_axis",dimensionNames,omegaJK,isComplex=false);
-    diagfile.addVariable("geo_hke_axis",dimensionNames,hke_jk,isComplex=false);
-    diagfile.addVariable("geo_pe_axis",dimensionNames,pe_jk,isComplex=false);
+    diagfile.addVariable("omega_jk",dimensionNames,omegaJK,isComplex=false);
+    diagfile.addVariable("geo_hke_jk",dimensionNames,hke_jk,isComplex=false);
+    diagfile.addVariable("geo_pe_jk",dimensionNames,pe_jk,isComplex=false);
     diagfile.addVariable("Lr2_pm",dimensionNames,Lr2_pm,isComplex=false);
 
     varAnnotation = wvt.propertyAnnotationWithName('t');

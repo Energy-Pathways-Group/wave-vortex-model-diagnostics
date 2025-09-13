@@ -255,6 +255,10 @@ classdef WVDiagnostics < handle
                 options.wavelengthColor = [.5,.5,.5];
                 options.labelSpacing = 1000;
                 options.lineWidth = 1;
+                options.kmax = Inf;
+                options.jmax = Inf;
+                options.quiverScale
+                options.figureHandle
             end
             if isnumeric(options.forcingFlux)
                 options.forcingFlux = {options.forcingFlux};
@@ -262,6 +266,7 @@ classdef WVDiagnostics < handle
             if isnumeric(options.color)
                 options.color = {options.color};
             end
+
 
 
             % We will pretend the "0" wavenumber is actually evenly spaced
@@ -283,12 +288,30 @@ classdef WVDiagnostics < handle
             jMin = exp(-1.5*log(wvd.jWavenumber(3)) + 2.5*log(wvd.jWavenumber(2)));
 
             N = 500;
-            kLinLog = linspace(log10(kMin),max(log10(wvd.kRadial(:))),N);
-            jLinLog = linspace(log10(jMin),max(log10(wvd.jWavenumber(:))),N/2);
+            if isinf(options.kmax)
+                logKmax =  max(log10(wvd.kRadial(:)));
+            else
+                logKmax = log10(options.kmax);
+            end
+            if isinf(options.jmax)
+                logJmax =  max(log10(wvd.jWavenumber(:)));
+            else
+                logJmax = log10(options.jmax);
+            end
+            kLinLog = linspace(log10(kMin),logKmax,N);
+            jLinLog = linspace(log10(jMin),logJmax,N);
             [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
 
-            fig = figure(Units='points',Visible = options.visible);
-            set(gcf,'PaperPositionMode','auto')
+            if ~isfield(options,"figureHandle")
+                fig = figure(Units='points',Visible = options.visible);
+                set(gcf,'PaperPositionMode','auto')
+            else
+                fig = options.figureHandle;
+                clf(options.figureHandle)
+                set(0, 'currentfigure', options.figureHandle);
+            end
+            % fig = figure(Units='points',Visible = options.visible);
+            % set(gcf,'PaperPositionMode','auto')
 
             filled = true;
 
@@ -296,14 +319,7 @@ classdef WVDiagnostics < handle
             ax = gobjects(nData,1);
 
             for k=1:nData
-                if k == 1 % Create the base axes   
-                    ax(k) = axes;
-                else % Stack new axes on top
-                    ax(k) = axes;
-                    ax(k).Color = 'none';                 % transparent background
-                    ax(k).Position = ax(1).Position;      % match positions
-                    linkaxes([ax(1) ax(k)])               % link panning/zooming
-                end
+                ax(k) = axes;
 
                 forcingFlux = options.forcingFlux{k};
                 fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
@@ -321,11 +337,9 @@ classdef WVDiagnostics < handle
                     % zero out/nan stuff below out contour threshold
                     fluxLinLogTmp = fluxLinLog;
                     fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
-                    contourf(KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], 'LineStyle','none'); hold on
-                    % contour(KLinLog, JLinLog, fluxLinLog, negLevels(end)*[1 1], '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
-
-                    contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
-                    % contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
+                    contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], 'LineStyle','none'); hold on
+                    contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
+                    % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
 
                 else
                     contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
@@ -333,11 +347,17 @@ classdef WVDiagnostics < handle
                 end
                 colormap(ax(k),cmap)
                 clim(color_axis_limits)
+
+                % this seems to have to be placed at the bottom
                 ax(k).Color = 'none';
                 set(ax(k),'XTickLabel',[]);
                 set(ax(k),'YTickLabel',[]);
                 set(ax(k),'XTick',[]);
                 set(ax(k),'YTick',[]);
+                if k>1
+                    ax(k).Position = ax(1).Position;      % match positions
+                    linkaxes([ax(1) ax(k)])               % link panning/zooming
+                end
             end
 
             [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux.');
@@ -348,28 +368,14 @@ classdef WVDiagnostics < handle
             logY(:,1) = log10(jPseudoLocation(1));
             if ~isinf(options.vectorDensityLinearTransitionWavenumber)
                 cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
-                if 1
-                    index = find(logY(1,:) > cutoff,1,'first');
-                    delta = logY(1,index+1) - logY(1,index);
-                    y = (logY(1,1:index+1)).';
+                index = find(logY(1,:) > cutoff,1,'first');
+                delta = logY(1,index+1) - logY(1,index);
+                y = (logY(1,1:index+1)).';
 
-                    xIndex = find(diff(logX(:,1)) < delta,1,'first');
-                    x = logX(1:xIndex,1);
-                    x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
-                    y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
-                else
-                    tmp = logX(:,1);
-                    x = tmp(tmp<cutoff);
-                    tmp = (logY(1,:)).';
-                    y = tmp(tmp<cutoff);
-                    if x(end)-x(end-1) > y(end)-y(end-1)
-                        delta = x(end)-x(end-1);
-                    else
-                        delta = y(end)-y(end-1);
-                    end
-                    x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
-                    y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
-                end
+                xIndex = find(diff(logX(:,1)) < delta,1,'first');
+                x = logX(1:xIndex,1);
+                x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
+                y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
 
                 [X,Y] = ndgrid(x,y);
                 Uprime= interpn(logX,logY,Uprime,X,Y);
@@ -382,7 +388,6 @@ classdef WVDiagnostics < handle
             ax(k+1) = axes;
             ax(k+1).Color = 'none';                 % transparent background
             ax(k+1).Position = ax(1).Position;      % match positions
-
             linkaxes([ax(1) ax(k+1)])               % link panning/zooming
             kj = 10.^KLinLog; kr = 10.^ JLinLog;
             Kh = sqrt(kj.^2 + kr.^2);
@@ -391,20 +396,22 @@ classdef WVDiagnostics < handle
             [C,h] = contour(ax(k+1),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor,'DisplayName','pseudo-wavelength (km)');
             clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
             ax(k+1).Color = 'none'; 
-            set(ax(k+1),'XTickLabel',[]);
-            set(ax(k+1),'YTickLabel',[]);
-            set(ax(k+1),'XTick',[]);
-            set(ax(k+1),'YTick',[]);
+            % set(ax(k+1),'XTickLabel',[]);
+            % set(ax(k+1),'YTickLabel',[]);
+            % set(ax(k+1),'XTick',[]);
+            % set(ax(k+1),'YTick',[]);
             
             hold on
             Mag = sqrt(Uprime.*Uprime + Vprime.*Vprime);
             MaxMag = max(Mag(:));
             Uprime(Mag/MaxMag < 1/20) = NaN;
             Vprime(Mag/MaxMag < 1/20) = NaN;
-            % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],AutoScale="off",LineWidth=2)
-            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment="center",MaxHeadSize=0.8)
-            % scale = 0.5;
-            % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],LineWidth=1.0,Alignment="center",MaxHeadSize=0.4)
+            if isfield(options,"quiverScale")
+                quiver(ax(k+1),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=0*[1 1 1],LineWidth=1.0,Alignment="center",MaxHeadSize=0.8)
+            else
+                quiver(ax(k+1),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment="center",MaxHeadSize=0.8)
+            end
+
 
             %% log style ticks
             
@@ -434,14 +441,16 @@ classdef WVDiagnostics < handle
             % add major ticks
             set(h, 'XTick', (major_x_wn), 'YTick', (major_y_wn));
             % Set tick labels to 10^x format, remembering to flip
-            set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x), flip(major_x), 'UniformOutput', false));
-            set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y), flip(major_y), 'UniformOutput', false));
+            set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x-3), flip(major_x), 'UniformOutput', false));
+            set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y-3), flip(major_y), 'UniformOutput', false));
 
             % add minor ticks
             set(h, 'XMinorTick','on', 'YMinorTick','on')
             h.XAxis.MinorTickValues = (minor_x_wn);
             h.YAxis.MinorTickValues = (minor_y_wn);
 
+            xlabel("horizontal wavelength (km)")
+            ylabel("radius of deformation (km)")
         end
 
         function [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
@@ -736,7 +745,11 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.omega_jk(self)
             % - Returns t: omega_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('omega_jk');
+                if self.diagfile.hasVariableWithName('omega_jk')
+                    t = self.diagfile.readVariables('omega_jk');
+                else
+                    t = self.diagfile.readVariables('omega_axis');
+                end
             else
                 [omegaN,n] = self.wvt.transformToRadialWavenumber(abs(self.wvt.Omega),ones(size(self.wvt.Omega)));
                 t = (omegaN./n);
@@ -753,7 +766,11 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.geo_hke_jk(self)
             % - Returns t: geo_hke_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('geo_hke_jk');
+                if self.diagfile.hasVariableWithName('geo_hke_jk')
+                    t = self.diagfile.readVariables('geo_hke_jk');
+                else
+                    t = self.diagfile.readVariables('geo_hke_axis');
+                end
             else
                 t = self.wvt.transformToRadialWavenumber(self.wvt.A0_KE_factor);
             end
@@ -769,7 +786,11 @@ classdef WVDiagnostics < handle
             % - Declaration: t = get.geo_pe_jk(self)
             % - Returns t: geo_pe_jk matrix from diagnostics file
             if ~isempty(self.diagfile)
-                t = self.diagfile.readVariables('geo_pe_jk');
+                if self.diagfile.hasVariableWithName('geo_pe_jk')
+                    t = self.diagfile.readVariables('geo_pe_jk');
+                else
+                    t = self.diagfile.readVariables('geo_pe_axis');
+                end
             else
                 t = self.wvt.transformToRadialWavenumber(self.wvt.A0_PE_factor);
             end
