@@ -249,8 +249,8 @@ classdef WVDiagnostics < handle
                 options.inertialFlux
                 options.vectorDensityLinearTransitionWavenumber = Inf
                 options.forcingFlux
-                options.color = [0.9290    0.6940    0.1250]
-                options.overSaturationFactor = 1;
+                % options.color = [0.9290    0.6940    0.1250]
+                % options.overSaturationFactor = 1;
                 options.wavelengths = [1,2,5,10,20,50,100,200,500];
                 options.wavelengthColor = [.5,.5,.5];
                 options.labelSpacing = 1000;
@@ -260,12 +260,12 @@ classdef WVDiagnostics < handle
                 options.quiverScale
                 options.figureHandle
             end
-            if isnumeric(options.forcingFlux)
-                options.forcingFlux = {options.forcingFlux};
-            end
-            if isnumeric(options.color)
-                options.color = {options.color};
-            end
+            % if isnumeric(options.forcingFlux)
+            %     options.forcingFlux = {options.forcingFlux};
+            % end
+            % if isnumeric(options.color)
+            %     options.color = {options.color};
+            % end
 
 
 
@@ -321,14 +321,14 @@ classdef WVDiagnostics < handle
             for k=1:nData
                 ax(k) = axes;
 
-                forcingFlux = options.forcingFlux{k};
+                forcingFlux = options.forcingFlux(k).flux;
                 fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
                 fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
                 fluxLinLog = interpn(KPadded,JPadded,(fluxPadded.'),10.^KLinLog,10.^JLinLog,"linear");
 
-                color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.overSaturationFactor;
-                cmap = WVDiagnostics.symmetricTintMap(options.color{k});
-                nLevels = 10;
+                color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.forcingFlux(k).relativeAmplitude;
+                cmap = WVDiagnostics.symmetricTintMap(options.forcingFlux(k).color);
+                nLevels = 1+ceil(options.forcingFlux(k).relativeAmplitude*10);
                 maxAbs  = max(abs(forcingFlux(:)));
                 posLevels = linspace(0, maxAbs, nLevels+1);   posLevels(1)  = [];  % strictly positive
                 negLevels = linspace(-maxAbs, 0, nLevels+1);  negLevels(end) = []; % strictly negative
@@ -337,8 +337,13 @@ classdef WVDiagnostics < handle
                     % zero out/nan stuff below out contour threshold
                     fluxLinLogTmp = fluxLinLog;
                     fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
-                    contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], 'LineStyle','none'); hold on
-                    contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
+                    if options.forcingFlux(k).alpha < 1
+                    contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha ); hold on
+                    else
+                    contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none'); hold on
+                    end
+                    % contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
+                    contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0);
                     % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
 
                 else

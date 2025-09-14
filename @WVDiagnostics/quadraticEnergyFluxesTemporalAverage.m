@@ -10,7 +10,7 @@ function forcing_fluxes = quadraticEnergyFluxesTemporalAverage(self,options)
 % - Returns forcing_fluxes: struct array with averaged fluxes
 arguments
     self WVDiagnostics
-    options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];
+    options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total];
     options.timeIndices = Inf;
 end
 
