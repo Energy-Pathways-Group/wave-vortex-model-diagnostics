@@ -253,6 +253,12 @@ classdef WVDiagnostics < handle
                 % options.overSaturationFactor = 1;
                 options.wavelengths = [1,2,5,10,20,50,100,200,500];
                 options.wavelengthColor = [.5,.5,.5];
+                options.addFrequencyContours = false;
+                options.frequencies = [1.01 1.05 1.2 2 4 8 16];
+                options.frequencyColor = [.7,.7,.7];
+                options.addKEPEContours = false;
+                options.keFractions = [.01,.1,.25,.5,.75,.9,.99];
+                options.keFractionColor = [.7,.7,.7];
                 options.labelSpacing = 1000;
                 options.lineWidth = 1;
                 options.kmax = Inf;
@@ -267,8 +273,6 @@ classdef WVDiagnostics < handle
             % if isnumeric(options.color)
             %     options.color = {options.color};
             % end
-
-
 
             % We will pretend the "0" wavenumber is actually evenly spaced
             % from the nearest two wavenumbers
@@ -288,6 +292,7 @@ classdef WVDiagnostics < handle
             kMin = exp(-1.5*log(wvd.kRadial(3)) + 2.5*log(wvd.kRadial(2)));
             jMin = exp(-1.5*log(wvd.jWavenumber(3)) + 2.5*log(wvd.jWavenumber(2)));
 
+            % make K and J grid for log of variables in linear space
             N = 500;
             if isinf(options.kmax)
                 logKmax =  max(log10(wvd.kRadial(:)));
@@ -319,6 +324,22 @@ classdef WVDiagnostics < handle
             nData = length(options.forcingFlux);
             ax = gobjects(nData,1);
 
+            % add patch for IO and MDA modes
+            % ax(1) = axes;
+            % hold on
+            % patchX = [min(kLinLog) log10(wvd.kRadial(2)) log10(wvd.kRadial(2)) max(kLinLog) max(kLinLog) min(kLinLog) min(kLinLog)];
+            % patchY = [max(jLinLog) max(jLinLog) log10(wvd.jWavenumber(2)) log10(wvd.jWavenumber(2)) min(jLinLog) min(jLinLog) max(jLinLog)];
+            % patchAlpha = .1;
+            % patchColor = 'k';
+            % fill(ax(1),patchX, patchY, patchColor, 'FaceAlpha',patchAlpha, 'EdgeColor','none'); % HandleVisibility='off'
+            % trying with contourf instead
+            % IOMDA = zeros(size(KLinLog));
+            % IOMDA(KLinLog<log10(wvd.kRadial(2))) = 1;
+            % IOMDA(JLinLog<log10(wvd.jWavenumber(2))) = 1;
+            % contourf(ax(1),KLinLog, JLinLog, IOMDA, [.9 .9], LineStyle='none',FaceAlpha=.1 ); hold on
+
+
+            % loop over forcing fluxes to plot
             for k=1:nData
                 ax(k) = axes;
 
@@ -334,18 +355,25 @@ classdef WVDiagnostics < handle
                 posLevels = linspace(0, maxAbs, nLevels+1);   posLevels(1)  = [];  % strictly positive
                 negLevels = linspace(-maxAbs, 0, nLevels+1);  negLevels(end) = []; % strictly negative
 
+                % contour and contourf forcing fluxes
                 if filled
                     % zero out/nan stuff below out contour threshold
                     fluxLinLogTmp = fluxLinLog;
                     fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
                     if options.forcingFlux(k).alpha < 1
-                    contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha ); hold on
+                        contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha ); hold on
                     else
-                    contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none'); hold on
+                        contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none'); hold on
+                    end
+                    if nLevels>11 % cap on number of contour lines to draw.
+                        skip = floor(nLevels/10);
+                    else
+                        skip = 1;
                     end
                     % contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
-                    contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0);
+                    contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0);
                     % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
+                    contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.3);
 
                 else
                     contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
@@ -366,6 +394,7 @@ classdef WVDiagnostics < handle
                 end
             end
 
+            % compute quiver arrows for inertial flux
             [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux.');
             [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
             % we need two adjustments. First, we need to move the first row and column
@@ -391,6 +420,7 @@ classdef WVDiagnostics < handle
                 logY = Y;
             end
 
+            % add pseudoRadialWavelength contours
             ax(k+1) = axes;
             ax(k+1).Color = 'none';                 % transparent background
             ax(k+1).Position = ax(1).Position;      % match positions
@@ -406,7 +436,25 @@ classdef WVDiagnostics < handle
             % set(ax(k+1),'YTickLabel',[]);
             % set(ax(k+1),'XTick',[]);
             % set(ax(k+1),'YTick',[]);
+
+            % add frequency contours
+            if options.addFrequencyContours
+                hold on
+                omegaJK = interp2(wvd.kRadial,wvd.jWavenumber,wvd.omega_jk,10.^KLinLog,10.^JLinLog);
+                [C,h] = contour(ax(k+1),KLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor,'DisplayName','frequency (f)');
+                clabel(C,h,options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
+            end
+
+            % add ke/(ke+pe) contours
+            if options.addKEPEContours
+                hold on
+                fraction = wvd.geo_hke_jk./(wvd.geo_hke_jk+wvd.geo_pe_jk);
+                fractionJK = interp2(wvd.kRadial,wvd.jWavenumber,fraction,10.^KLinLog,10.^JLinLog);
+                [C,h] = contour(ax(k+1),KLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor,'DisplayName','KE/(KE+PE)');
+                clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
+            end           
             
+            % plot quiver arrows for inertial flux
             hold on
             Mag = sqrt(Uprime.*Uprime + Vprime.*Vprime);
             MaxMag = max(Mag(:));
@@ -418,14 +466,11 @@ classdef WVDiagnostics < handle
                 quiver(ax(k+1),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment="center",MaxHeadSize=0.8)
             end
 
-
-            %% log style ticks
-            
+            % make log style ticks
             h = gca;
             % vector for tick labels (wavelength)
             X = 2*pi./(10.^kLinLog)/1;
             Y = 2*pi./(10.^jLinLog)/1;
-
             % Major ticks (decades)
             major_x = floor(min(log10(X))):ceil(max(log10(X)));
             major_y = floor(min(log10(Y))):ceil(max(log10(Y)));
@@ -443,20 +488,22 @@ classdef WVDiagnostics < handle
             major_y_wn = log10(2*pi)-flip(major_y);
             minor_x_wn = log10(2*pi)-flip(minor_x);
             minor_y_wn = log10(2*pi)-flip(minor_y);
-
             % add major ticks
             set(h, 'XTick', (major_x_wn), 'YTick', (major_y_wn));
             % Set tick labels to 10^x format, remembering to flip
             set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x-3), flip(major_x), 'UniformOutput', false));
             set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y-3), flip(major_y), 'UniformOutput', false));
-
             % add minor ticks
             set(h, 'XMinorTick','on', 'YMinorTick','on')
             h.XAxis.MinorTickValues = (minor_x_wn);
             h.YAxis.MinorTickValues = (minor_y_wn);
 
+            % add labels
             xlabel("horizontal wavelength (km)")
             ylabel("radius of deformation (km)")
+
+            % legend
+            % Either give legend name with DisplayName='text' or hide with HandleVisibility='off'
         end
 
         function [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
