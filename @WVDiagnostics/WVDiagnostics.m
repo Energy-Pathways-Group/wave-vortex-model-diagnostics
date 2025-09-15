@@ -259,6 +259,7 @@ classdef WVDiagnostics < handle
                 options.jmax = Inf;
                 options.quiverScale
                 options.figureHandle
+                options.nLevels = 10
             end
             % if isnumeric(options.forcingFlux)
             %     options.forcingFlux = {options.forcingFlux};
@@ -328,7 +329,7 @@ classdef WVDiagnostics < handle
 
                 color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.forcingFlux(k).relativeAmplitude;
                 cmap = WVDiagnostics.symmetricTintMap(options.forcingFlux(k).color);
-                nLevels = 1+ceil(options.forcingFlux(k).relativeAmplitude*10);
+                nLevels = 1+ceil(options.forcingFlux(k).relativeAmplitude*options.nLevels);
                 maxAbs  = max(abs(forcingFlux(:)));
                 posLevels = linspace(0, maxAbs, nLevels+1);   posLevels(1)  = [];  % strictly positive
                 negLevels = linspace(-maxAbs, 0, nLevels+1);  negLevels(end) = []; % strictly negative
