@@ -324,25 +324,19 @@ classdef WVDiagnostics < handle
             nData = length(options.forcingFlux);
             ax = gobjects(nData,1);
 
-            % add patch for IO and MDA modes
-            % ax(1) = axes;
-            % hold on
-            % patchX = [min(kLinLog) log10(wvd.kRadial(2)) log10(wvd.kRadial(2)) max(kLinLog) max(kLinLog) min(kLinLog) min(kLinLog)];
-            % patchY = [max(jLinLog) max(jLinLog) log10(wvd.jWavenumber(2)) log10(wvd.jWavenumber(2)) min(jLinLog) min(jLinLog) max(jLinLog)];
-            % patchAlpha = .1;
-            % patchColor = 'k';
-            % fill(ax(1),patchX, patchY, patchColor, 'FaceAlpha',patchAlpha, 'EdgeColor','none'); % HandleVisibility='off'
-            % trying with contourf instead
-            % IOMDA = zeros(size(KLinLog));
-            % IOMDA(KLinLog<log10(wvd.kRadial(2))) = 1;
-            % IOMDA(JLinLog<log10(wvd.jWavenumber(2))) = 1;
-            % contourf(ax(1),KLinLog, JLinLog, IOMDA, [.9 .9], LineStyle='none',FaceAlpha=.1 ); hold on
-
-
             % loop over forcing fluxes to plot
             for k=1:nData
                 ax(k) = axes;
 
+                if k==1
+                    % add contour for IO and MDA modes
+                    IOMDA = zeros(size(KLinLog));
+                    IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
+                    IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
+                    contourf(ax(k),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05 ); 
+                    hold on
+                end
+                
                 forcingFlux = options.forcingFlux(k).flux;
                 fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
                 fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
@@ -437,10 +431,23 @@ classdef WVDiagnostics < handle
             % set(ax(k+1),'XTick',[]);
             % set(ax(k+1),'YTick',[]);
 
+            % add coutour for damping scale
+            hold on
+            k_damp = wvd.wvt.forcingWithName('adaptive damping').k_damp; % can also use .k_no_damp
+            j_damp = wvd.wvt.forcingWithName('adaptive damping').j_damp; % can also use .j_no_damp
+            jWavelength_damp = wvd.jWavenumber(round(j_damp));
+            pseudoRadialWavelengthDamp = 2*pi/sqrt(k_damp.^2 + jWavelength_damp.^2)/1000;
+            Damp = zeros(size(KLinLog));
+            Damp(pseudoRadialWavelength<1.2*pseudoRadialWavelengthDamp) = 1;
+            C = orderedcolors("gem");
+            contourf(ax(k+1),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=C(2,:), FaceAlpha=.1);
+
             % add frequency contours
             if options.addFrequencyContours
                 hold on
-                omegaJK = interp2(wvd.kRadial,wvd.jWavenumber,wvd.omega_jk,10.^KLinLog,10.^JLinLog);
+                omegaPadded = cat(1,wvd.omega_jk(1,:),wvd.omega_jk);
+                omegaPadded = cat(2,omegaPadded(:,1),omegaPadded);
+                omegaJK = interpn(KPadded,JPadded,omegaPadded.',10.^KLinLog,10.^JLinLog,"linear");
                 [C,h] = contour(ax(k+1),KLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor,'DisplayName','frequency (f)');
                 clabel(C,h,options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
             end
@@ -449,7 +456,9 @@ classdef WVDiagnostics < handle
             if options.addKEPEContours
                 hold on
                 fraction = wvd.geo_hke_jk./(wvd.geo_hke_jk+wvd.geo_pe_jk);
-                fractionJK = interp2(wvd.kRadial,wvd.jWavenumber,fraction,10.^KLinLog,10.^JLinLog);
+                fractionPadded = cat(1,fraction(1,:),fraction);
+                fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
+                fractionJK = interpn(KPadded,JPadded,fractionPadded.',10.^KLinLog,10.^JLinLog,"linear");
                 [C,h] = contour(ax(k+1),KLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor,'DisplayName','KE/(KE+PE)');
                 clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
             end           
