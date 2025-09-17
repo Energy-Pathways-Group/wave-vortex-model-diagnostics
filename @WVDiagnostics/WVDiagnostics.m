@@ -22,6 +22,10 @@ classdef WVDiagnostics < handle
         zscale_units = "m f^2";
     end
 
+    properties (Access=private)
+        wvt_aa_cache
+    end
+
     properties (Dependent)
         t_diag
         t_wv
@@ -36,6 +40,8 @@ classdef WVDiagnostics < handle
         geo_hke_jk
         geo_pe_jk
         forcingNames
+        wvt_aa
+        diagnosticsHasExplicitAntialiasing
     end
 
     properties (SetObservable)
@@ -721,6 +727,23 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+        function wvt_aa = get.wvt_aa(self)
+            if isempty(self.wvt_aa_cache) || ~isvalid(self.wvt_aa_cache)
+                if isa(self.wvt,"WVTransformBoussinesq")
+                    if ~exist(self.wvaapath,"file")
+                        fprintf("No existing Boussinesq transform with explicity antialiasing found. Creating a new transform.\n");
+                        wvt_ = self.wvt.waveVortexTransformWithExplicitAntialiasing();
+                        ncfile_ = wvt_.writeToFile(self.wvaapath);
+                        ncfile_.close;
+                    end
+                    self.wvt_aa_cache = WVTransform.waveVortexTransformFromFile(self.wvaapath,iTime=Inf,shouldReadOnly=true);
+                else
+                    self.wvt_aa_cache = self.wvt.waveVortexTransformWithExplicitAntialiasing();
+                end
+            end
+            wvt_aa = self.wvt_aa_cache;
+        end
+
         function t = get.t_diag(self)
             % Get time vector from the diagnostics file
             %
@@ -907,6 +930,15 @@ classdef WVDiagnostics < handle
             end
         end   
 
+        function bool = get.diagnosticsHasExplicitAntialiasing(self)
+            bool = false;
+            if ~isempty(self.diagfile)
+                if self.diagfile.hasVariableWithName("Z0_antialias_filter")
+                    bool = true;
+                end
+            end
+        end
+
         function setEnergyUnits(self, units)
             % Set the time and energy scaling and units for plotting and output.
             %
@@ -962,7 +994,7 @@ classdef WVDiagnostics < handle
             self.wvpath = filename;
 
 
-            [self.wvt, self.wvfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=Inf);
+            [self.wvt, self.wvfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=Inf,shouldReadOnly=true);
             self.wvt.addOperation(EtaTrueOperation());
             self.wvt.addOperation(APEOperation(self.wvt));
             self.wvt.addOperation(APVOperation());
@@ -1055,8 +1087,12 @@ classdef WVDiagnostics < handle
         end
 
         function iTimeChanged(~,eventData)
-            wvd = eventData.AffectedObject;
-            wvd.wvt.initFromNetCDFFile(wvd.wvfile,iTime=wvd.iTime);
+            self = eventData.AffectedObject;
+            self.wvt.initFromNetCDFFile(self.wvfile,iTime=self.iTime);
+            if ~isempty(self.wvt_aa_cache)
+                self.wvt_aa_cache.t = self.wvt.t;
+                [self.wvt_aa_cache.A0,self.wvt_aa_cache.Ap,self.wvt_aa_cache.Am] = self.wvt.spectralVariableWithResolution(self.wvt_aa_cache,self.wvt.A0,self.wvt.Ap,self.wvt.Am);
+            end
         end
 
         function [X,Y,U,V] = PoissonFlowFromFluxWithAxes(x, y, flux)
