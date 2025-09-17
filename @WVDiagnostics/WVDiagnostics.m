@@ -50,6 +50,7 @@ classdef WVDiagnostics < handle
 
     methods
         createDiagnosticsFile(self,options)
+        createWWGTriadDiagnostic(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -168,6 +169,14 @@ classdef WVDiagnostics < handle
 
         enstrophy_fluxes = quadraticEnstrophyFluxesTemporalAverage(self,options)
         enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Fluxes in space, [j kRadial]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        wwg = quadraticEnergyTriadFluxWWGWave(self)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -1023,7 +1032,7 @@ classdef WVDiagnostics < handle
             else
                 self.wvaapath= fullfile(pwd,strcat(fname,"-wvt-aa.nc"));
             end
-
+            
             self.zscale = self.wvt.f^2;
             self.z_flux_scale = self.zscale/(86400*365);
 
@@ -1048,6 +1057,9 @@ classdef WVDiagnostics < handle
         matrix = iDCT2(N)
         matrix = DST2(N)
         matrix = iDST2(N)
+
+        E0 = waveWaveGeostrophicEnergy(wvt,maskKU,maskKUx)
+        E0 = waveWaveGeostrophicEnergyForMode(wvt,maskKU,maskKUx,Nj)
 
         function cmap = symmetricTintMap(c,options)
             %SYMMETRICTINTMAP Colormap going from color -> tinted white -> color
