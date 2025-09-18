@@ -98,10 +98,10 @@ if exist(self.diagpath,"file") && ~isfield(options,"filename")
 else
     outputIndexOffset = 0;
     if options.shouldMeasureAntialiasingFlux
-        [wvt_lowres, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
+        [wvt_lowres, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf,shouldReadOnly=true);
         if isa(wvt_lowres,"WVTransformBoussinesq")
             if exist(self.wvaapath,"file")
-                wvt = WVTransform.waveVortexTransformFromFile(self.wvaapath,iTime=Inf);
+                wvt = WVTransform.waveVortexTransformFromFile(self.wvaapath,iTime=Inf,shouldReadOnly=true);
             else
                 wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
                 wvt.writeToFile(self.wvaapath);
@@ -110,7 +110,7 @@ else
             wvt = wvt_lowres.waveVortexTransformWithExplicitAntialiasing();
         end
     else
-        [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
+        [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf,shouldReadOnly=true);
     end
     tDim = ncfile.readVariables('wave-vortex/t');
 
