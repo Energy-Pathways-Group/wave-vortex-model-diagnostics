@@ -349,7 +349,7 @@ classdef WVDiagnostics < handle
                     IOMDA = zeros(size(KLinLog));
                     IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
                     IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
-                    [~,H(length(H)+1)] = contourf(ax(k),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="IO/MDA/BT modes", HandleVisibility='on'); 
+                    contourf(ax(k),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
                     hold on
                 end
                 
@@ -404,32 +404,6 @@ classdef WVDiagnostics < handle
                 end
             end
 
-            % compute quiver arrows for inertial flux
-            [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux.');
-            [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
-            % we need two adjustments. First, we need to move the first row and column
-            % half an increment
-            logX(1,:) = log10(kPseudoLocation(1));
-            logY(:,1) = log10(jPseudoLocation(1));
-            if ~isinf(options.vectorDensityLinearTransitionWavenumber)
-                cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
-                index = find(logY(1,:) > cutoff,1,'first');
-                delta = logY(1,index+1) - logY(1,index);
-                y = (logY(1,1:index+1)).';
-
-                xIndex = find(diff(logX(:,1)) < delta,1,'first');
-                x = logX(1:xIndex,1);
-                x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
-                y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
-
-                [X,Y] = ndgrid(x,y);
-                Uprime= interpn(logX,logY,Uprime,X,Y);
-                Vprime = interpn(logX,logY,Vprime,X,Y);
-
-                logX = X;
-                logY = Y;
-            end
-
             % add coutour for damping scale
             ax(k+1) = axes;
             ax(k+1).Color = 'none';                 % transparent background
@@ -444,14 +418,14 @@ classdef WVDiagnostics < handle
             pseudoRadialWavelengthDamp = 2*pi/sqrt(k_damp.^2 + jWavelength_damp.^2)/1000;
             Damp = zeros(size(KLinLog));
             Damp(pseudoRadialWavelength<1.2*pseudoRadialWavelengthDamp) = 1;
-            C = orderedcolors("gem");
-            [~,H(length(H)+1)] = contourf(ax(k+1),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=C(2,:), FaceAlpha=.1, DisplayName="adaptive damping");            
+            col = orderedcolors("gem");
+            [~,H(length(H)+1)] = contourf(ax(k+1),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.1, DisplayName="adaptive damping");            
             
             % add pseudoRadialWavelength contours
             hold on
             % pseudoRadialWavelength(pseudoRadialWavelength==Inf) = max(radialWavelength);
-            [C,H(length(H)+1)] = contour(ax(k+1),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
-            clabel(C,H(end),options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
+            [C,h] = contour(ax(k+1),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+            clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
             ax(k+1).Color = 'none'; 
             % set(ax(k+1),'XTickLabel',[]);
             % set(ax(k+1),'YTickLabel',[]);
@@ -464,8 +438,8 @@ classdef WVDiagnostics < handle
                 omegaPadded = cat(1,wvd.omega_jk(1,:),wvd.omega_jk);
                 omegaPadded = cat(2,omegaPadded(:,1),omegaPadded);
                 omegaJK = interpn(KPadded,JPadded,omegaPadded.',10.^KLinLog,10.^JLinLog,"linear");
-                [C,H(length(H)+1)] = contour(ax(k+1),KLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)");
-                clabel(C,H(end),options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
+                [C,h] = contour(ax(k+1),KLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
+                clabel(C,h,options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
             end
 
             % add ke/(ke+pe) contours
@@ -475,21 +449,66 @@ classdef WVDiagnostics < handle
                 fractionPadded = cat(1,fraction(1,:),fraction);
                 fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
                 fractionJK = interpn(KPadded,JPadded,fractionPadded.',10.^KLinLog,10.^JLinLog,"linear");
-                [C,H(length(H)+1)] = contour(ax(k+1),KLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)");
-                clabel(C,H(end),options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
+                [C,h] = contour(ax(k+1),KLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
+                clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
             end           
             
-            % plot quiver arrows for inertial flux
-            hold on
-            Mag = sqrt(Uprime.*Uprime + Vprime.*Vprime);
-            MaxMag = max(Mag(:));
-            Uprime(Mag/MaxMag < 1/20) = NaN;
-            Vprime(Mag/MaxMag < 1/20) = NaN;
-            if isfield(options,"quiverScale")
-                H(length(H)+1) = quiver(ax(k+1),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=0*[1 1 1],LineWidth=1.0,Alignment="center",MaxHeadSize=0.8, DisplayName="inertial flux");
-            else
-                H(length(H)+1) = quiver(ax(k+1),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment="center",MaxHeadSize=0.8, DisplayName="inertial flux");
+            for k=1:length(options.inertialFlux)
+
+                % compute quiver arrows for inertial flux
+                [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux(k).flux.');
+                [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
+                % we need two adjustments. First, we need to move the first row and column
+                % half an increment
+                logX(1,:) = log10(kPseudoLocation(1));
+                logY(:,1) = log10(jPseudoLocation(1));
+                if ~isinf(options.vectorDensityLinearTransitionWavenumber)
+                    cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
+                    index = find(logY(1,:) > cutoff,1,'first');
+                    delta = logY(1,index+1) - logY(1,index);
+                    y = (logY(1,1:index+1)).';
+    
+                    xIndex = find(diff(logX(:,1)) < delta,1,'first');
+                    x = logX(1:xIndex,1);
+                    x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
+                    y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
+    
+                    [X,Y] = ndgrid(x,y);
+                    Uprime= interpn(logX,logY,Uprime,X,Y);
+                    Vprime = interpn(logX,logY,Vprime,X,Y);
+    
+                    logX = X;
+                    logY = Y;
+                end
+    
+                % logic for quiver arrow alignment
+                if isscalar(options.inertialFlux)
+                    alignment = "center";
+                elseif k==1
+                    alignment = "center"; % "head";
+                elseif k==2
+                    alignment = "center"; % "tail";
+                else
+                    error("Maximum of 2 inertialFlux arrows allowed.")
+                end
+                
+                % plot quiver arrows for inertial flux
+                hold on
+                Mag = sqrt(Uprime.*Uprime + Vprime.*Vprime);
+                MaxMag = max(Mag(:));
+                Uprime(Mag/MaxMag < 1/20) = NaN;
+                Vprime(Mag/MaxMag < 1/20) = NaN;
+                if isfield(options,"quiverScale")
+                    if isfield(options.inertialFlux(k),"color")
+                        quiver(ax(k+1),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=options.inertialFlux(k).color,LineWidth=3.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+                    end
+                    quiver(ax(k+1),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=0*[1 1 1],LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');            
+                else
+                    quiver(ax(k+1),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+                end
+
             end
+
 
             % make log style ticks
             h = gca;
@@ -529,7 +548,7 @@ classdef WVDiagnostics < handle
 
             % legend
             % Either give legend name with DisplayName='text' or hide with HandleVisibility='off'
-            legend(H,'location','northwest');
+            legend(gca,H,'location','northwest');
         end
 
         function [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
