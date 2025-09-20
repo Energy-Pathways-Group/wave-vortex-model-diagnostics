@@ -47,6 +47,7 @@ classdef EnergyReservoir
       io                        (false,false,false,true,false,"te_io","inertial")
       wave                      (false,false,false,true,true,"te_wave","wave")
       total                     (true,true,true,true,true,"te_quadratic","total quadratic")
+      damp                      (true,true,true,true,true,"te_damp","closure region")
    end
 
    methods (Static)

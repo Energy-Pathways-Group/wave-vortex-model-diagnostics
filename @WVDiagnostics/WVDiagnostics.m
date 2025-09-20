@@ -76,6 +76,7 @@ classdef WVDiagnostics < handle
         fig = plotEnergyFluxTemporalAverage(self,options)
 
         fig = plotSourcesSinksReservoirsDiagram(self,options)
+        fig = plotSourcesSinksReservoirsDiagramWithClosureRegion(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -1217,6 +1218,8 @@ classdef WVDiagnostics < handle
                     fancyName = "total";
                 case "te_quadratic"
                     fancyName = "total quadratic";
+                case "te_damp"
+                    fancyName = "closure region";
                 otherwise
                     error("unknown energy reservoir");
             end
