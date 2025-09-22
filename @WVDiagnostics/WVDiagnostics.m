@@ -79,7 +79,7 @@ classdef WVDiagnostics < handle
         fig = plotSourcesSinksReservoirsDiagram(self,options)
         fig = plotSourcesSinksReservoirsDiagramWithClosureRegion(self,options)
         summarizeSourcesSinksReservoirs(self,options)
-        [forcing_quadratic,forcing_exact, inertial] = filterEnergyForSourcesSinksReservoirs(self,options)
+        [sources, sinks, inertial, ddt] = filterEnergyForSourcesSinksReservoirs(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %

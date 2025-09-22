@@ -1,4 +1,4 @@
-function [forcing, inertial, ddt] = filterEnergyForSourcesSinksReservoirs(self,options)
+function [sources, sinks, inertial, ddt] = filterEnergyForSourcesSinksReservoirs(self,options)
 % This function returns values assuming three reservoirs: geo, wave, and
 % damping. The damping resevoir is just scales below a threshold, wave or
 % geostrophic. It also returns the exact and exact-damp resevoirs. 
@@ -55,6 +55,8 @@ end
         forcing(iForce).te_exact_damp = forcing_exact_damp(iForce).te;
     end
 
+
+
     inertial(1).name = "te_gmda";
     inertial(1).fancyName = WVDiagnostics.fancyNameForName(inertial(1).name);
     inertial(1).te_gmda = 0;
@@ -64,6 +66,25 @@ end
     inertial(2).fancyName = WVDiagnostics.fancyNameForName(inertial(2).name);
     inertial(2).te_damp = inertial_triads(4).te_wave + inertial_triads(2).te_wave + inertial_triads(3).te_wave + inertial_triads(4).te_gmda;
     inertial(2).te_wave = 0;
+
+    inertial(3).name = "te_exact";
+    inertial(3).fancyName = "exact undamped reservoir";
+    inertial(1).te_gmda = 0;
+    inertial(3).te_damp = forcing(1).te_exact;
+    inertial(3).te_wave = 0;
+
+    % remove nonlinear advection, now that we copied the values we needed
+    forcing(1) = [];
+
+    % divide into sources and sinks
+    iSink = 1; iSource = 1;
+    for iForce=1:length(forcing)
+        if forcing(iForce).te_exact < 0
+            sinks(iSink) = forcing(iForce); iSink = iSink + 1;
+        else
+            sources(iSource) = forcing(iForce); iSource = iSource + 1;
+        end
+    end
 
     % Alt 1
     inertial(1).te_wave = inertial_triads(4).te_gmda - inertial_triads(1).te_wave;
@@ -78,7 +99,6 @@ end
     ddt.te_gmda = (reservoirEnergy(1).energy(end) - reservoirEnergy(1).energy(1))/(t(end)-t(1));
     ddt.te_wave = (reservoirEnergy(2).energy(end) - reservoirEnergy(2).energy(1))/(t(end)-t(1));
     ddt.te_exact = (reservoirEnergy(3).energy(end) - reservoirEnergy(3).energy(1))/(t(end)-t(1));
-
 end
 
 % One can replace "inertial_triads(1).te_wave" with E0_ggw
