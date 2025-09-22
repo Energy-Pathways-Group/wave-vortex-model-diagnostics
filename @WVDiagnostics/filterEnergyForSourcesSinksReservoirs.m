@@ -1,4 +1,19 @@
 function [forcing, inertial, ddt] = filterEnergyForSourcesSinksReservoirs(self,options)
+% This function returns values assuming three reservoirs: geo, wave, and
+% damping. The damping resevoir is just scales below a threshold, wave or
+% geostrophic. It also returns the exact and exact-damp resevoirs. 
+%
+% The forcing struct has the the forcing on the three/two different
+% reservoirs
+%
+% The inertial struct has the flux from the two reservoirs (wave
+% geostrophic) to each other and to the damping region.
+%
+% The forcing struct also include the nonlinear advection, which has the
+% flux to the damping region.
+%
+% The ddt struct contains the change in total energy, closing the energy
+% budget.
 arguments
     self WVDiagnostics
     options.customNames = configureDictionary("string","string")
