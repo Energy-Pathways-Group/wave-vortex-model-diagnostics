@@ -51,6 +51,7 @@ classdef WVDiagnostics < handle
     methods
         createDiagnosticsFile(self,options)
         createWWGTriadDiagnostic(self,options)
+        createDampedRegionDiagnostics(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -77,6 +78,8 @@ classdef WVDiagnostics < handle
 
         fig = plotSourcesSinksReservoirsDiagram(self,options)
         fig = plotSourcesSinksReservoirsDiagramWithClosureRegion(self,options)
+        summarizeSourcesSinksReservoirs(self,options)
+        [forcing_quadratic,forcing_exact, inertial] = filterEnergyForSourcesSinksReservoirs(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -156,6 +159,8 @@ classdef WVDiagnostics < handle
 
         [enstrophy_fluxes,t] = quadraticEnstrophyFluxesOverTime(self,options)
         [enstrophy_fluxes,t] = quadraticEnstrophyTriadFluxesOverTime(self,options)
+
+        [E0_ggw,Epm_wwg] = quadraticEnergyMirrorTriadsUndamped(self,options);
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
