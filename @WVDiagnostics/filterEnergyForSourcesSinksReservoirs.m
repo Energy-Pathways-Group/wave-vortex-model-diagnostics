@@ -1,4 +1,4 @@
-function [sources, sinks, inertial, ddt] = filterEnergyForSourcesSinksReservoirs(self,options)
+function [sources, sinks, inertial, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
 % This function returns values assuming three reservoirs: geo, wave, and
 % damping. The damping resevoir is just scales below a threshold, wave or
 % geostrophic. It also returns the exact and exact-damp resevoirs. 
@@ -79,7 +79,7 @@ end
     % divide into sources and sinks
     iSink = 1; iSource = 1;
     for iForce=1:length(forcing)
-        if forcing(iForce).te_exact < 0
+        if forcing(iForce).te_exact + forcing(iForce).te_exact_damp < 0
             sinks(iSink) = forcing(iForce); iSink = iSink + 1;
         else
             sources(iSource) = forcing(iForce); iSource = iSource + 1;
@@ -96,6 +96,13 @@ end
     % ape_bg = self.diagfile.readVariables("ape_bg");
     % ape_bg = ape_bg(options.timeIndices);
     % ddt.te_bg = (ape_bg(end) - ape_bg(1))/(t(end)-t(1));
+    energy.te_gmda = mean(reservoirEnergy(1).energy);
+    energy.te_wave = mean(reservoirEnergy(2).energy);
+    energy.te_exact = mean(reservoirEnergy(3).energy);
+    E = self.wvt.transformToRadialWavenumber(self.wvt.Apm_TE_factor.*(abs(self.wvt.Ap).^2 + abs(self.wvt.Am).^2) + self.wvt.A0_TE_factor.*(abs(self.wvt.A0).^2));
+    E_big = zeros(length(self.j),length(self.kRadial));
+    E_big(1:size(E,1),1:size(E,2),:) = E;
+    energy.te_damp = sum( E_big(:) .* ~NoDamp(:));
     ddt.te_gmda = (reservoirEnergy(1).energy(end) - reservoirEnergy(1).energy(1))/(t(end)-t(1));
     ddt.te_wave = (reservoirEnergy(2).energy(end) - reservoirEnergy(2).energy(1))/(t(end)-t(1));
     ddt.te_exact = (reservoirEnergy(3).energy(end) - reservoirEnergy(3).energy(1))/(t(end)-t(1));
