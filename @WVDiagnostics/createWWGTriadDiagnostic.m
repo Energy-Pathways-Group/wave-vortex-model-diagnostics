@@ -30,7 +30,7 @@ if exist(wwgTriadPath,"file")
         error('Some entries of t_diag are not exactly in t_wv.');
     end
     if length(t) > 1
-        stride = didx(1);
+        stride = idx(2)-idx(1);
     else
         stride = options.stride;
     end
