@@ -1,4 +1,4 @@
-function E0 = waveWaveGeostrophicEnergy(wvt,maskKU,maskKUx)
+function E0 = waveWaveGeostrophicEnergy(wvt,mask)
 % Note that
 % energy = waveWaveGeostrophicEnergy(wvt,1,1);
 % should produce the same answer as
@@ -15,13 +15,10 @@ function E0 = waveWaveGeostrophicEnergy(wvt,maskKU,maskKUx)
     Wpm = wvt.WAp.*Apt + wvt.WAm.*Amt;
     Npm = wvt.NAp.*Apt + wvt.NAm.*Amt;
 
-    U = wvt.transformToSpatialDomainWithF(Apm=maskKU.*Upm);
-    V = wvt.transformToSpatialDomainWithF(Apm=maskKU.*Vpm);
-    W = wvt.transformToSpatialDomainWithG(Apm=maskKU.*Wpm);
-
-    [~,Ux,Uy,Uz] = wvt.transformToSpatialDomainWithFAllDerivatives(        Apm=maskKUx.*Upm);
-    [~,Vx,Vy,Vz] = wvt.transformToSpatialDomainWithFAllDerivatives(        Apm=maskKUx.*Vpm);
-    [ETA,ETAx,ETAy,ETAz] = wvt.transformToSpatialDomainWithGAllDerivatives(Apm=maskKUx.*Npm);
+    [U,Ux,Uy,Uz] = wvt.transformToSpatialDomainWithFAllDerivatives(        Apm=mask.*Upm);
+    [V,Vx,Vy,Vz] = wvt.transformToSpatialDomainWithFAllDerivatives(        Apm=mask.*Vpm);
+    W =                          wvt.transformToSpatialDomainWithG(        Apm=mask.*Wpm);
+    [ETA,ETAx,ETAy,ETAz] = wvt.transformToSpatialDomainWithGAllDerivatives(Apm=mask.*Npm);
 
     uNL = -U.*Ux - V.*Uy - W.*Uz;
     vNL = -U.*Vx - V.*Vy - W.*Vz;

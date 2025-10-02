@@ -52,6 +52,7 @@ classdef WVDiagnostics < handle
         createDiagnosticsFile(self,options)
         createWWGTriadDiagnostic(self,options)
         createDampedRegionDiagnostics(self,options)
+        create1DMirrorFluxes(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -195,6 +196,9 @@ classdef WVDiagnostics < handle
         [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)  
         [varargout] = transformToOmegaAxis(self,varargin)   
 
+        [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
+        [omegaAxis,bins_omega] = sparseOmegaAxis(self)
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Spectra (also implemented in the WVT)
@@ -852,7 +856,7 @@ classdef WVDiagnostics < handle
             if ~isempty(self.diagfile)
                 t = self.diagfile.readVariables('Lr2_pm');
             else
-                t = self.wvt.Lr2_pm;
+                t = self.wvt.g*self.wvt.h_pm/self.wvt.f/self.wvt.f;
             end
         end
 
@@ -1083,7 +1087,8 @@ classdef WVDiagnostics < handle
         matrix = DST2(N)
         matrix = iDST2(N)
 
-        E0 = waveWaveGeostrophicEnergy(wvt,maskKU,maskKUx)
+        Epm = geostrophicGeostrophicWaveEnergy(wvt,mask)
+        E0 = waveWaveGeostrophicEnergy(wvt,mask)
         E0 = waveWaveGeostrophicEnergyForMode(wvt,maskKU,maskKUx,Nj)
 
         function cmap = symmetricTintMap(c,options)
