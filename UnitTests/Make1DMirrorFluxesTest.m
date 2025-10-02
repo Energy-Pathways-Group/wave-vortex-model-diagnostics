@@ -47,7 +47,7 @@ for i=1:length(kp)
 end
 
 mask_omega = false(wvd.wvt.Nj,wvt.Nkl,length(omegaAxis));
-for iK = 1:1:length(mask_omega)
+for iK = 1:1:length(omegaAxis)
     mask_omega(:,:,iK) = (bins_omega <= iK);
 end
 
@@ -72,7 +72,9 @@ sum(Ep_w(:)+Em_w(:))
 %%
 
 % /Applications/MATLAB_R2025b.app/bin/matlab -nojvm -nodisplay -nosplash
+% path = "/Users/Shared/CimRuns_June2025/output/run1_icR_iner0_tide0_lat32_geo0065_N0052_hydrostatic_res512.nc";
 % path = "/Users/Shared/CimRuns_June2025/output/run9_icR_iner07_tide014_lat32_geo0065_N0052_hydrostatic_res512.nc";
+% path = "/Users/Shared/CimRuns_June2025/output/run18_icR_iner07_tide014_lat32_geo0065_N0052_boussinesq_res512.nc";
 % wvd = WVDiagnostics(path);
 % wvd.create1DMirrorFluxes();
 

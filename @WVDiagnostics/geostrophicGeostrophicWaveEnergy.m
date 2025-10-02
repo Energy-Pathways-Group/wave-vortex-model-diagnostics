@@ -26,7 +26,7 @@ function Epm = geostrophicGeostrophicWaveEnergy(wvt,mask)
     elseif isa(wvt,'WVTransformHydrostatic')
         [Fp,Fm,~] = wvt.transformUVEtaToWaveVortex(uNL,vNL,nNL);
     elseif isa(wvt,'WVTransformBoussinesq')
-        [Fp,Fm,~] = wvt.transformUVWEtaToWaveVortex(uNL,vNL,zeros(wvt.spectralMatrixSize),nNL);
+        [Fp,Fm,~] = wvt.transformUVWEtaToWaveVortex(uNL,vNL,zeros(wvt.spatialMatrixSize),nNL);
     else
         error('WVTransform not recognized.')
     end

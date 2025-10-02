@@ -61,7 +61,7 @@ for iK = 1:1:length(kp)
 end
 
 mask_omega = false(wvt.Nj,wvt.Nkl,length(omegaAxis));
-for iK = 1:1:length(mask_omega)
+for iK = 1:1:length(omegaAxis)
     mask_omega(:,:,iK) = (bins_omega <= iK);
 end
 
