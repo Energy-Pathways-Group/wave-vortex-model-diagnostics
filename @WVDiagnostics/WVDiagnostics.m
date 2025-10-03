@@ -77,7 +77,7 @@ classdef WVDiagnostics < handle
         fig = plotEnergyTriadFluxOverTime(self,options)
         fig = plotEnergyFluxTemporalAverage(self,options)
 
-        fig = plotEnergyFlux1D(self,options)
+        fig = plotEnergyFluxes1D(self,options)
 
         fig = plotSourcesSinksReservoirsDiagram(self,options)
         fig = plotSourcesSinksReservoirsDiagramWithClosureRegion(self,options)
