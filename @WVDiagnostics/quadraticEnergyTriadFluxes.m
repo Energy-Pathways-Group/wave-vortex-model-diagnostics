@@ -10,7 +10,7 @@ function inertial_fluxes = quadraticEnergyTriadFluxes(self,options)
 % - Returns inertial_fluxes: an array of structs
 arguments
     self WVDiagnostics
-    options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total]
+    options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total]
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
 end
 

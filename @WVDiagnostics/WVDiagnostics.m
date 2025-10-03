@@ -77,6 +77,8 @@ classdef WVDiagnostics < handle
         fig = plotEnergyTriadFluxOverTime(self,options)
         fig = plotEnergyFluxTemporalAverage(self,options)
 
+        fig = plotEnergyFlux1D(self,options)
+
         fig = plotSourcesSinksReservoirsDiagram(self,options)
         fig = plotSourcesSinksReservoirsDiagramWithClosureRegion(self,options)
         summarizeSourcesSinksReservoirs(self,options)
@@ -176,6 +178,15 @@ classdef WVDiagnostics < handle
 
         enstrophy_fluxes = quadraticEnstrophyFluxesTemporalAverage(self,options)
         enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % Fluxes in space, [kPseudoRadialSparse t]
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        [M_wwg, M_ggw, kp] = quadraticEnergyMirrorTriadFluxes1D(self,options)
+        [inertial_fluxes_g, inertial_fluxes_w, kp] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
