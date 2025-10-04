@@ -11,7 +11,7 @@ end
 
 [M_wwg, M_ggw, kp] = self.quadraticEnergyMirrorTriadFluxes1D(timeIndices=options.timeIndices);
 
-flux_interp = @(v) cat(1,zeros(1,size(v,2)),diff(interp1(self.kPseudoRadial,cumsum(v),kp)));
+flux_interp = @(v) diff(cat(1,zeros(1,size(v,2)),interp1(self.kPseudoRadial,cumsum(v),kp)));
 
 triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave];
 fluxes_g = self.filterFluxesForReservoir(self.quadraticEnergyTriadFluxes(energyReservoirs=EnergyReservoir.geostrophic_mda,triadComponents=triadComponents),filter=filter_time);

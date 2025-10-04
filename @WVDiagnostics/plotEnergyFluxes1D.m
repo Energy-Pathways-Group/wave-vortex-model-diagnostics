@@ -19,6 +19,8 @@ yLimits = [-2.2,2.2];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [inertial_fluxes_g, inertial_fluxes_w, kp] = self.quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(timeIndices=options.timeIndices);
+[inertial_fluxes_w_omega, omegaAxisSparse] = self.quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_omega(timeIndices=options.timeIndices);
+
 inertial_fluxes_g([inertial_fluxes_g.name] == "ggg").color=0*[1 1 1];
 inertial_fluxes_g([inertial_fluxes_g.name] == "ggg").lineStyle="-";
 inertial_fluxes_g([inertial_fluxes_g.name] == "ggw").color=0*[1 1 1];
@@ -30,12 +32,17 @@ inertial_fluxes_g([inertial_fluxes_g.name] == "tx-ggw").lineStyle="-.";
 
 inertial_fluxes_w([inertial_fluxes_w.name] == "www").color=0*[1 1 1];
 inertial_fluxes_w([inertial_fluxes_w.name] == "www").lineStyle="-";
+inertial_fluxes_w([inertial_fluxes_w.name] == "www").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "www").flux;
 inertial_fluxes_w([inertial_fluxes_w.name] == "wwg").color=0*[1 1 1];
 inertial_fluxes_w([inertial_fluxes_w.name] == "wwg").lineStyle=":";
+inertial_fluxes_w([inertial_fluxes_w.name] == "wwg").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "wwg").flux;
 inertial_fluxes_w([inertial_fluxes_w.name] == "tx-wwg").color=0*[1 1 1];
 inertial_fluxes_w([inertial_fluxes_w.name] == "tx-wwg").lineStyle="--";
+inertial_fluxes_w([inertial_fluxes_w.name] == "tx-wwg").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "tx-wwg").flux;
 inertial_fluxes_w([inertial_fluxes_w.name] == "tx-ggw").color=0*[1 1 1];
 inertial_fluxes_w([inertial_fluxes_w.name] == "tx-ggw").lineStyle="-.";
+inertial_fluxes_w([inertial_fluxes_w.name] == "tx-ggw").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "tx-ggw").flux;
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -86,6 +93,7 @@ for i=1:length(energy_fluxes)
     forcing_fluxes_w(i).color = C(mod(i,size(C,1))+1,:);
     forcing_fluxes_w(i).alpha = 0.3;
     forcing_fluxes_w(i).flux = self.transformToPseudoRadialWavenumber(EnergyReservoir.wave,energy_fluxes(i).te_wave);
+    forcing_fluxes_w(i).flux_omega = self.transformToOmegaAxis(energy_fluxes(i).te_wave);
 end
 
 % override the forcings, if the user specifies
@@ -123,16 +131,23 @@ radialWavelength(1) = 1.5*radialWavelength(2);
 
 filter = @(v) cumsum(v)/self.flux_scale;
 
+omegaAxis = self.omegaAxis/wvt.f;
+omegaAxis = [0.9,omegaAxis]; % add point below f
+
+omegaAxisSparse = omegaAxisSparse/wvt.f;
+omegaAxisSparse = [0.9;omegaAxisSparse]; % add point below f
+filter_omega = @(v) cumsum([0;v])/self.flux_scale;
+
 fig = figure(Visible=options.visible,Units="points",Position=[50 50 900 600]);
 fig.PaperPositionMode = "auto";
 fig.Color = "w";
-tl = tiledlayout(fig,GridSize=[2 1],TileSpacing='tight');
+tl = tiledlayout(fig,GridSize=[2 2],TileSpacing="compact",Padding="compact");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Visualization: geostrophic fluxes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ax = nexttile(tl);
+ax = nexttile(tl,1);
 fluxes = inertial_fluxes_g;
 for i=1:length(fluxes)
     if max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
@@ -147,7 +162,7 @@ for i=1:length(fluxes)
         continue;
     end
     plot(radialWavelength,flux,LineWidth=options.forcingLineWidth,Color=fluxes(i).color,DisplayName=fluxes(i).fancyName), hold on
-    drawPatchForFluxWithColor(flux,fluxes(i).color);
+    drawPatchForFluxWithColor(radialWavelength,flux,fluxes(i).color);
 end
 plot(ax,radialWavelength,filter(ddt_TE_A0),'c',LineWidth=options.forcingLineWidth,DisplayName='d/dt geostrophic energy')
 
@@ -168,7 +183,7 @@ text(ax,max(xlim)*.95,max(ylim),'a)','FontSize',14,'HorizontalAlignment','left',
 % Visualization: wave fluxes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ax = nexttile(tl);
+ax = nexttile(tl,3);
 fluxes = inertial_fluxes_w;
 for i=1:length(fluxes)
     if max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
@@ -183,7 +198,7 @@ for i=1:length(fluxes)
         continue;
     end
     plot(radialWavelength,flux,LineWidth=options.forcingLineWidth,Color=fluxes(i).color,DisplayName=fluxes(i).fancyName), hold on
-    drawPatchForFluxWithColor(flux,fluxes(i).color);
+    drawPatchForFluxWithColor(radialWavelength,flux,fluxes(i).color);
 end
 plot(ax,radialWavelength,filter(ddt_TE_Apm),'c',LineWidth=options.forcingLineWidth,DisplayName='d/dt wave energy')
 
@@ -200,9 +215,42 @@ lgd2.NumColumns = 2;
 text(ax,max(xlim)*.95,max(ylim),'b)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Visualization: wave fluxes frequency axis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ax = nexttile(tl,4);
+fluxes = inertial_fluxes_w;
+for i=1:length(fluxes)
+    if max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
+        continue;
+    end
+    plot(omegaAxisSparse,filter_omega(fluxes(i).flux_omega),LineWidth=options.triadLineWidth,Color=fluxes(i).color,LineStyle=fluxes(i).lineStyle,DisplayName=fluxes(i).fancyName), hold on
+end
+fluxes = forcing_fluxes_w;
+for i=1:length(fluxes)
+    flux = filter_omega(fluxes(i).flux_omega);
+    if max(abs(flux)) < options.fluxTolerance
+        continue;
+    end
+    plot(omegaAxis,flux,LineWidth=options.forcingLineWidth,Color=fluxes(i).color,DisplayName=fluxes(i).fancyName), hold on
+    drawPatchForFluxWithColor(omegaAxis,flux,fluxes(i).color);
+end
+% plot(ax,radialWavelength,filter(ddt_TE_Apm),'c',LineWidth=options.forcingLineWidth,DisplayName='d/dt wave energy')
+
+ax.XScale = "log";
+ax.XLim = [min(omegaAxis) max(omegaAxis)];
+ax.YLim = yLimits;
+ax.XLabel.String = "frequency (f)";
+ax.YTickLabels = [];
+
+text(ax,min(xlim)*1.05,max(ylim),'c)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
+
+% setTileSpacingBetween(tl, 0.5)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Helper function to highlight a flux
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function drawPatchForFluxWithColor(flux,color)
+    function drawPatchForFluxWithColor(fluxAxis,flux,color)
         % find radialWavelength for 10%-90% forcing interval
         cv = abs(flux) / max(abs(flux));
         % Remove duplicates values
@@ -212,7 +260,7 @@ text(ax,max(xlim)*.95,max(ylim),'b)','FontSize',14,'HorizontalAlignment','left',
             uniqueInd(firstOne-1) = 1;
         end
         cv_unique = cv(uniqueInd);
-        r_unique = radialWavelength(uniqueInd);
+        r_unique = fluxAxis(uniqueInd);
         r01 = interp1(cv_unique, r_unique, 0.16);
         r09 = interp1(cv_unique, r_unique, 0.84);
         % patch coordinates
@@ -225,5 +273,7 @@ text(ax,max(xlim)*.95,max(ylim),'b)','FontSize',14,'HorizontalAlignment','left',
         % add forcing/damping patch
         patch(ax,patchX,patchY,color,'FaceAlpha',fluxes(i).alpha,'EdgeColor','none','HandleVisibility','off')
     end
+
+
 
 end
