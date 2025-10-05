@@ -1,8 +1,9 @@
-function create1DMirrorFluxes(self,options)
+function create2DMirrorFluxes(self,options)
 arguments
     self WVDiagnostics
     options.stride = 1
     options.timeIndices
+    options.mirrorTriad {mustBeMember(options.mirrorTriad, ["wwg","ggw"])} = "wwg";
 end
 
 if ~exist(self.diagpath,"file")
@@ -11,17 +12,29 @@ end
 diagfile = self.diagfile;
 wvt = self.wvt;
 
-[kp,bins_0,bins_pm] = self.sparsePseudoRadialAxis;
+[js,ks,bins_0,bins_pm] = self.sparseJKAxis;
+matrixSize = [length(js) length(ks)];
+N = length(js)*length(ks);
 
-if diagfile.hasGroupWithName("mirror-fluxes-1d")
+groupName = "mirror-flux-2d-" + options.mirrorTriad;
+tName = "t_" + options.mirrorTriad;
+if options.mirrorTriad=="wwg"
+    triadPrimaryName = "F_wwg_js_ks";
+    triadMirrorName = "pi_w_wwg_js_ks";
+else
+    triadPrimaryName = "F_ggw_js_ks";
+    triadMirrorName = "pi_g_ggw_js_ks";
+end
+
+if diagfile.hasGroupWithName(groupName)
     %%%%%%%%%%%%%%%%%%
     % If existing file
     %%%%%%%%%%%%%%%%%%
-    group = diagfile.groupWithName("mirror-fluxes-1d");
-    t = group.readVariables("t");
+    group = diagfile.groupWithName(groupName);
+    t = group.readVariables(tName);
     [found, idx] = ismember(t, self.t_wv);
     if ~all(found)
-        error('Some entries of mirror-fluxes-1d/t are not exactly in t_wv.');
+        error('Some entries of mirror-fluxes-2d/t are not exactly in t_wv.');
     end
     if length(t) > 1
         stride = idx(2)-idx(1);
@@ -34,10 +47,8 @@ if diagfile.hasGroupWithName("mirror-fluxes-1d")
     end
     outputIndexOffset = length(t);
 
-    pi_w_wwg_kp = group.variableWithName("pi_w_wwg_kp");
-    F_wwg_kp = group.variableWithName("F_wwg_kp");
-    pi_g_ggw_kp = group.variableWithName("pi_g_ggw_kp");
-    F_ggw_kp = group.variableWithName("F_ggw_kp");
+    Pi_var = group.variableWithName(triadMirrorName);
+    F_var = group.variableWithName(triadPrimaryName);
 else
     %%%%%%%%%%%%%%%%%%
     % If new file
@@ -50,10 +61,11 @@ else
         timeIndices = options.timeIndices;
     end
 
-    group = diagfile.addGroup("mirror-fluxes-1d");
-    group.addDimension("kp",kp);
+    group = diagfile.addGroup(groupName);
+    group.addDimension("js",js);
+    group.addDimension("ks",ks);
 
-    varAnnotation = wvt.propertyAnnotationWithName('t');
+    varAnnotation = wvt.propertyAnnotationWithName("t");
     varAnnotation.attributes('units') = varAnnotation.units;
     varAnnotation.attributes('long_name') = varAnnotation.description;
     varAnnotation.attributes('standard_name') = 'time';
@@ -61,14 +73,11 @@ else
     varAnnotation.attributes('units') = 'seconds since 1970-01-01 00:00:00';
     varAnnotation.attributes('axis') = 'T';
     varAnnotation.attributes('calendar') = 'standard';
-    group.addDimension(varAnnotation.name,length=Inf,type="double",attributes=varAnnotation.attributes);
+    group.addDimension(tName,length=Inf,type="double",attributes=varAnnotation.attributes);
 
-    dimensionNames = ["kp", "t"];
-    pi_w_wwg_kp = group.addVariable("pi_w_wwg_kp",dimensionNames,type="double",isComplex=false);
-    F_wwg_kp = group.addVariable("F_wwg_kp",dimensionNames,type="double",isComplex=false);
-    pi_g_ggw_kp = group.addVariable("pi_g_ggw_kp",dimensionNames,type="double",isComplex=false);
-    F_ggw_kp = group.addVariable("F_ggw_kp",dimensionNames,type="double",isComplex=false);
-
+    dimensionNames = ["js", "ks", tName];
+    Pi_var = group.addVariable(triadMirrorName,dimensionNames,type="double",isComplex=false);
+    F_var = group.addVariable(triadPrimaryName,dimensionNames,type="double",isComplex=false);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -78,14 +87,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 valid = ~isnan(bins_0);
-S_0 = sparse(find(valid), bins_0(valid), 1, numel(wvt.Ap), numel(kp), nnz(valid));
+S_0 = sparse(find(valid), bins_0(valid), 1, numel(wvt.Ap), N, nnz(valid));
 
 valid = ~isnan(bins_pm);
-S_pm = sparse(find(valid), bins_pm(valid), 1, numel(wvt.Ap), numel(kp), nnz(valid));
+S_pm = sparse(find(valid), bins_pm(valid), 1, numel(wvt.Ap), N, nnz(valid));
 
-mask_0 = false(wvd.wvt.Nj,wvt.Nkl,length(kp));
-mask_pm = false(wvd.wvt.Nj,wvt.Nkl,length(kp));
-for iK = 1:1:length(kp)
+mask_0 = false(wvt.Nj,wvt.Nkl,N);
+mask_pm = false(wvt.Nj,wvt.Nkl,N);
+for iK = 1:N
     mask_0(:,:,iK) = (bins_0 <= iK);
     mask_pm(:,:,iK) = (bins_pm <= iK);
 end
@@ -100,12 +109,12 @@ integrationLastInformWallTime = datetime('now');
 loopStartTime = integrationLastInformWallTime;
 integrationLastInformLoopNumber = 1;
 integrationInformTime = 10;
-fprintf("Starting loop to compute the 1d mirror fluxes for %d time indices, over N=%d, Nk=%d.\n",length(timeIndices),length(kp));
+fprintf("Starting loop to compute the 2d mirror fluxes for %d time indices, over N=%d.\n",length(timeIndices),N);
 for timeIndex = 1:length(timeIndices)
     deltaWallTime = datetime('now')-integrationLastInformWallTime;
     if ( seconds(deltaWallTime) > integrationInformTime)
         wallTimePerLoopTime = deltaWallTime / (timeIndex - integrationLastInformLoopNumber);
-        wallTimeRemaining = wallTimePerLoopTime*(length(timeIndices) - timeIndex);
+        wallTimeRemaining = wallTimePerLoopTime*(length(timeIndices) - timeIndex + 1);
         fprintf('Time index %d of %d. Estimated time to finish is %s (%s)\n', timeIndex, length(timeIndices), wallTimeRemaining, datetime(datetime('now')+wallTimeRemaining,TimeZone='local',Format='d-MMM-y HH:mm:ss Z')) ;
         integrationLastInformWallTime = datetime('now');
         integrationLastInformLoopNumber = timeIndex;
@@ -113,27 +122,30 @@ for timeIndex = 1:length(timeIndices)
 
     outputIndex = timeIndex + outputIndexOffset;
     self.iTime = timeIndices(timeIndex);
-    group.variableWithName('t').setValueAlongDimensionAtIndex(wvt.t,'t',outputIndex);
+    group.variableWithName(tName).setValueAlongDimensionAtIndex(wvt.t,tName,outputIndex);
 
-    E0 = WVDiagnostics.waveWaveGeostrophicEnergy(wvt,1);
-    F_wwg_kp_val = reshape(E0(:).' * S_0,[],1);
-    F_wwg_kp.setValueAlongDimensionAtIndex(F_wwg_kp_val,'t',outputIndex);
+    Pi_val = zeros(matrixSize);
+    if options.mirrorTriad=="wwg"
+        E0 = WVDiagnostics.waveWaveGeostrophicEnergy(wvt,1);
+        F_val = reshape(reshape(E0(:).' * S_0,[],1),matrixSize);
+        F_var.setValueAlongDimensionAtIndex(F_val,tName,outputIndex);
 
-    Epm = WVDiagnostics.geostrophicGeostrophicWaveEnergy(wvt,1);
-    F_ggw_kp_val = reshape(Epm(:).' * S_pm,[],1);
-    F_ggw_kp.setValueAlongDimensionAtIndex(F_ggw_kp_val,'t',outputIndex);
+        for i=1:N
+            E0 = WVDiagnostics.waveWaveGeostrophicEnergy(wvt,mask_pm(:,:,i));
+            Pi_val(i) = sum(E0(:));
+        end
+    else
+        Epm = WVDiagnostics.geostrophicGeostrophicWaveEnergy(wvt,1);
+        F_val = reshape(reshape(Epm(:).' * S_pm,[],1),matrixSize);
+        F_var.setValueAlongDimensionAtIndex(F_val,tName,outputIndex);
 
-    pi_w_wwg_kp_val = zeros(length(kp),1);
-    pi_g_ggw_kp_val = zeros(length(kp),1);
-
-    for i=1:length(kp)
-        E0 = WVDiagnostics.waveWaveGeostrophicEnergy(wvt,mask_pm(:,:,i));
-        pi_w_wwg_kp_val(i) = sum(E0(:));
-        Epm = WVDiagnostics.geostrophicGeostrophicWaveEnergy(wvt,mask_0(:,:,i));
-        pi_g_ggw_kp_val(i) = sum(Epm(:));
+        for i=1:N
+            Epm = WVDiagnostics.geostrophicGeostrophicWaveEnergy(wvt,mask_0(:,:,i));
+            Pi_val(i) = sum(Epm(:));
+        end
     end
-    pi_w_wwg_kp.setValueAlongDimensionAtIndex(pi_w_wwg_kp_val,'t',outputIndex);
-    pi_g_ggw_kp.setValueAlongDimensionAtIndex(pi_g_ggw_kp_val,'t',outputIndex);
+    Pi_var.setValueAlongDimensionAtIndex(Pi_val,tName,outputIndex);
+
 end
 deltaLoopTime = datetime('now')-loopStartTime;
 fprintf("Total loop time %s, which is %s per time index.\n",deltaLoopTime,deltaLoopTime/length(timeIndices));

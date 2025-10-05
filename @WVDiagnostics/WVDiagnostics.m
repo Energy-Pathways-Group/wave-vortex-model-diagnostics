@@ -53,6 +53,7 @@ classdef WVDiagnostics < handle
         createWWGTriadDiagnostic(self,options)
         createDampedRegionDiagnostics(self,options)
         create1DMirrorFluxes(self,options)
+        create2DMirrorFluxes(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -212,7 +213,10 @@ classdef WVDiagnostics < handle
 
         [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
         [omegaAxis,bins_omega] = sparseOmegaAxis(self)
-        
+        k = sparseKRadialAxis(self)
+        j = sparseJWavenumberAxis(self)
+        [j,k,bins_0,bins_pm] = sparseJKAxis(self)
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Spectra (also implemented in the WVT)
