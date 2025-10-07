@@ -1,8 +1,8 @@
 basedir = "/Users/Shared/CimRuns_June2025/output/";
 basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 
-runNumber=9; runName = "hydrostatic: geostrophic + waves";
-wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
+runNumber=18; runName = "hydrostatic: geostrophic + waves";
+wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
 
 %%
 wvt = wvd.wvt;
@@ -75,8 +75,8 @@ end
 toc
 
 %%
-[js,ks,F,Pi] = wvd.diagfile.readVariables("mirror-flux-2d-wwg/js","mirror-flux-2d-wwg/ks","mirror-flux-2d-wwg/F_wwg_js_ks","mirror-flux-2d-wwg/pi_w_wwg_js_ks");
+[M_wwg, F_wwg, ks, js] = wvd.quadraticEnergyMirrorTriadFluxes2D(timeIndices=51:251);
 
-%%
 figure
-pcolor(ks,js,mean(F,3)), shading flat
+pcolor(ks,js,mean(F_wwg,3)), shading flat, xscale('log'), yscale('log')
+clim(0.2*[-1 1]*max(max(abs(mean(F,3)))))
