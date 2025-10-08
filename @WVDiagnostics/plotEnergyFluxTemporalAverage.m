@@ -15,7 +15,7 @@ function fig = plotEnergyFluxTemporalAverage(self,options)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics
-    options.approximation {mustBeMember(options.approximation,{'quadratic','exact'})} = 'exact'
+    options.approximation {mustBeMember(options.approximation,{'quadratic','exact'})} = 'quadratic'
     options.energyReservoir = EnergyReservoir.total;
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]
     options.showForcingFluxes = true;
@@ -173,7 +173,7 @@ end
 switch options.axes
     case "jk"
         % jkR plot labels
-        xlabel(tl,'wavelength (km)')
+        xlabel(tl,'horizontal wavelength (km)')
         ylabel(tl,"vertical mode")
         cb = colorbar;
         cb.Layout.Tile = 'east';
@@ -189,7 +189,7 @@ switch options.axes
     case "k"
         % kR plot options
         ylabel(tl,"energy flux (" + self.flux_scale_units + ")")
-        xlabel(tl,'wavelength (km)')
+        xlabel(tl,'horizontal wavelength (km)')
     case "k-pseudo-isotropic"
         % kR plot options
         ylabel(tl,"energy flux (" + self.flux_scale_units + ")")

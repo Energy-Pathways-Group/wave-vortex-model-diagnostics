@@ -9,7 +9,7 @@ arguments
     options.forcingFluxAttributes
 end
 
-yLimits = [-2.2,2.2];
+% yLimits = [-2.2,2.2]; % set automatically below
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -143,6 +143,14 @@ fig.PaperPositionMode = "auto";
 fig.Color = "w";
 tl = tiledlayout(fig,GridSize=[2 2],TileSpacing="compact",Padding="compact");
 
+% max and min fluxes for ylimits
+ffgMax = max(max(abs(filter([forcing_fluxes_g.flux]))));
+ffwMax = max(max(abs(filter([forcing_fluxes_w.flux]))));
+ifgMax = max(max(abs(filter([inertial_fluxes_g.flux]))));
+ifwMax = max(max(abs(filter([inertial_fluxes_w.flux]))));
+yLimits = [-max([ffgMax ffwMax ifgMax ifwMax]),max([ffgMax ffwMax ifgMax ifwMax])];
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Visualization: geostrophic fluxes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -246,6 +254,21 @@ ax.YTickLabels = [];
 text(ax,min(xlim)*1.05,max(ylim),'c)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
 
 % setTileSpacingBetween(tl, 0.5)
+
+% % get all YLim and set all to match largest
+% % This would work, except drawPatchForFluxWithColor above also uses YLim
+% axesHandles = findobj(fig.Children, 'Type', 'axes');
+% % Get all Y data from each axes
+% allYLim = [];
+% for iax = 1:length(axesHandles)
+%     allYLim = [allYLim axesHandles(iax).YLim];
+% end
+% % Compute common Y limits
+% yLimits = [min(allYLim), max(allYLim)];
+% % Set YLim for all axes
+% for ax = axesHandles'
+%     ax.YLim = yLimits;
+% end 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Helper function to highlight a flux
