@@ -158,7 +158,9 @@ yLimits = [-max([ffgMax ffwMax ifgMax ifwMax]),max([ffgMax ffwMax ifgMax ifwMax]
 ax = nexttile(tl,1);
 fluxes = inertial_fluxes_g;
 for i=1:length(fluxes)
-    if max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
+    if isempty(filter(fluxes(i).flux))
+        continue;
+    elseif max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
         continue;
     end
     plot(radialWavelengthSparse,filter(fluxes(i).flux),LineWidth=options.triadLineWidth,Color=fluxes(i).color,LineStyle=fluxes(i).lineStyle,DisplayName=fluxes(i).fancyName), hold on
@@ -166,7 +168,9 @@ end
 fluxes = forcing_fluxes_g;
 for i=1:length(fluxes)
     flux = filter(fluxes(i).flux);
-    if max(abs(flux)) < options.fluxTolerance
+    if isempty(flux)
+        continue;
+    elseif max(abs(flux)) < options.fluxTolerance
         continue;
     end
     plot(radialWavelength,flux,LineWidth=options.forcingLineWidth,Color=fluxes(i).color,DisplayName=fluxes(i).fancyName), hold on
@@ -194,7 +198,9 @@ text(ax,max(xlim)*.95,max(ylim),'a)','FontSize',14,'HorizontalAlignment','left',
 ax = nexttile(tl,3);
 fluxes = inertial_fluxes_w;
 for i=1:length(fluxes)
-    if max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
+    if isempty(filter(fluxes(i).flux))
+        continue;
+    elseif max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
         continue;
     end
     plot(radialWavelengthSparse,filter(fluxes(i).flux),LineWidth=options.triadLineWidth,Color=fluxes(i).color,LineStyle=fluxes(i).lineStyle,DisplayName=fluxes(i).fancyName), hold on
@@ -202,7 +208,9 @@ end
 fluxes = forcing_fluxes_w;
 for i=1:length(fluxes)
     flux = filter(fluxes(i).flux);
-    if max(abs(flux)) < options.fluxTolerance
+    if isempty(flux)
+        continue;
+    elseif max(abs(flux)) < options.fluxTolerance
         continue;
     end
     plot(radialWavelength,flux,LineWidth=options.forcingLineWidth,Color=fluxes(i).color,DisplayName=fluxes(i).fancyName), hold on
@@ -229,7 +237,9 @@ text(ax,max(xlim)*.95,max(ylim),'b)','FontSize',14,'HorizontalAlignment','left',
 ax = nexttile(tl,4);
 fluxes = inertial_fluxes_w;
 for i=1:length(fluxes)
-    if max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
+    if isempty(filter(fluxes(i).flux))
+        continue;
+    elseif max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
         continue;
     end
     plot(omegaAxisSparse,filter_omega(fluxes(i).flux_omega),LineWidth=options.triadLineWidth,Color=fluxes(i).color,LineStyle=fluxes(i).lineStyle,DisplayName=fluxes(i).fancyName), hold on
@@ -237,7 +247,9 @@ end
 fluxes = forcing_fluxes_w;
 for i=1:length(fluxes)
     flux = filter_omega(fluxes(i).flux_omega);
-    if max(abs(flux)) < options.fluxTolerance
+    if isempty(flux)
+        continue;
+    elseif max(abs(flux)) < options.fluxTolerance
         continue;
     end
     plot(omegaAxis,flux,LineWidth=options.forcingLineWidth,Color=fluxes(i).color,DisplayName=fluxes(i).fancyName), hold on
