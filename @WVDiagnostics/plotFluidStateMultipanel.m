@@ -188,6 +188,8 @@ if options.shouldShowEnergySpectra
     % % % % % % pcolor(ax,radialWavelength,wvt.j,val), shading flat,
     % % % % % % set(gca,'XDir','reverse')
     % % % % % % set(gca,'XScale','log')
+    % % % % set(gca,'XScale','log')
+    % % % % set(gca,'YScale','log')
     % % % xticklabels([])
     % % % % title('geostrophic energy')
     % % % title('energy spectrum')
@@ -256,6 +258,8 @@ if options.shouldShowEnergySpectra
     % % % % % % pcolor(ax,radialWavelength,wvt.j,val), shading flat,
     % % % % % % set(gca,'XDir','reverse')
     % % % % % % set(gca,'XScale','log')
+    % % % % set(gca,'XScale','log')
+    % % % % set(gca,'YScale','log')
     % % % % title('wave energy')
     % % % % title('energy spectrum')
     % % % axis square
