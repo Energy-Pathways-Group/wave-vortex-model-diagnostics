@@ -6,6 +6,7 @@ arguments
     options.triadLineWidth = 2
     options.forcingLineWidth = 1.5
     options.fluxTolerance = 5e-2
+    options.keFractions = [.01,0.025,.1,.25,.5,.75,.9,0.975,.99]
     options.forcingFluxAttributes
 end
 
@@ -20,28 +21,23 @@ end
 
 [inertial_fluxes_g, inertial_fluxes_w, kp] = self.quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(timeIndices=options.timeIndices);
 [inertial_fluxes_w_omega, omegaAxisSparse] = self.quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_omega(timeIndices=options.timeIndices);
+[inertial_fluxes_g_kepe, kePeAxis] = self.quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_kepe(timeIndices=options.timeIndices);
 
-inertial_fluxes_g([inertial_fluxes_g.name] == "ggg").color=0*[1 1 1];
-inertial_fluxes_g([inertial_fluxes_g.name] == "ggg").lineStyle="-";
-inertial_fluxes_g([inertial_fluxes_g.name] == "ggw").color=0*[1 1 1];
-inertial_fluxes_g([inertial_fluxes_g.name] == "ggw").lineStyle=":";
-inertial_fluxes_g([inertial_fluxes_g.name] == "tx-wwg").color=0*[1 1 1];
-inertial_fluxes_g([inertial_fluxes_g.name] == "tx-wwg").lineStyle="--";
-inertial_fluxes_g([inertial_fluxes_g.name] == "tx-ggw").color=0*[1 1 1];
-inertial_fluxes_g([inertial_fluxes_g.name] == "tx-ggw").lineStyle="-.";
+fluxNames = ["ggg", "ggw", "tx-wwg", "tx-ggw"];
+fluxLineStyle = ["-", ":", "--", "-."];
+for iName=1:length(fluxNames)
+    inertial_fluxes_g([inertial_fluxes_g.name] == fluxNames(iName)).color=0*[1 1 1];
+    inertial_fluxes_g([inertial_fluxes_g.name] == fluxNames(iName)).lineStyle=fluxLineStyle(iName);
+    inertial_fluxes_g([inertial_fluxes_g.name] == fluxNames(iName)).flux_kepe = inertial_fluxes_g_kepe([inertial_fluxes_g.name] == fluxNames(iName)).flux;
+end
 
-inertial_fluxes_w([inertial_fluxes_w.name] == "www").color=0*[1 1 1];
-inertial_fluxes_w([inertial_fluxes_w.name] == "www").lineStyle="-";
-inertial_fluxes_w([inertial_fluxes_w.name] == "www").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "www").flux;
-inertial_fluxes_w([inertial_fluxes_w.name] == "wwg").color=0*[1 1 1];
-inertial_fluxes_w([inertial_fluxes_w.name] == "wwg").lineStyle=":";
-inertial_fluxes_w([inertial_fluxes_w.name] == "wwg").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "wwg").flux;
-inertial_fluxes_w([inertial_fluxes_w.name] == "tx-wwg").color=0*[1 1 1];
-inertial_fluxes_w([inertial_fluxes_w.name] == "tx-wwg").lineStyle="--";
-inertial_fluxes_w([inertial_fluxes_w.name] == "tx-wwg").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "tx-wwg").flux;
-inertial_fluxes_w([inertial_fluxes_w.name] == "tx-ggw").color=0*[1 1 1];
-inertial_fluxes_w([inertial_fluxes_w.name] == "tx-ggw").lineStyle="-.";
-inertial_fluxes_w([inertial_fluxes_w.name] == "tx-ggw").flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == "tx-ggw").flux;
+fluxNames = ["www", "wwg", "tx-wwg", "tx-ggw"];
+fluxLineStyle = ["-", ":", "--", "-."];
+for iName=1:length(fluxNames)
+    inertial_fluxes_w([inertial_fluxes_w.name] == fluxNames(iName)).color=0*[1 1 1];
+    inertial_fluxes_w([inertial_fluxes_w.name] == fluxNames(iName)).lineStyle=fluxLineStyle(iName);
+    inertial_fluxes_w([inertial_fluxes_w.name] == fluxNames(iName)).flux_omega = inertial_fluxes_w_omega([inertial_fluxes_w.name] == fluxNames(iName)).flux;
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -87,6 +83,7 @@ for i=1:length(energy_fluxes)
     forcing_fluxes_g(i).color = C(mod(i,size(C,1))+1,:);
     forcing_fluxes_g(i).alpha = 0.3;
     forcing_fluxes_g(i).flux = self.transformToPseudoRadialWavenumber(EnergyReservoir.geostrophic_mda,energy_fluxes(i).te_gmda);
+    forcing_fluxes_g(i).flux_kepe = self.transformToKePeAxis(energy_fluxes(i).te_gmda);
 
     forcing_fluxes_w(i).name = energy_fluxes(i).name;
     forcing_fluxes_w(i).fancyName = energy_fluxes(i).fancyName;
@@ -191,6 +188,45 @@ lgd1.NumColumns = 2;
 
 text(ax,max(xlim)*.95,max(ylim),'a)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Visualization: geostrophic fluxes KePe axis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+kePeAxisSimple = reshape(1:length(kePeAxis),size(kePeAxis));
+
+ax = nexttile(tl,2);
+fluxes = inertial_fluxes_g;
+for i=1:length(fluxes)
+    if isempty(filter(fluxes(i).flux))
+        continue;
+    elseif max(abs(filter(fluxes(i).flux))) < options.fluxTolerance
+        continue;
+    end
+    plot(kePeAxisSimple,filter(fluxes(i).flux_kepe),LineWidth=options.triadLineWidth,Color=fluxes(i).color,LineStyle=fluxes(i).lineStyle,DisplayName=fluxes(i).fancyName), hold on
+end
+fluxes = forcing_fluxes_g;
+for i=1:length(fluxes)
+    flux = filter(fluxes(i).flux_kepe);
+    if isempty(flux)
+        continue;
+    elseif max(abs(flux)) < options.fluxTolerance
+        continue;
+    end
+    plot(kePeAxisSimple,flux,LineWidth=options.forcingLineWidth,Color=fluxes(i).color,DisplayName=fluxes(i).fancyName), hold on
+    drawPatchForFluxWithColor(kePeAxisSimple,flux,fluxes(i).color);
+end
+% plot(ax,radialWavelength,filter(ddt_TE_Apm),'c',LineWidth=options.forcingLineWidth,DisplayName='d/dt wave energy')
+
+ax.XTick = interp1(kePeAxis,kePeAxisSimple,options.keFractions);
+ax.XTickLabels = string(options.keFractions);
+ax.XLim = [kePeAxisSimple(1) kePeAxisSimple(end)];
+ax.YLim = yLimits;
+ax.XLabel.String = "ke/(ke+pe)";
+ax.YTickLabels = [];
+
+text(ax,min(xlim)*1.05,max(ylim),'b)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Visualization: wave fluxes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -228,7 +264,7 @@ ax.YLabel.String = "wave energy flux (" + self.flux_scale_units + ")";
 lgd2 = legend(Location="southwest",Interpreter="latex");
 lgd2.NumColumns = 2;
 
-text(ax,max(xlim)*.95,max(ylim),'b)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
+text(ax,max(xlim)*.95,max(ylim),'c)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Visualization: wave fluxes frequency axis
@@ -263,7 +299,7 @@ ax.YLim = yLimits;
 ax.XLabel.String = "frequency (f)";
 ax.YTickLabels = [];
 
-text(ax,min(xlim)*1.05,max(ylim),'c)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
+text(ax,min(xlim)*1.05,max(ylim),'d)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
 
 % setTileSpacingBetween(tl, 0.5)
 

@@ -34,6 +34,7 @@ classdef WVDiagnostics < handle
         kRadial
         kPseudoRadial
         omegaAxis
+        kePeAxis
         Lr2
         Lr2_pm
         omega_jk
@@ -191,6 +192,7 @@ classdef WVDiagnostics < handle
 
         [inertial_fluxes_g, inertial_fluxes_w, kp] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(self,options)
         [inertial_fluxes_w, omegaAxis] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_omega(self,options)
+        [inertial_fluxes_g, kePeAxis] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_kepe(self,options)
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -211,7 +213,8 @@ classdef WVDiagnostics < handle
         [varargout] = transformToPseudoRadialWavenumber(self,energyReservoir,varargin);
         [varargout] = transformToPseudoRadialWavenumberA0(self,varargin);
         [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)  
-        [varargout] = transformToOmegaAxis(self,varargin)   
+        [varargout] = transformToOmegaAxis(self,varargin) 
+        [varargout] = transformToKePeAxis(self,varargin) 
 
         [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
         [omegaAxis,bins_omega] = sparseOmegaAxis(self)
@@ -962,6 +965,12 @@ classdef WVDiagnostics < handle
             omegaj1=omega(1,:);
             dOmega=max(diff(sort(omegaj1(:))));
             omega=min(omega(:)):dOmega:max(omega(:));
+        end
+
+        function kepe = get.kePeAxis(self)
+            % fraction = self.geo_hke_jk./(self.geo_hke_jk+self.geo_pe_jk);
+            a = cat(1,0,10.^linspace(log10(0.01),log10(0.5),10).');
+            kepe = cat(1,a,1-flip(a(1:end-1)));
         end
 
         function t = get.t_wv(self)
