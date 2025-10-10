@@ -218,6 +218,7 @@ classdef WVDiagnostics < handle
 
         [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
         [omegaAxis,bins_omega] = sparseOmegaAxis(self)
+        [kePeAxis,bins_kepe] = sparseKePeAxis(self)
         k = sparseKRadialAxis(self)
         j = sparseJWavenumberAxis(self)
         [j,k,bins_0,bins_pm] = sparseJKAxis(self)
