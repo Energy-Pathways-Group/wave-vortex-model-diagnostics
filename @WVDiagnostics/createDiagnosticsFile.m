@@ -161,7 +161,7 @@ else
     [omegaN,n,hke_jk,pe_jk,hN] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)),wvt.A0_KE_factor,wvt.A0_PE_factor,h_pm);
     omegaJK = (omegaN./n);
     h_kj = (hN./n);
-    Lr2_pm = wvt.g * h_kj / wvt.f*wvt.f;
+    Lr2_pm = wvt.g * h_kj / (wvt.f*wvt.f);
     diagfile.addVariable("omega_jk",dimensionNames,omegaJK,isComplex=false);
     diagfile.addVariable("geo_hke_jk",dimensionNames,hke_jk,isComplex=false);
     diagfile.addVariable("geo_pe_jk",dimensionNames,pe_jk,isComplex=false);
