@@ -801,7 +801,7 @@ classdef WVDiagnostics < handle
                         ncfile_ = wvt_.writeToFile(self.wvaapath);
                         ncfile_.close;
                     end
-                    self.wvt_aa_cache = WVTransform.waveVortexTransformFromFile(self.wvaapath,iTime=Inf,shouldReadOnly=true);
+                    self.wvt_aa_cache = WVTransform.waveVortexTransformFromFile(self.wvaapath,iTime=self.iTime,shouldReadOnly=true);
                 else
                     self.wvt_aa_cache = self.wvt.waveVortexTransformWithExplicitAntialiasing();
                 end

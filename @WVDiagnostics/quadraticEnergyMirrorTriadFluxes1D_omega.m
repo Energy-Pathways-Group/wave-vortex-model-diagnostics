@@ -7,7 +7,7 @@ end
 % components are computed on a custom sparse omega grid
 
 val= self.diagfile.readVariables('pi_w_wwg_omega');
-M_wwg= cat(1,zeros(1,size(val,2)),diff(val));
+M_wwg= diff(cat(1,zeros(1,size(val,2)),val));
 
 omegaAxis =  reshape(self.diagfile.readVariables('omegaAxis'),[],1);
 

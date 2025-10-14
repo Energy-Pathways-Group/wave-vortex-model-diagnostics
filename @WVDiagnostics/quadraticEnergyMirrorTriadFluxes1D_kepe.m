@@ -5,7 +5,7 @@ arguments
 end
 
 val= self.diagfile.readVariables('pi_g_ggw_kepe');
-M_ggw= cat(1,zeros(1,size(val,2)),diff(val));
+M_ggw= diff(cat(1,zeros(1,size(val,2)),val));
 
 kePeAxis =  reshape(self.diagfile.readVariables('kePeAxis'),[],1);
 

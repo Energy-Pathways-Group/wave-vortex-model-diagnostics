@@ -25,53 +25,124 @@ arguments
 end
     options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave];
 
-    forcing_fluxes_jk = self.quadraticEnergyFluxesTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
-    forcing_exact_jk = self.exactEnergyFluxesTemporalAverage(timeIndices=options.timeIndices);
-    inertial_jk = self.quadraticEnergyTriadFluxesTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+    kp = self.kPseudoRadial;
+    forcing_fluxes_kp = self.quadraticEnergyFluxesTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+    forcing_exact_kp = self.exactEnergyFluxesTemporalAverage(timeIndices=options.timeIndices);
 
-    % We could be smarter about this. But roughly speaking we want a region
-    % where none of the forcing shows up above our precision reporting
-    % level. It turns out our tidal forcing shows up if I do no_damp, so
-    % gotta put in the middle to strike the balance.
-    % Here were some failed ideas... the current idea is to split the
-    % difference, literally average the two values. It seems to work well.
-    
-    svv = self.wvt.forcingWithName("adaptive damping");
-    [J,K] = ndgrid(self.j,self.kRadial);
+    % First convert the forcing fluxes to kPseudoRadial
+    for iForce=1:length(forcing_fluxes_kp)
+        forcing_fluxes_kp(iForce).te_gmda = self.transformToPseudoRadialWavenumberA0(forcing_fluxes_kp(iForce).te_gmda);
+        forcing_fluxes_kp(iForce).te_wave = self.transformToPseudoRadialWavenumberApm(forcing_fluxes_kp(iForce).te_wave);
+    end
+    for iForce=1:length(forcing_exact_kp)
+        forcing_exact_kp(iForce).te = self.transformToPseudoRadialWavenumberA0(forcing_exact_kp(iForce).te);
+    end
 
-    % NoDamp = (K < svv.k_damp) & (J < svv.j_damp);
-    % NoDamp = (K < svv.k_no_damp) & (J < svv.j_no_damp);
-    NoDamp = (K < (svv.k_damp+svv.k_no_damp)/2) & (J < (svv.j_damp + svv.j_no_damp)/2);
-    forcing = self.filterFluxesForReservoir(forcing_fluxes_jk,filter=@(v) sum(sum(v(NoDamp))));
-    forcing_fluxes_damp = self.filterFluxesForReservoir(forcing_fluxes_jk,filter=@(v) sum(sum(v(~NoDamp))));
-    forcing_exact = self.filterFluxesForReservoir(forcing_exact_jk,filter=@(v) sum(sum(v(NoDamp))));
-    forcing_exact_damp = self.filterFluxesForReservoir(forcing_exact_jk,filter=@(v) sum(sum(v(~NoDamp))));
-    inertial_triads = self.filterFluxesForReservoir(inertial_jk,filter=@(v) sum(sum(v(NoDamp))));
+    % Now find which indices are outside the damping region
+    damping_index = [forcing_fluxes_kp.name] == "adaptive_damping";
+    if ~any(damping_index)
+        error("Unable to find adaptive damping and thus do not know how to proceed. I guess we could look for another closure.");
+    end
+    damping_kp = forcing_fluxes_kp(damping_index).te_gmda + forcing_fluxes_kp(damping_index).te_wave;
+    NoDamp = abs(cumsum(damping_kp/self.flux_scale)) < options.fluxTolerance;
 
+    % Sort the forcing (both quadratic and exact) into damped and undamped
+    forcing = self.filterFluxesForReservoir(forcing_fluxes_kp,filter=@(v) sum(sum(v(NoDamp))));
+    forcing_fluxes_damp = self.filterFluxesForReservoir(forcing_fluxes_kp,filter=@(v) sum(sum(v(~NoDamp))));
+    forcing_exact = self.filterFluxesForReservoir(forcing_exact_kp,filter=@(v) sum(sum(v(NoDamp))));
+    forcing_exact_damp = self.filterFluxesForReservoir(forcing_exact_kp,filter=@(v) sum(sum(v(~NoDamp))));
+
+    % create a new reservoir, te_damp, which contains the combined geo and
+    % wave forcing in the damped region. Same for the exact flux.
     for iForce=1:length(forcing)
         forcing(iForce).te_damp = forcing_fluxes_damp(iForce).te_gmda + forcing_fluxes_damp(iForce).te_wave;
-        % forcing(iForce).te_quadratic = forcing(iForce).te_gmda + forcing(iForce).te_wave + forcing(iForce).te_damp;
         forcing(iForce).te_exact = forcing_exact(iForce).te;
         forcing(iForce).te_exact_damp = forcing_exact_damp(iForce).te;
     end
 
+    % inertial_triads = self.filterFluxesForReservoir(inertial_jk,filter=@(v) sum(sum(v(NoDamp))));
+    
+    % Now deal with the inertial triads. Here we use the *sparse* pseudo
+    % radial axis, so we need to find the appropriate indices again.
+    [inertial_fluxes_g_kps, inertial_fluxes_w_kps, kps] = self.quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(timeIndices=options.timeIndices);
+    NoDampKps = kps <= max(kp(NoDamp));
 
+    % the total transfers are opposite and equal
+    % but the transfers into/from the undamped region will not be
+    gmda_tx_wave_no_damp = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-wwg").flux(NoDampKps) + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-ggw").flux(NoDampKps));
+    wave_tx_gmda_no_damp = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-wwg").flux(NoDampKps) + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-ggw").flux(NoDampKps));
+    gmda_tx_wave_damp = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-wwg").flux(~NoDampKps) + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-ggw").flux(~NoDampKps));
+    wave_tx_gmda_damp = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-wwg").flux(~NoDampKps) + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-ggw").flux(~NoDampKps));
 
+    % Categorization method 1: Only count transfer that both start and land
+    % in the un-damped region. Then allocate the rest as transfers to the
+    % damped region.
+    % if abs(gmda_tx_wave_no_damp) < abs(wave_tx_gmda_no_damp)
+    %     % Two possibilities
+    %     % 1. gmda (< 0) loses energy to wave (> 0), wave *gain* from damped geo,
+    %     % 2. gmda (> 0) gain energy from wave (< 0), but wave more negative than gmda positive, so wave lose to damped geo
+    %     gmda_tx_wave = gmda_tx_wave_no_damp;
+    %     wave_tx_gmda = -gmda_tx_wave_no_damp;
+    %     gmda_tx_damp = 0;
+    %     wave_tx_damp = wave_tx_gmda_no_damp + gmda_tx_wave_no_damp;
+    % else
+    %     gmda_tx_wave = -wave_tx_gmda_no_damp;
+    %     wave_tx_gmda = wave_tx_gmda_no_damp;
+    %     gmda_tx_damp = wave_tx_gmda_no_damp + gmda_tx_wave_no_damp;
+    %     wave_tx_damp = 0;
+    % end
+
+    % Categorization method 2: Count transfers as in the undamped region
+    % where they originate. The portion that lands in the damped region,
+    % add that the forward flux
+    % if abs(gmda_tx_wave_no_damp) > abs(wave_tx_gmda_no_damp)
+    %     % Two possibilities
+    %     % 1. gmda (< 0) loses energy to wave (> 0), wave *gain* from damped geo,
+    %     % 2. gmda (> 0) gain energy from wave (< 0), but wave more negative than gmda positive, so wave lose to damped geo
+    %     gmda_tx_wave = gmda_tx_wave_no_damp;
+    %     wave_tx_gmda = -gmda_tx_wave_no_damp;
+    %     gmda_tx_damp = 0;
+    %     wave_tx_damp = wave_tx_gmda_no_damp + gmda_tx_wave_no_damp;
+    % else
+    %     gmda_tx_wave = -wave_tx_gmda_no_damp;
+    %     wave_tx_gmda = wave_tx_gmda_no_damp;
+    %     gmda_tx_damp = wave_tx_gmda_no_damp + gmda_tx_wave_no_damp;
+    %     wave_tx_damp = 0;
+    % end
+
+    % but the transfers into/from the undamped region will not be
+    g_cascade = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "ggg").flux(NoDampKps) + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "ggw").flux(NoDampKps));
+    w_cascade = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "www").flux(NoDampKps) + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "wwg").flux(NoDampKps));
+    g_cascade_damp = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "ggg").flux(~NoDampKps) + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "ggw").flux(~NoDampKps));
+    w_cascade_damp = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "www").flux(~NoDampKps) + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "wwg").flux(~NoDampKps));
+
+    % There is one route for te_gmda to transfer to te_wave, and that is
+    % the direct transfer terms summed. Although, *some* of that energy
+    % might land in the damping region of the waves, and thus actually land
+    % in te_damp. The two cascade terms will also transfer to te_damp.
     inertial(1).name = "te_gmda";
     inertial(1).fancyName = WVDiagnostics.fancyNameForName(inertial(1).name);
     inertial(1).te_gmda = 0;
-    inertial(1).te_damp = inertial_triads(1).te_gmda + inertial_triads(2).te_gmda + inertial_triads(3).te_gmda + inertial_triads(1).te_wave;
+    inertial(1).te_wave = gmda_tx_wave_no_damp;
+    inertial(1).te_damp = g_cascade;
 
     inertial(2).name = "te_wave";
     inertial(2).fancyName = WVDiagnostics.fancyNameForName(inertial(2).name);
-    inertial(2).te_damp = inertial_triads(4).te_wave + inertial_triads(2).te_wave + inertial_triads(3).te_wave + inertial_triads(4).te_gmda;
+    inertial(2).te_gmda = wave_tx_gmda_no_damp;
     inertial(2).te_wave = 0;
+    inertial(2).te_damp = w_cascade;
 
     inertial(3).name = "te_exact";
     inertial(3).fancyName = "exact undamped reservoir";
     inertial(3).te_gmda = 0;
     inertial(3).te_damp = forcing(1).te_exact;
     inertial(3).te_wave = 0;
+
+    inertial(4).name = "te_damp";
+    inertial(4).fancyName = WVDiagnostics.fancyNameForName(inertial(4).name);
+    inertial(4).te_gmda = gmda_tx_wave_damp;
+    inertial(4).te_wave = wave_tx_gmda_damp;
+    inertial(4).te_damp = 0;
 
     % remove nonlinear advection, now that we copied the values we needed
     forcing(1) = [];
@@ -86,42 +157,33 @@ end
         end
     end
 
-    % Alt 1
-    inertial(1).te_wave = inertial_triads(4).te_gmda - inertial_triads(1).te_wave;
-    inertial(2).te_gmda = inertial_triads(1).te_wave - inertial_triads(4).te_gmda;
-
     [reservoirEnergy, t] = self.quadraticEnergyOverTime(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices,shouldIncludeExactTotalEnergy=true);
-    
 
-    % ape_bg = self.diagfile.readVariables("ape_bg");
-    % ape_bg = ape_bg(options.timeIndices);
-    % ddt.te_bg = (ape_bg(end) - ape_bg(1))/(t(end)-t(1));
-    energy.te_gmda = mean(reservoirEnergy(1).energy);
-    energy.te_wave = mean(reservoirEnergy(2).energy);
+    % Let's be precise here, and pull out the energy for the damped region
+    % also
+    if self.diagnosticsHasExplicitAntialiasing
+        wvt = self.wvt_aa;
+    else
+        wvt = self.wvt;
+    end
+    self.iTime = options.timeIndices(end);
+    E_pm_kp = self.transformToPseudoRadialWavenumberApm(wvt.transformToRadialWavenumber(wvt.Apm_TE_factor.*(abs(wvt.Ap).^2 + abs(wvt.Am).^2)));
+    E_0_kp = self.transformToPseudoRadialWavenumberA0(wvt.transformToRadialWavenumber(wvt.A0_TE_factor.*(abs(wvt.A0).^2)));
+    E_damp_pm_f = sum(E_pm_kp(:) .* ~NoDamp(:));
+    E_damp_0_f = sum(E_0_kp(:) .* ~NoDamp(:));
+    self.iTime = options.timeIndices(1);
+    E_pm_kp = self.transformToPseudoRadialWavenumberApm(wvt.transformToRadialWavenumber(wvt.Apm_TE_factor.*(abs(wvt.Ap).^2 + abs(wvt.Am).^2)));
+    E_0_kp = self.transformToPseudoRadialWavenumberA0(wvt.transformToRadialWavenumber(wvt.A0_TE_factor.*(abs(wvt.A0).^2)));
+    E_damp_pm_i = sum(E_pm_kp(:) .* ~NoDamp(:));
+    E_damp_0_i = sum(E_0_kp(:) .* ~NoDamp(:));
+
+    energy.te_gmda = mean(reservoirEnergy(1).energy) - (E_damp_0_i + E_damp_0_f)/2;
+    energy.te_wave = mean(reservoirEnergy(2).energy) - (E_damp_pm_i + E_damp_pm_f)/2;
+    energy.te_damp = (E_damp_0_i + E_damp_0_f + E_damp_pm_i + E_damp_pm_f)/2;
     energy.te_exact = mean(reservoirEnergy(3).energy);
-    E = self.wvt.transformToRadialWavenumber(self.wvt.Apm_TE_factor.*(abs(self.wvt.Ap).^2 + abs(self.wvt.Am).^2) + self.wvt.A0_TE_factor.*(abs(self.wvt.A0).^2));
-    E_big = zeros(length(self.j),length(self.kRadial));
-    E_big(1:size(E,1),1:size(E,2),:) = E;
-    energy.te_damp = sum( E_big(:) .* ~NoDamp(:));
+    
     ddt.te_gmda = (reservoirEnergy(1).energy(end) - reservoirEnergy(1).energy(1))/(t(end)-t(1));
     ddt.te_wave = (reservoirEnergy(2).energy(end) - reservoirEnergy(2).energy(1))/(t(end)-t(1));
+    ddt.te_damp = (E_damp_pm_f + E_damp_0_f - E_damp_pm_i - E_damp_0_i)/(t(end)-t(1));
     ddt.te_exact = (reservoirEnergy(3).energy(end) - reservoirEnergy(3).energy(1))/(t(end)-t(1));
 end
-
-% One can replace "inertial_triads(1).te_wave" with E0_ggw
-% and replace "inertial_triads(4).te_gmda" with Epm_wwg
-% [E0_ggw_jkt,Epm_wwg_jkt] = self.quadraticEnergyMirrorTriadsUndamped(timeIndices=options.timeIndices);
-% E0_ggw = sum(sum(mean(NoDamp.*E0_ggw_jkt,3),2),1);
-% Epm_wwg = sum(sum(mean(NoDamp.*Epm_wwg_jkt,3),2),1);
-% E0_ggw = sum(sum(mean(E0_ggw_jkt,3),2),1);
-% Epm_wwg = sum(sum(mean(Epm_wwg_jkt,3),2),1);
-% fprintf("low-pass ggw: %f, total ggw: %f\n", E0_ggw/self.flux_scale,inertial_triads(1).te_wave/self.flux_scale);
-% fprintf("low-pass wwg: %f, total wwg: %f\n", Epm_wwg/self.flux_scale,inertial_triads(4).te_gmda/self.flux_scale);
-% some geostrophic energy goes straight to the damped wave modes
-% % Alt 2: asymmetric. Not good
-% inertial(1).te_wave = inertial_triads(4).te_gmda - E0_ggw;
-% inertial(2).te_gmda = inertial_triads(1).te_wave - Epm_wwg;
-%
-% % Alt 3:
-% inertial(1).te_wave = Epm_wwg - E0_ggw;
-% inertial(2).te_gmda = E0_ggw - Epm_wwg;

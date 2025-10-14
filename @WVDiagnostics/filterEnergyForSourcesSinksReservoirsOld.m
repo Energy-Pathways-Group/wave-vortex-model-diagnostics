@@ -1,4 +1,4 @@
-function [sources, sinks, inertial, ddt, energy] = filterEnergyForSourcesSinksReservoirs2(self,options)
+function [sources, sinks, inertial, ddt, energy] = filterEnergyForSourcesSinksReservoirsOld(self,options)
 % This function returns values assuming three reservoirs: geo, wave, and
 % damping. The damping resevoir is just scales below a threshold, wave or
 % geostrophic. It also returns the exact and exact-damp resevoirs. 
@@ -25,57 +25,38 @@ arguments
 end
     options.energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave];
 
-    kp = self.kPseudoRadial;
-    forcing_fluxes_kp = self.quadraticEnergyFluxesTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
-    forcing_exact_kp = self.exactEnergyFluxesTemporalAverage(timeIndices=options.timeIndices);
+    forcing_fluxes_jk = self.quadraticEnergyFluxesTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
+    forcing_exact_jk = self.exactEnergyFluxesTemporalAverage(timeIndices=options.timeIndices);
+    inertial_jk = self.quadraticEnergyTriadFluxesTemporalAverage(energyReservoirs=options.energyReservoirs,timeIndices=options.timeIndices);
 
-    % First convert the forcing fluxes to kPseudoRadial
-    for iForce=1:length(forcing_fluxes_kp)
-        forcing_fluxes_kp(iForce).te_gmda = self.transformToPseudoRadialWavenumberA0(forcing_fluxes_kp(iForce).te_gmda);
-        forcing_fluxes_kp(iForce).te_wave = self.transformToPseudoRadialWavenumberApm(forcing_fluxes_kp(iForce).te_wave);
-    end
-    for iForce=1:length(forcing_exact_kp)
-        forcing_exact_kp(iForce).te = self.transformToPseudoRadialWavenumberA0(forcing_exact_kp(iForce).te);
-    end
+    % We could be smarter about this. But roughly speaking we want a region
+    % where none of the forcing shows up above our precision reporting
+    % level. It turns out our tidal forcing shows up if I do no_damp, so
+    % gotta put in the middle to strike the balance.
+    % Here were some failed ideas... the current idea is to split the
+    % difference, literally average the two values. It seems to work well.
+    
+    svv = self.wvt.forcingWithName("adaptive damping");
+    [J,K] = ndgrid(self.j,self.kRadial);
 
-    % Now find which indices are outside the damping region
-    damping_index = [forcing_fluxes_kp.name] == "adaptive_damping";
-    if ~any(damping_index)
-        error("Unable to find adaptive damping and thus do not know how to proceed. I guess we could look for another closure.");
-    end
-    damping_kp = forcing_fluxes_kp(damping_index).te_gmda + forcing_fluxes_kp(damping_index).te_wave;
-    NoDamp = abs(cumsum(damping_kp/self.flux_scale)) < options.fluxTolerance;
+    % NoDamp = (K < svv.k_damp) & (J < svv.j_damp);
+    % NoDamp = (K < svv.k_no_damp) & (J < svv.j_no_damp);
+    NoDamp = (K < (svv.k_damp+svv.k_no_damp)/2) & (J < (svv.j_damp + svv.j_no_damp)/2);
+    forcing = self.filterFluxesForReservoir(forcing_fluxes_jk,filter=@(v) sum(sum(v(NoDamp))));
+    forcing_fluxes_damp = self.filterFluxesForReservoir(forcing_fluxes_jk,filter=@(v) sum(sum(v(~NoDamp))));
+    forcing_exact = self.filterFluxesForReservoir(forcing_exact_jk,filter=@(v) sum(sum(v(NoDamp))));
+    forcing_exact_damp = self.filterFluxesForReservoir(forcing_exact_jk,filter=@(v) sum(sum(v(~NoDamp))));
+    inertial_triads = self.filterFluxesForReservoir(inertial_jk,filter=@(v) sum(sum(v(NoDamp))));
 
-    % Sort the forcing (both quadratic and exact) into damped and undamped
-    forcing = self.filterFluxesForReservoir(forcing_fluxes_kp,filter=@(v) sum(sum(v(NoDamp))));
-    forcing_fluxes_damp = self.filterFluxesForReservoir(forcing_fluxes_kp,filter=@(v) sum(sum(v(~NoDamp))));
-    forcing_exact = self.filterFluxesForReservoir(forcing_exact_kp,filter=@(v) sum(sum(v(NoDamp))));
-    forcing_exact_damp = self.filterFluxesForReservoir(forcing_exact_kp,filter=@(v) sum(sum(v(~NoDamp))));
-
-    % create a new reservoir, te_damp, which contains the combined geo and
-    % wave forcing in the damped region. Same for the exact flux.
     for iForce=1:length(forcing)
         forcing(iForce).te_damp = forcing_fluxes_damp(iForce).te_gmda + forcing_fluxes_damp(iForce).te_wave;
+        % forcing(iForce).te_quadratic = forcing(iForce).te_gmda + forcing(iForce).te_wave + forcing(iForce).te_damp;
         forcing(iForce).te_exact = forcing_exact(iForce).te;
         forcing(iForce).te_exact_damp = forcing_exact_damp(iForce).te;
     end
 
-    % inertial_triads = self.filterFluxesForReservoir(inertial_jk,filter=@(v) sum(sum(v(NoDamp))));
-    
-    % Now deal with the inertial triads. Here we use the *sparse* pseudo
-    % radial axis, so we need to find the appropriate indices again.
-    [inertial_fluxes_g_kps, inertial_fluxes_w_kps, kps] = self.quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(timeIndices=options.timeIndices);
-    NoDampKps = kps <= max(kp(NoDamp));
 
-    gmda_tx_wave = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-wwg").flux(NoDampKps) + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-ggw").flux(NoDampKps));
-    wave_tx_gmda = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-wwg").flux(NoDampKps) + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-ggw").flux(NoDampKps));
-    gmda_tx_wave = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-wwg").flux + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-ggw").flux);
-    wave_tx_gmda = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-wwg").flux + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-ggw").flux);
 
-    % There is one route for te_gmda to transfer to te_wave, and that is
-    % the direct transfer terms summed. Although, *some* of that energy
-    % might land in the damping region of the waves, and thus actually land
-    % in te_damp. The two cascade terms will also transfer to te_damp.
     inertial(1).name = "te_gmda";
     inertial(1).fancyName = WVDiagnostics.fancyNameForName(inertial(1).name);
     inertial(1).te_gmda = 0;

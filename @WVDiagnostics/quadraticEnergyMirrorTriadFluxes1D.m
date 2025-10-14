@@ -7,10 +7,10 @@ end
 % components are computed on a custom sparse pseudo-radial wavelength grid
 
 val= self.diagfile.readVariables('pi_w_wwg_kp');
-M_wwg= cat(1,zeros(1,size(val,2)),diff(val));
+M_wwg= diff(cat(1,zeros(1,size(val,2)),val));
 
 val= self.diagfile.readVariables('pi_g_ggw_kp');
-M_ggw= cat(1,zeros(1,size(val,2)),diff(val));
+M_ggw= diff(cat(1,zeros(1,size(val,2)),val));
 
 kp =  reshape(self.diagfile.readVariables('kp'),[],1);
 

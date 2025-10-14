@@ -203,8 +203,8 @@ end
 
 RowSublabels = strings(1,3);
 if options.shouldShowExactValues
-    source_total = sum([forcing_sources.te_exact]);
-    sink_total = sum([forcing_sinks.te_exact]);
+    source_total = sum([forcing_sources.te_exact]) +  sum([forcing_sources.te_exact_damp]);
+    sink_total = sum([forcing_sinks.te_exact]) + sum([forcing_sinks.te_exact_damp]);
 
     if options.shouldShowUnits
         RowSublabels(1) = sprintf("[%.2f %s]",source_total/self.flux_scale,self.flux_scale_units);
