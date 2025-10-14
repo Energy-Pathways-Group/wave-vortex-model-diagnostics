@@ -1,4 +1,4 @@
-function [sources, sinks, inertial, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
+function [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
 % This function returns values assuming three reservoirs: geo, wave, and
 % damping. The damping resevoir is just scales below a threshold, wave or
 % geostrophic. It also returns the exact and exact-damp resevoirs. 
@@ -74,6 +74,34 @@ end
     gmda_tx_wave_damp = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-wwg").flux(~NoDampKps) + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "tx-ggw").flux(~NoDampKps));
     wave_tx_gmda_damp = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-wwg").flux(~NoDampKps) + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "tx-ggw").flux(~NoDampKps));
 
+    % There is one route for te_gmda to transfer to te_wave, and that is
+    % the direct transfer terms summed. Although, *some* of that energy
+    % might land in the damping region of the waves, and thus actually land
+    % in te_damp. The two cascade terms will also transfer to te_damp.
+    inertial_tx(1).name = "te_gmda";
+    inertial_tx(1).fancyName = WVDiagnostics.fancyNameForName(inertial_tx(1).name);
+    inertial_tx(1).te_gmda = 0;
+    inertial_tx(1).te_wave = wave_tx_gmda_no_damp;
+    inertial_tx(1).te_damp = wave_tx_gmda_damp;
+
+    inertial_tx(2).name = "te_wave";
+    inertial_tx(2).fancyName = WVDiagnostics.fancyNameForName(inertial_tx(2).name);
+    inertial_tx(2).te_gmda = gmda_tx_wave_no_damp;
+    inertial_tx(2).te_wave = 0;
+    inertial_tx(2).te_damp = gmda_tx_wave_damp;
+
+    inertial_tx(3).name = "te_damp";
+    inertial_tx(3).fancyName = WVDiagnostics.fancyNameForName(inertial_tx(3).name);
+    inertial_tx(3).te_gmda = 0;
+    inertial_tx(3).te_wave = 0;
+    inertial_tx(3).te_damp = 0;
+    
+    inertial_tx(4).name = "te_exact";
+    inertial_tx(4).fancyName = "exact undamped reservoir";
+    inertial_tx(4).te_gmda = 0;
+    inertial_tx(4).te_damp = forcing(1).te_exact;
+    inertial_tx(4).te_wave = 0;
+
     % Categorization method 1: Only count transfer that both start and land
     % in the un-damped region. Then allocate the rest as transfers to the
     % damped region.
@@ -116,33 +144,29 @@ end
     g_cascade_damp = sum(inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "ggg").flux(~NoDampKps) + inertial_fluxes_g_kps([inertial_fluxes_g_kps.name] == "ggw").flux(~NoDampKps));
     w_cascade_damp = sum(inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "www").flux(~NoDampKps) + inertial_fluxes_w_kps([inertial_fluxes_w_kps.name] == "wwg").flux(~NoDampKps));
 
-    % There is one route for te_gmda to transfer to te_wave, and that is
-    % the direct transfer terms summed. Although, *some* of that energy
-    % might land in the damping region of the waves, and thus actually land
-    % in te_damp. The two cascade terms will also transfer to te_damp.
-    inertial(1).name = "te_gmda";
-    inertial(1).fancyName = WVDiagnostics.fancyNameForName(inertial(1).name);
-    inertial(1).te_gmda = 0;
-    inertial(1).te_wave = gmda_tx_wave_no_damp;
-    inertial(1).te_damp = g_cascade;
+    inertial_cascade(1).name = "te_gmda";
+    inertial_cascade(1).fancyName = WVDiagnostics.fancyNameForName(inertial_tx(1).name);
+    inertial_cascade(1).te_gmda = 0;
+    inertial_cascade(1).te_wave = 0;
+    inertial_cascade(1).te_damp = -g_cascade;
 
-    inertial(2).name = "te_wave";
-    inertial(2).fancyName = WVDiagnostics.fancyNameForName(inertial(2).name);
-    inertial(2).te_gmda = wave_tx_gmda_no_damp;
-    inertial(2).te_wave = 0;
-    inertial(2).te_damp = w_cascade;
+    inertial_cascade(2).name = "te_wave";
+    inertial_cascade(2).fancyName = WVDiagnostics.fancyNameForName(inertial_tx(2).name);
+    inertial_cascade(2).te_gmda = 0;
+    inertial_cascade(2).te_wave = 0;
+    inertial_cascade(2).te_damp = -w_cascade;
 
-    inertial(3).name = "te_exact";
-    inertial(3).fancyName = "exact undamped reservoir";
-    inertial(3).te_gmda = 0;
-    inertial(3).te_damp = forcing(1).te_exact;
-    inertial(3).te_wave = 0;
+    inertial_cascade(3).name = "te_damp";
+    inertial_cascade(3).fancyName = WVDiagnostics.fancyNameForName(inertial_tx(3).name);
+    inertial_cascade(3).te_gmda = g_cascade;
+    inertial_cascade(3).te_wave = w_cascade;
+    inertial_cascade(3).te_damp = 0;
 
-    inertial(4).name = "te_damp";
-    inertial(4).fancyName = WVDiagnostics.fancyNameForName(inertial(4).name);
-    inertial(4).te_gmda = gmda_tx_wave_damp;
-    inertial(4).te_wave = wave_tx_gmda_damp;
-    inertial(4).te_damp = 0;
+    inertial_cascade(4).name = "te_exact";
+    inertial_cascade(4).fancyName = "exact undamped reservoir";
+    inertial_cascade(4).te_gmda = 0;
+    inertial_cascade(4).te_wave = 0;
+    inertial_cascade(4).te_damp = -forcing(1).te_exact;
 
     % remove nonlinear advection, now that we copied the values we needed
     forcing(1) = [];
