@@ -154,3 +154,12 @@ T_dw = T_ddw_dw.value - T_wwd_wd.value + T_gwd_dw.value;
 mean(T_wg(timeIndices))/wvd.flux_scale
 mean(T_dg(timeIndices))/wvd.flux_scale
 mean(T_dw(timeIndices))/wvd.flux_scale
+
+dEg = dEg_gwd_var.value(timeIndices);
+dEw = dEw_gwd_var.value(timeIndices);
+dEd = dEd_gwd_var.value(timeIndices);
+
+(mean(dEg) + mean(dEw) + mean(dEd))/wvd.flux_scale
+mean(dEg)/wvd.flux_scale
+mean(dEw)/wvd.flux_scale
+mean(dEd)/wvd.flux_scale
