@@ -20,9 +20,13 @@ if ~diagfile.hasVariableWithName("T_ggw_gw")
     T_ddw_dw = diagfile.addVariable("T_ddw_dw","t",type="double",isComplex=false);
     T_ddg_dg = diagfile.addVariable("T_ddg_dg","t",type="double",isComplex=false);
     T_ddd_dd = diagfile.addVariable("T_ddd_dd","t",type="double",isComplex=false);
-    T_gwd_gw = diagfile.addVariable("T_gwd_gw","t",type="double",isComplex=false);
-    T_gwd_gd = diagfile.addVariable("T_gwd_gd","t",type="double",isComplex=false);
-    T_gwd_wd = diagfile.addVariable("T_gwd_wd","t",type="double",isComplex=false);
+    T_gwd_wg = diagfile.addVariable("T_gwd_wg","t",type="double",isComplex=false);
+    T_gwd_dg = diagfile.addVariable("T_gwd_dg","t",type="double",isComplex=false);
+    T_gwd_dw = diagfile.addVariable("T_gwd_dw","t",type="double",isComplex=false);
+
+    dEg_gwd_var = diagfile.addVariable("dEg_gwd","t",type="double",isComplex=false);
+    dEw_gwd_var = diagfile.addVariable("dEw_gwd","t",type="double",isComplex=false);
+    dEd_gwd_var = diagfile.addVariable("dEd_gwd","t",type="double",isComplex=false);
 else
     T_ggw_gw = diagfile.variableWithName("T_ggw_gw");
     T_ggg_gg = diagfile.variableWithName("T_ggg_gg");
@@ -33,9 +37,13 @@ else
     T_ddw_dw = diagfile.variableWithName("T_ddw_dw");
     T_ddg_dg = diagfile.variableWithName("T_ddg_dg");
     T_ddd_dd = diagfile.variableWithName("T_ddd_dd");
-    T_gwd_gw = diagfile.variableWithName("T_gwd_gw");
-    T_gwd_gd = diagfile.variableWithName("T_gwd_gd");
-    T_gwd_wd = diagfile.variableWithName("T_gwd_wd");
+    T_gwd_wg = diagfile.variableWithName("T_gwd_wg");
+    T_gwd_dg = diagfile.variableWithName("T_gwd_dg");
+    T_gwd_dw = diagfile.variableWithName("T_gwd_dw");
+
+    dEg_gwd_var = diagfile.variableWithName("dEg_gwd");
+    dEw_gwd_var = diagfile.variableWithName("dEw_gwd");
+    dEd_gwd_var = diagfile.variableWithName("dEd_gwd");
 end
 
 %%
@@ -109,6 +117,7 @@ for timeIndex = 1:length(timeIndices)
     [Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(Fp,Fm,F0);
     dEg_wdg = geoEnergy(Ep,Em,E0);
     dEg = dEg_dwg + dEg_wdg;
+    dEg_gwd_var.setValueAlongDimensionAtIndex(dEg,'t',outputIndex);
 
     [Fp,Fm,F0] = wvt.nonlinearFluxForFlowComponents(dampComponent,geoComponent);
     [Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(Fp,Fm,F0);
@@ -118,6 +127,7 @@ for timeIndex = 1:length(timeIndices)
     [Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(Fp,Fm,F0);
     dEw_gdw = waveEnergy(Ep,Em,E0);
     dEw = dEw_dgw + dEw_gdw;
+    dEw_gwd_var.setValueAlongDimensionAtIndex(dEw,'t',outputIndex);
 
     [Fp,Fm,F0] = wvt.nonlinearFluxForFlowComponents(geoComponent,waveComponent);
     [Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(Fp,Fm,F0);
@@ -127,18 +137,19 @@ for timeIndex = 1:length(timeIndices)
     [Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(Fp,Fm,F0);
     dEd_wgd = dampEnergy(Ep,Em,E0);
     dEd = dEd_gwd + dEd_wgd;
+    dEd_gwd_var.setValueAlongDimensionAtIndex(dEd,'t',outputIndex);
 
-    T_gwd_gw.setValueAlongDimensionAtIndex((dEg - dEw)/3,'t',outputIndex);
-    T_gwd_gd.setValueAlongDimensionAtIndex((dEg - dEd)/3,'t',outputIndex);
-    T_gwd_wd.setValueAlongDimensionAtIndex((dEw - dEd)/3,'t',outputIndex);
+    T_gwd_wg.setValueAlongDimensionAtIndex((dEg - dEw)/3,'t',outputIndex);
+    T_gwd_dg.setValueAlongDimensionAtIndex((dEg - dEd)/3,'t',outputIndex);
+    T_gwd_dw.setValueAlongDimensionAtIndex((dEw - dEd)/3,'t',outputIndex);
 end
 deltaLoopTime = datetime('now')-loopStartTime;
 fprintf("Total loop time %s, which is %s per time index.\n",deltaLoopTime,deltaLoopTime/length(timeIndices));
 
 %%
-T_wg = T_wwg_wg.value - T_ggw_gw.value + T_gwd_gw.value;
-T_dg = T_ddg_dg.value - T_ggd_gd.value + T_gwd_gd.value;
-T_dw = T_ddw_dw.value - T_wwd_wd.value + T_gwd_wd.value;
+T_wg = T_wwg_wg.value - T_ggw_gw.value + T_gwd_wg.value;
+T_dg = T_ddg_dg.value - T_ggd_gd.value + T_gwd_dg.value;
+T_dw = T_ddw_dw.value - T_wwd_wd.value + T_gwd_dw.value;
 
 mean(T_wg(timeIndices))/wvd.flux_scale
 mean(T_dg(timeIndices))/wvd.flux_scale
