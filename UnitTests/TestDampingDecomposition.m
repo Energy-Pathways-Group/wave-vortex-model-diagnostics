@@ -1,14 +1,14 @@
 basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 % wvd1 = WVDiagnostics(basedir + replace(getRunParameters(1),"256","512") + ".nc");
-wvd9 = WVDiagnostics(basedir + replace(getRunParameters(9),"256","256") + ".nc");
+wvd9 = WVDiagnostics(basedir + replace(getRunParameters(9),"256","512") + ".nc");
 % wvd18 = WVDiagnostics(basedir + replace(getRunParameters(18),"256","512") + ".nc");
 
 %%
 wvd = wvd9;
 wvt = wvd.wvt;
 
-timeIndices = 2751:3001;
-% timeIndices = 1:251;
+% timeIndices = 2751:3001;
+timeIndices = 1:251;
 
 diagfile = wvd.diagfile;
 if ~diagfile.hasVariableWithName("T_ggw_gw")
@@ -168,18 +168,26 @@ T_dw = T_ddw_dw.value(timeIndices) - T_wwd_wd.value(timeIndices) + dEw_gwd_var.v
 mean(T_wg)/wvd.flux_scale
 mean(T_dg)/wvd.flux_scale
 mean(T_dw)/wvd.flux_scale
-% 
-% dEg = dEg_gwd_var.value(timeIndices);
-% dEw = dEw_gwd_var.value(timeIndices);
-% dEd = dEd_gwd_var.value(timeIndices);
-% 
-% (mean(dEg) + mean(dEw) + mean(dEd))/wvd.flux_scale
-% mean(dEg)/wvd.flux_scale
-% mean(dEw)/wvd.flux_scale
-% mean(dEd)/wvd.flux_scale
 
 delta = inertial_tx(2).te_gmda - mean(T_wg);
 sprintf("Matching geostrophic loss: T_wg=%.3f, T_dg=%.3f, T_dw=%.3f",(mean(T_wg)+delta)/wvd.flux_scale, (mean(T_dg)-delta)/wvd.flux_scale,(mean(T_dw)+delta)/wvd.flux_scale)
 
 delta = -inertial_tx(1).te_wave - mean(T_wg);
 sprintf("Matching wave gain: T_wg=%.3f, T_dg=%.3f, T_dw=%.3f",(mean(T_wg)+delta)/wvd.flux_scale, (mean(T_dg)-delta)/wvd.flux_scale,(mean(T_dw)+delta)/wvd.flux_scale)
+
+T_wg = T_wwg_wg.value(timeIndices) - T_ggw_gw.value(timeIndices) + dEg_gwd_var.value(timeIndices);
+T_dg = T_ddg_dg.value(timeIndices) - T_ggd_gd.value(timeIndices);
+T_dw = T_ddw_dw.value(timeIndices) - T_wwd_wd.value(timeIndices) - dEd_gwd_var.value(timeIndices);
+
+delta = -inertial_tx(1).te_wave - mean(T_wg);
+sprintf("Catalyst: T_wg=%.3f, T_dg=%.3f, T_dw=%.3f",(mean(T_wg)+delta)/wvd.flux_scale, (mean(T_dg)-delta)/wvd.flux_scale,(mean(T_dw)+delta)/wvd.flux_scale)
+
+%%
+dEg = dEg_gwd_var.value(timeIndices);
+dEw = dEw_gwd_var.value(timeIndices);
+dEd = dEd_gwd_var.value(timeIndices);
+
+(mean(dEg) + mean(dEw) + mean(dEd))/wvd.flux_scale
+mean(dEg)/wvd.flux_scale
+mean(dEw)/wvd.flux_scale
+mean(dEd)/wvd.flux_scale
