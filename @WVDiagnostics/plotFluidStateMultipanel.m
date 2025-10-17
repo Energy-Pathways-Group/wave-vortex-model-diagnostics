@@ -73,7 +73,8 @@ jPaddedWVD = cat(1,0,jPseudoLocationWVD);
 textColor = '[.5,.5,.5]';
 
 % location for x-z section
-iY = round(wvt.Nx/2);
+% iY = round(wvt.Nx/2);
+iY = 1;
 
 % create the lines of constant frequency
 [omegaN,n] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)));
