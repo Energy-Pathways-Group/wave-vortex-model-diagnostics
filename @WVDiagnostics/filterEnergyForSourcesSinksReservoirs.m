@@ -43,8 +43,14 @@ end
     if ~any(damping_index)
         error("Unable to find adaptive damping and thus do not know how to proceed. I guess we could look for another closure.");
     end
+
+    % Method 1
     damping_kp = forcing_fluxes_kp(damping_index).te_gmda + forcing_fluxes_kp(damping_index).te_wave;
     NoDamp = abs(cumsum(damping_kp/self.flux_scale)) < options.fluxTolerance;
+    
+    % Method 2
+    svv = self.wvt.forcingWithName("adaptive damping");
+    NoDamp = kp < (svv.k_damp+svv.k_no_damp)/2;
 
     % Sort the forcing (both quadratic and exact) into damped and undamped
     forcing = self.filterFluxesForReservoir(forcing_fluxes_kp,filter=@(v) sum(sum(v(NoDamp))));

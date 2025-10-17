@@ -86,6 +86,8 @@ classdef WVDiagnostics < handle
         summarizeSourcesSinksReservoirs(self,options)
         [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
 
+        showDampingFluxVsPseudolength(self,options)
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Figures for Potential Enstrophy

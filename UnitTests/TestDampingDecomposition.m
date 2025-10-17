@@ -1,13 +1,14 @@
 basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
 % wvd1 = WVDiagnostics(basedir + replace(getRunParameters(1),"256","512") + ".nc");
 wvd9 = WVDiagnostics(basedir + replace(getRunParameters(9),"256","256") + ".nc");
-% wvd18 = WVDiagnostics(basedir + replace(getRunParameters(18),"256","256") + ".nc");
+% wvd18 = WVDiagnostics(basedir + replace(getRunParameters(18),"256","512") + ".nc");
 
 %%
 wvd = wvd9;
 wvt = wvd.wvt;
 
 timeIndices = 2751:3001;
+% timeIndices = 1:251;
 
 diagfile = wvd.diagfile;
 if ~diagfile.hasVariableWithName("T_ggw_gw")
@@ -147,19 +148,38 @@ deltaLoopTime = datetime('now')-loopStartTime;
 fprintf("Total loop time %s, which is %s per time index.\n",deltaLoopTime,deltaLoopTime/length(timeIndices));
 
 %%
-T_wg = T_wwg_wg.value - T_ggw_gw.value + T_gwd_wg.value;
-T_dg = T_ddg_dg.value - T_ggd_gd.value + T_gwd_dg.value;
-T_dw = T_ddw_dw.value - T_wwd_wd.value + T_gwd_dw.value;
+[sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = wvd.filterEnergyForSourcesSinksReservoirs(timeIndices=timeIndices);
 
-mean(T_wg(timeIndices))/wvd.flux_scale
-mean(T_dg(timeIndices))/wvd.flux_scale
-mean(T_dw(timeIndices))/wvd.flux_scale
 
-dEg = dEg_gwd_var.value(timeIndices);
-dEw = dEw_gwd_var.value(timeIndices);
-dEd = dEd_gwd_var.value(timeIndices);
+%%
 
-(mean(dEg) + mean(dEw) + mean(dEd))/wvd.flux_scale
-mean(dEg)/wvd.flux_scale
-mean(dEw)/wvd.flux_scale
-mean(dEd)/wvd.flux_scale
+% T_gwd_wg = 0;
+% T_gwd_dg = mean(dEg);
+% T_gwd_dw = mean(dEw);
+% 
+% T_wg = T_wwg_wg.value(timeIndices) - T_ggw_gw.value(timeIndices) + T_gwd_wg.value(timeIndices);
+% T_dg = T_ddg_dg.value(timeIndices) - T_ggd_gd.value(timeIndices) + T_gwd_dg.value(timeIndices);
+% T_dw = T_ddw_dw.value(timeIndices) - T_wwd_wd.value(timeIndices) + T_gwd_dw.value(timeIndices);
+
+T_wg = T_wwg_wg.value(timeIndices) - T_ggw_gw.value(timeIndices);
+T_dg = T_ddg_dg.value(timeIndices) - T_ggd_gd.value(timeIndices) + dEg_gwd_var.value(timeIndices);
+T_dw = T_ddw_dw.value(timeIndices) - T_wwd_wd.value(timeIndices) + dEw_gwd_var.value(timeIndices);
+
+mean(T_wg)/wvd.flux_scale
+mean(T_dg)/wvd.flux_scale
+mean(T_dw)/wvd.flux_scale
+% 
+% dEg = dEg_gwd_var.value(timeIndices);
+% dEw = dEw_gwd_var.value(timeIndices);
+% dEd = dEd_gwd_var.value(timeIndices);
+% 
+% (mean(dEg) + mean(dEw) + mean(dEd))/wvd.flux_scale
+% mean(dEg)/wvd.flux_scale
+% mean(dEw)/wvd.flux_scale
+% mean(dEd)/wvd.flux_scale
+
+delta = inertial_tx(2).te_gmda - mean(T_wg);
+sprintf("Matching geostrophic loss: T_wg=%.3f, T_dg=%.3f, T_dw=%.3f",(mean(T_wg)+delta)/wvd.flux_scale, (mean(T_dg)-delta)/wvd.flux_scale,(mean(T_dw)+delta)/wvd.flux_scale)
+
+delta = -inertial_tx(1).te_wave - mean(T_wg);
+sprintf("Matching wave gain: T_wg=%.3f, T_dg=%.3f, T_dw=%.3f",(mean(T_wg)+delta)/wvd.flux_scale, (mean(T_dg)-delta)/wvd.flux_scale,(mean(T_dw)+delta)/wvd.flux_scale)

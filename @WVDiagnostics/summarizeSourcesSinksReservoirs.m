@@ -6,7 +6,7 @@ arguments
     options.shouldDisplayDiffValues = false
 end
 
-[sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = self.filterEnergyForSourcesSinksReservoirs(timeIndices=51:251);
+[sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = self.filterEnergyForSourcesSinksReservoirs(timeIndices=timeIndices);
 
 
 %
