@@ -60,9 +60,9 @@ zeta_z_w = wvt.diffX(wvt.v_w) - wvt.diffY(wvt.u_w);  % wave
     end
 
     function makeVorticityXYPlot(zeta_z)
-        val = zeta_z(:,:,end)/wvt.f;
+        val = circshift(zeta_z(:,:,end)/wvt.f,-iY,2);
         pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
-        hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,Color=0*[1 1 1],LineWidth=2); % add line for x-z section
+        % hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,Color=0*[1 1 1],LineWidth=2); % add line for x-z section
         axis square
         colormap(ax, cmDivRWB);
         set(gca,'Layer','top','TickLength',[0.015 0.015])
