@@ -56,6 +56,13 @@ classdef WVDiagnostics < handle
         create1DMirrorFluxes(self,options)
         create2DMirrorFluxes(self,options)
 
+        createReservoirGroup(self,options) % groupName, flowComponents
+        [triadVar, forcingVar] = variablesForReservoirGroup(self,options) % groupName, flowComponents
+        % [triadVar, flowComponentNames] = triadVariablesFromReservoirGroup(self,options) % groupName
+        addTriadFluxesForReservoirGroupAtTime(self,options) %triadVar, flowComponents, wvt, outputIndex
+        addForcingFluxesForReservoirGroupAtTime(self,options) %forcingVar, flowComponents, wvt, outputIndex
+        [transferFlux, forcingFlux] = fluxesForReservoirGroup(self,options)
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Figures (instantaneous snapshot, from model output)

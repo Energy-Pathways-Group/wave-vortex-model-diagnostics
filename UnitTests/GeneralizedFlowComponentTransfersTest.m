@@ -1,7 +1,13 @@
 basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
+basedir = "/Users/Shared/CimRuns_June2025/output/";
 wvd = WVDiagnostics(basedir + replace(getRunParameters(9),"256","256") + ".nc");
 wvt = wvd.wvt;
 timeIndices = 2751:3001;
+
+
+%%
+diagfile = wvd.diagfile;
+groupName = "reservoir-damped-wave-geo";
 
 %%
 % we want to save name and 
@@ -49,8 +55,7 @@ for i=1:length(flowComponents)
 end
 %%
 
-diagfile = wvd.diagfile;
-groupName = "reservoir-damped-wave-geo";
+
 triadVar = configureDictionary("string","cell");
 if diagfile.hasGroupWithName(groupName)
     group = diagfile.groupWithName(groupName);
@@ -164,20 +169,36 @@ for k=1:length(flowComponentNames)
 end
 
 function [Tba, Tca, Tcb] = transfersFromFluxes(dA,dB,dC)
-if abs(dA) < abs(dB) && abs(dA) < abs(dC)
-    alpha = abs(dB/(dC-dB));
-    Tba = alpha*dA;
-    Tca = (1-alpha)*dA;
-    Tcb = dB + alpha*dA;
-elseif abs(dB) < abs(dA) && abs(dB) < abs(dC)
-    alpha = abs(dA/(dA-dC));
-    Tba =- alpha*dB;
-    Tca = dA + alpha*dB;
-    Tcb = (1-alpha)*dB;
+if abs(dC) >= abs(dA) && abs(dC) >= abs(dB)
+    Tba = 0;
+    Tca = dA;
+    Tcb = dB;
+elseif abs(dB) >= abs(dA) && abs(dB) >= abs(dC)
+    Tba = dA;
+    Tca = 0;
+    Tcb = -dC;
 else
-    alpha = abs(dA/(dA-dB));
-    Tba = dA + alpha*dC;
-    Tca = -alpha*dC;
-    Tcb = -(1-alpha)*dC;
+    Tba = -dB;
+    Tca = -dC;
+    Tcb = 0;
 end
 end
+
+% function [Tba, Tca, Tcb] = transfersFromFluxes(dA,dB,dC)
+% if abs(dA) < abs(dB) && abs(dA) < abs(dC)
+%     alpha = abs(dB/(dC-dB));
+%     Tba = alpha*dA;
+%     Tca = (1-alpha)*dA;
+%     Tcb = dB + alpha*dA;
+% elseif abs(dB) < abs(dA) && abs(dB) < abs(dC)
+%     alpha = abs(dA/(dA-dC));
+%     Tba =- alpha*dB;
+%     Tca = dA + alpha*dB;
+%     Tcb = (1-alpha)*dB;
+% else
+%     alpha = abs(dA/(dA-dB));
+%     Tba = dA + alpha*dC;
+%     Tca = -alpha*dC;
+%     Tcb = -(1-alpha)*dC;
+% end
+% end

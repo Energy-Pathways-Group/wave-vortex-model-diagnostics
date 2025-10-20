@@ -1,0 +1,102 @@
+function [transferFlux, forcingFlux] = fluxesForReservoirGroup(self,options)
+arguments
+    self WVDiagnostics
+    options.outputfile NetCDFGroup
+    options.name string = "reservoir-damped-wave-geo"
+    options.timeIndices
+end
+
+if ~isfield(options,"outputfile")
+    options.outputfile = self.diagfile;
+end
+
+if ~isfield(options,"timeIndices")
+    t = self.diagfile.readVariables("t");
+    timeIndices = 1:length(t);
+else
+    timeIndices = options.timeIndices;
+end
+
+if ~options.outputfile.hasGroupWithName(options.name)
+    error("Unable to find the group "+options.name+".");
+end
+group = options.outputfile.groupWithName(options.name);
+flowComponentNames = reshape(group.attributes('flow-components'),[],1);
+
+forcingNames = self.forcingNames;
+forcingFlux(length(forcingNames)) = struct("name","placeholder");
+% forcingFlux = zeros(length(forcingNames),length(flowComponentNames));
+
+for iForce=1:length(forcingNames)
+    name = replace(forcingNames(iForce),"-","_");
+    name = replace(name," ","_");
+    forcingFlux(iForce).name = name;
+    forcingFlux(iForce).fancyName = forcingNames(iForce);
+    for k=1:length(flowComponentNames)
+        dE = group.readVariables(name+"_"+k);
+        forcingFlux(iForce).("reservoir_"+string(k)) = mean(dE(timeIndices));
+    end
+end
+
+
+% loop over T_i_j_k
+transferFlux = zeros(length(flowComponentNames),length(flowComponentNames));
+for k=1:length(flowComponentNames)
+    % Flux *into* the k-th reservoir
+    for i=1:length(flowComponentNames)
+        for j=1:i
+            
+            if i==j
+                % has the form T_i_i_k OR T_k_k_k
+                E = group.readVariables("T_" + i + "_" + j + "_" + k);
+                E = mean(E(timeIndices));
+                transferFlux(i,k) = transferFlux(i,k) + E;
+            elseif i==k % our for-loop is such that i will reach k, but never let j get that high
+                % has the form T_k_j_k, so we need -T_k_k_j
+                E = group.readVariables("T_" + k + "_" + k + "_" + j);
+                E = mean(E(timeIndices));
+                transferFlux(j,k) = transferFlux(j,k) - E;
+            elseif j==k % our for-loop is such that i will reach k, but never let j get that high
+                % has the form T_i_k_k, so we need -T_k_k_i
+                E = group.readVariables("T_" + k + "_" + k + "_" + i);
+                E = mean(E(timeIndices));
+                transferFlux(i,k) = transferFlux(i,k) - E;
+            else
+                % now we have a true mixed triad
+                E_i_j_k = group.readVariables("T_" + i + "_" + j + "_" + k);
+                E_j_k_i = group.readVariables("T_" + max(j,k) + "_" + min(j,k) + "_" + i);
+                E_k_i_j = group.readVariables("T_" + max(i,k) + "_" + min(i,k) + "_" + j);
+
+                E_i_j_k = mean(E_i_j_k(timeIndices));
+                E_j_k_i = mean(E_j_k_i(timeIndices));
+                E_k_i_j = mean(E_k_i_j(timeIndices));
+
+                d = (E_j_k_i + E_k_i_j + E_i_j_k)/self.flux_scale; % / max([abs(E_j_k_i),abs(E_k_i_j),abs(E_i_j_k)]);
+                disp( "T_" + i + "_" + j + "_" + k + " with relative error " + string(d))
+
+                % a -> i, b -> j, c -> k
+                [Tji, Tki, Tkj] = transfersFromFluxes(E_j_k_i,E_k_i_j,E_i_j_k);
+                transferFlux(i,k) = transferFlux(i,k) - Tki;
+                transferFlux(j,k) = transferFlux(j,k) - Tkj;
+            end
+        end
+    end
+end
+
+function [Tba, Tca, Tcb] = transfersFromFluxes(dA,dB,dC)
+if abs(dC) >= abs(dA) && abs(dC) >= abs(dB)
+    Tba = 0;
+    Tca = dA;
+    Tcb = dB;
+elseif abs(dB) >= abs(dA) && abs(dB) >= abs(dC)
+    Tba = dA;
+    Tca = 0;
+    Tcb = -dC;
+else
+    Tba = -dB;
+    Tca = -dC;
+    Tcb = 0;
+end
+end
+
+end
