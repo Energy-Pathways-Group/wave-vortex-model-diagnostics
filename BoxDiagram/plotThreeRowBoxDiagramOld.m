@@ -10,7 +10,6 @@ function hFig = plotThreeRowBoxDiagram(row1,row2,row3, arrows, options)
         row2 Box
         row3 Box
         arrows Arrow
-        options.nRow2Subrows = 2
         options.RowLabels (1,3) string = ["Sources" "Reservoirs" "Sinks"]
         options.RowSublabels (1,3) string = strings(1,3)
         options.BoxSize (1,2) double {mustBePositive} = [2 1]
@@ -23,19 +22,7 @@ function hFig = plotThreeRowBoxDiagram(row1,row2,row3, arrows, options)
         options.visible = "on"
     end
 
-    rows{1} = row1;
-    boxesPerRow = ceil(length(row2)/options.nRow2Subrows);
-    iRow = 2;
-    for i=1:options.nRow2Subrows
-        if i==options.nRow2Subrows
-            indices = ((i-1)*boxesPerRow+1):length(row2);
-        else
-            indices = ((i-1)*boxesPerRow+1):i*boxesPerRow;
-        end
-        rows{iRow} = row2(indices); iRow = iRow+1;
-    end
-    rows{iRow} = row3;
-    nRows = length(rows);
+    rows   = {row1,row2,row3}; nRows = 3;
     w      = options.BoxSize(1); h = options.BoxSize(2);
     dx     = options.Dx;        dy = options.Dy;
     x0     = options.Origin(1); y0 = options.Origin(2);
@@ -93,15 +80,9 @@ function hFig = plotThreeRowBoxDiagram(row1,row2,row3, arrows, options)
     arrayfun(@(a) a.draw(ax), arrows);
 
     % Row labels
-    lblOffset = 2.0;
-    for r = 1:3
-        if r==1
-            yMid  = rows{r}(1).Position(2) + h/2;
-        elseif r==2
-            yMid  = rows{r+1}(1).Position(2) + 3*h/2;
-        elseif r==3
-            yMid  = rows{r+1}(1).Position(2) + h/2;
-        end
+    lblOffset = 0.8;
+    for r = 1:nRows
+        yMid  = rows{r}(1).Position(2) + h/2;
         xLeft = x0 - lblOffset;
         text(ax,xLeft,yMid,options.RowLabels(r),'FontSize',16,'FontWeight','bold', ...
             'Rotation',90,'HorizontalAlignment','center','VerticalAlignment','middle');

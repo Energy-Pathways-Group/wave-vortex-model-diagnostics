@@ -4,6 +4,7 @@ arguments
     options.outputfile NetCDFGroup
     options.name string = "reservoir-damped-wave-geo"
     options.timeIndices
+    options.outputFormat string {mustBeMember(options.outputFormat,{'matrix','struct','table'})} = 'matrix'
 end
 
 if ~isfield(options,"outputfile")
@@ -22,21 +23,22 @@ if ~options.outputfile.hasGroupWithName(options.name)
 end
 group = options.outputfile.groupWithName(options.name);
 flowComponentNames = reshape(group.attributes('flow-components'),[],1);
+flowComponentNamesNormalized = replace(replace(flowComponentNames,"-","_")," ","_");
 
 forcingNames = self.forcingNames;
-forcingFlux(length(forcingNames)) = struct("name","placeholder");
-% forcingFlux = zeros(length(forcingNames),length(flowComponentNames));
+forcingNamesNormalized = replace(replace(self.forcingNames,"-","_")," ","_");
 
+forcingFlux = zeros(length(forcingNames),length(flowComponentNames));
 for iForce=1:length(forcingNames)
-    name = replace(forcingNames(iForce),"-","_");
-    name = replace(name," ","_");
-    forcingFlux(iForce).name = name;
-    forcingFlux(iForce).fancyName = forcingNames(iForce);
     for k=1:length(flowComponentNames)
-        dE = group.readVariables(name+"_"+k);
-        forcingFlux(iForce).("reservoir_"+string(k)) = mean(dE(timeIndices));
+        dE = group.readVariables(forcingNamesNormalized(iForce)+"_"+k);
+        forcingFlux(iForce,k) = mean(dE(timeIndices));
     end
 end
+% % remove nonlinear advection
+% forcingNames(1) = [];
+% forcingNamesNormalized(1) = [];
+% forcingFlux(1,:) = [];
 
 ddt = zeros(1,length(flowComponentNames));
 energy = zeros(1,length(flowComponentNames));
@@ -78,8 +80,8 @@ for k=1:length(flowComponentNames)
                 E_j_k_i = mean(E_j_k_i(timeIndices));
                 E_k_i_j = mean(E_k_i_j(timeIndices));
 
-                d = (E_j_k_i + E_k_i_j + E_i_j_k)/self.flux_scale; % / max([abs(E_j_k_i),abs(E_k_i_j),abs(E_i_j_k)]);
-                disp( "T_" + i + "_" + j + "_" + k + " with relative error " + string(d))
+                % d = (E_j_k_i + E_k_i_j + E_i_j_k)/self.flux_scale; % / max([abs(E_j_k_i),abs(E_k_i_j),abs(E_i_j_k)]);
+                % disp( "T_" + i + "_" + j + "_" + k + " with relative error " + string(d))
 
                 % a -> i, b -> j, c -> k
                 [Tji, Tki, Tkj] = transfersFromFluxes(E_j_k_i,E_k_i_j,E_i_j_k);
@@ -89,6 +91,60 @@ for k=1:length(flowComponentNames)
         end
     end
 end
+
+if options.outputFormat == "struct" || options.outputFormat == "table"
+    forcingFluxStruct(length(forcingNames)) = struct("name","placeholder");
+    for iForce=1:length(forcingNames)
+        forcingFluxStruct(iForce).name = forcingNamesNormalized(iForce);
+        forcingFluxStruct(iForce).fancyName = forcingNames(iForce);
+        for k=1:length(flowComponentNames)
+            forcingFluxStruct(iForce).(flowComponentNamesNormalized(k)) = forcingFlux(iForce,k);
+        end
+    end
+    forcingFlux = forcingFluxStruct;
+
+    transferFluxStruct(length(flowComponentNames)) = struct("name","placeholder");
+    for i=1:length(flowComponentNames)
+        transferFluxStruct(i).name = flowComponentNamesNormalized(i);
+        transferFluxStruct(i).fancyName = flowComponentNames(i);
+        for k=1:length(flowComponentNames)
+            transferFluxStruct(i).(flowComponentNamesNormalized(k)) = transferFlux(i,k);
+        end
+    end
+    transferFlux = transferFluxStruct;
+
+    for k=1:length(flowComponentNames)
+        ddtStruct.(flowComponentNamesNormalized(k)) = ddt(k);
+    end
+    ddt = ddtStruct;
+
+    for k=1:length(flowComponentNames)
+        energyStruct.(flowComponentNamesNormalized(k)) = energy(k);
+    end
+    energy = energyStruct;
+
+    if options.outputFormat == "table"
+        forcingFlux = struct2table(forcingFlux);
+        forcingFlux.Properties.RowNames = forcingFlux.fancyName;
+        forcingFlux.name = [];
+        forcingFlux.fancyName = [];
+
+        transferFlux = struct2table(transferFlux);
+        transferFlux.Properties.RowNames = transferFlux.fancyName;
+        transferFlux.name = [];
+        transferFlux.fancyName = [];
+
+        ddt = struct2table(ddt);
+        ddt.Properties.RowNames = "ddt";
+
+        energy = struct2table(energy);
+        energy.Properties.RowNames = "energy";
+    end
+end
+
+% forcingNames = self.forcingNames;
+
+
 
 function [Tba, Tca, Tcb] = transfersFromFluxes(dA,dB,dC)
 if abs(dC) >= abs(dA) && abs(dC) >= abs(dB)
