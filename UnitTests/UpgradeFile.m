@@ -1,9 +1,11 @@
-basedir = "/Users/Shared/CimRuns_June2025/output/";
+% basedir = "/Users/Shared/CimRuns_June2025/output/";
 % basedir = "/Users/jearly/Dropbox/CimRuns_June2025/output/";
+basedir = '/Volumes/SanDiskExtremePro/research/Energy-Pathways-Group/garrett-munk-spin-up/CimRuns_June2025_v2/output/';
+
 
 runNumber=18;
 wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","512") + ".nc");
-% wvd = WVDiagnostics(basedir + replace(getRunParameters(17),"256","256") + ".nc");
+% wvd = WVDiagnostics(basedir + replace(getRunParameters(runNumber),"256","256") + ".nc");
 
 %%
 
