@@ -53,7 +53,7 @@ else
     flowComponents(i).maskA0 = flowComponents(i).maskA0 & ~NoDampMask;
 end
 
-[triadVar, forcingVar] = self.variablesForReservoirGroup(outputfile=options.outputfile,name=options.name,flowComponents=flowComponents);
+[triadVar, forcingVar, energyVar] = self.variablesForReservoirGroup(outputfile=options.outputfile,name=options.name,flowComponents=flowComponents);
 forcingNames = wvt.forcingNames;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,6 +90,11 @@ for timeIndex = 1:length(timeIndices)
             dE = sum(flowComponents(k).maskAp(:).*Ep(:) + flowComponents(k).maskAm(:).*Em(:) + flowComponents(k).maskA0(:).*E0(:));
             forcingVar{forcingNames(i)+"_"+k}.setValueAlongDimensionAtIndex(dE,'t',outputIndex);
         end
+    end
+
+    for k=1:length(flowComponents)
+        dE = wvt.totalEnergyOfFlowComponent(flowComponents(k));
+        energyVar{"E_"+k}.setValueAlongDimensionAtIndex(dE,'t',outputIndex);
     end
 end
 deltaLoopTime = datetime('now')-loopStartTime;

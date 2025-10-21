@@ -1,4 +1,4 @@
-function [transferFlux, forcingFlux] = fluxesForReservoirGroup(self,options)
+function [transferFlux, forcingFlux, ddt, energy] = fluxesForReservoirGroup(self,options)
 arguments
     self WVDiagnostics
     options.outputfile NetCDFGroup
@@ -10,8 +10,8 @@ if ~isfield(options,"outputfile")
     options.outputfile = self.diagfile;
 end
 
+t = self.diagfile.readVariables("t");
 if ~isfield(options,"timeIndices")
-    t = self.diagfile.readVariables("t");
     timeIndices = 1:length(t);
 else
     timeIndices = options.timeIndices;
@@ -38,6 +38,13 @@ for iForce=1:length(forcingNames)
     end
 end
 
+ddt = zeros(1,length(flowComponentNames));
+energy = zeros(1,length(flowComponentNames));
+for k=1:length(flowComponentNames)
+    E = group.readVariables("E_"+k);
+    energy(k) = mean(E(timeIndices));
+    ddt(k) = (E(timeIndices(end)) - E(timeIndices(1)))/(t(timeIndices(end)) - t(timeIndices(1)));
+end
 
 % loop over T_i_j_k
 transferFlux = zeros(length(flowComponentNames),length(flowComponentNames));
