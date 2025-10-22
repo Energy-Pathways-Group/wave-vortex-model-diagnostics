@@ -104,6 +104,7 @@ end
 
 
 tl = tiledlayout(2,nColumns,TileSpacing="tight");
+% % % tl = tiledlayout(1,nColumns,TileSpacing="tight");
 
 title(tl, options.title, 'Interpreter', 'none')
 
@@ -119,21 +120,64 @@ TZ_A0_j_kR = wvt.transformToRadialWavenumber(TZ_A0_j_kl);
 zeta_z_g = wvt.diffX(wvt.v_g) - wvt.diffY(wvt.u_g);  % geostrophic
 zeta_z_w = wvt.diffX(wvt.v_w) - wvt.diffY(wvt.u_w);  % wave
 
-% geostrophic vorticity section
+% % % % nested tiled layout allows common colorbar for subset of axes.
+% % % tl_inner = tiledlayout(tl,2,2,TileSpacing='tight');
+% % % tl_inner.Layout.TileSpan = [1,2];
+
+% geostrophic surface vorticity
 ax = nexttile(tl,1);
+% % % ax = nexttile(tl_inner,1);
+val = zeta_z_g(:,:,end)/wvt.f;
+pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
+hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
+title("geostrophic vorticity")
+% title("geostrophic surface vorticity")
+axis square
+xticklabels([])
+% yticklabels([])
+ylabel('y-distance (km)')
+set(gca,'YTick',xticks,'Layer','top','TickLength',[0.015 0.015])
+colormap(ax, cmDivRWB);
+clim(ax, zeta_limits);
+
+% geostrophic vorticity section
+ax = nexttile(tl,nColumns+1);
+% % % ax = nexttile(tl_inner,3);
 val = squeeze(zeta_z_g(:,iY,:)/wvt.f);
 pcolor(ax, wvt.x/1e3, wvt.z/1e3, val.'), shading interp,
 % title("geostrophic x-z vorticity")
-title("x-z vorticity")
+% title("x-z vorticity")
+xlabel('x-distance (km)')
+ylabel('Depth (km)')
 axis square
 colormap(ax, cmDivRWB);
-xticklabels([])
 ylabel('Depth (km)')
 set(gca,'Layer','top','TickLength',[0.015 0.015])
 clim(ax, zeta_limits);
+cb = colorbar("southoutside");
+cb.Label.String = "$\zeta$/f";
+cb.Label.Interpreter = 'latex';
+
+% wave surface vorticity
+ax = nexttile(tl,2);
+% % % ax = nexttile(tl_inner,2);
+val = zeta_z_w(:,:,end)/wvt.f;
+pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
+hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
+% title("surface vorticity")
+title("wave vorticity")
+axis square
+colormap(ax, cmDivRWB);
+yticklabels([])
+xticklabels([])
+% xlabel('x-distance (km)')
+% ylabel('y-distance (km)')
+set(gca,'YTick',xticks,'Layer','top','TickLength',[0.015 0.015])
+clim(ax, zeta_limits);
 
 % wave vorticity section
-ax = nexttile(tl,nColumns+1);
+ax = nexttile(tl,nColumns+2);
+% % % ax = nexttile(tl_inner,4);
 val = squeeze(zeta_z_w(:,iY,:)/wvt.f);
 pcolor(ax, wvt.x/1e3, wvt.z/1e3, val.'), shading interp,
 % title("wave x-z vorticity")
@@ -141,47 +185,26 @@ pcolor(ax, wvt.x/1e3, wvt.z/1e3, val.'), shading interp,
 axis square
 colormap(ax, cmDivRWB);
 xlabel('x-distance (km)')
-ylabel('Depth (km)')
+% ylabel('Depth (km)')
+yticklabels([])
 set(gca,'Layer','top','TickLength',[0.015 0.015])
 clim(ax, zeta_limits);
 cb = colorbar("southoutside");
 cb.Label.String = "$\zeta$/f";
 cb.Label.Interpreter = 'latex';
 
-% geostrophic surface vorticity
-ax = nexttile(tl,2);
-val = zeta_z_g(:,:,end)/wvt.f;
-pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
-hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
-title("surface vorticity")
-% title("geostrophic surface vorticity")
-axis square
-xticklabels([])
-yticklabels([])
-% ylabel('y-distance (km)')
-set(gca,'YTick',xticks,'Layer','top','TickLength',[0.015 0.015])
-colormap(ax, cmDivRWB);
-clim(ax, zeta_limits);
-
-% wave surface vorticity
-ax = nexttile(tl,nColumns+2);
-val = zeta_z_w(:,:,end)/wvt.f;
-pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
-hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
-% title("surface vorticity")
-% title("wave surface vorticity")
-axis square
-colormap(ax, cmDivRWB);
-xlabel('x-distance (km)')
-yticklabels([])
-% ylabel('y-distance (km)')
-set(gca,'YTick',xticks,'Layer','top','TickLength',[0.015 0.015])
-clim(ax, zeta_limits);
-cb = colorbar("southoutside");
-cb.Label.String = "$\zeta$/f";
-cb.Label.Interpreter = 'latex';
+% % % cb = colorbar;
+% % % cb.Layout.Tile = 'south';
+% % % cb.Label.String = "$\zeta$/f";
+% % % cb.Label.Interpreter = 'latex';
 
 if options.shouldShowEnergySpectra
+
+    % % % % nested tiled layout allows common colorbar for subset of axes.
+    % % % tl_inner = tiledlayout(tl,2,1,TileSpacing='tight');
+    % % % tl_inner.Layout.Tile = 3;
+    % % % % tl_inner.Layout.TileSpan = [1,2];
+
     % % % % geostrophic energy spectrum
     % % % ax = nexttile(tl,3);
     % % % val = log10(TE_A0_j_kR);
@@ -225,6 +248,7 @@ if options.shouldShowEnergySpectra
 
     % geostrophic energy spectrum
     ax = nexttile(tl,3);
+    % % % ax = nexttile(tl_inner,1);
     val = log10(TE_A0_j_kR);
     pcolor(ax,2*pi./kPseudoLocation/1000,2*pi./jPseudoLocation/1000,val), shading flat,
     set(gca,'XDir','reverse')
@@ -232,7 +256,8 @@ if options.shouldShowEnergySpectra
     set(gca,'YDir','reverse')
     set(gca,'YScale','log')
     xticklabels([])
-    title('energy spectrum')
+    % title('geostrophic energy spectrum')
+    title('geostrophic energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
     axis square
     clim(ax,energy_limits);
     ylabel("radius of deformation (km)")
@@ -286,6 +311,7 @@ if options.shouldShowEnergySpectra
 
     % wave energy spectrum
     ax = nexttile(tl,nColumns + 3);
+    % % % ax = nexttile(tl_inner,2);
     val = log10(TE_Apm_j_kR);
     pcolor(ax,2*pi./kPseudoLocation/1000,2*pi./jPseudoLocation/1000,val), shading flat,
     set(gca,'XDir','reverse')
@@ -295,6 +321,8 @@ if options.shouldShowEnergySpectra
     axis square
     cb = colorbar('southoutside');
     clim(ax,energy_limits);
+    % title('wave energy spectrum')
+    title('wave energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
     xlabel('horizontal wavelength (km)')
     % clim(ax,energy_limits);
     ylabel("radius of deformation (km)")
@@ -316,10 +344,10 @@ end
 % % % self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
 % Add a large label to the left of the first row (row 1)
-textAxes = axes('Position', [0, 0, 1, 1], 'Visible', 'off'); % Dummy invisible axes
-text(0.07, 0.74, 'Geostrophic', 'FontSize', 12, 'FontWeight', 'bold', ...
-    'HorizontalAlignment', 'center', 'Rotation', 90); % Rotated vertical label
-text(0.07, 0.34, 'Wave', 'FontSize', 12, 'FontWeight', 'bold', ...
-    'HorizontalAlignment', 'center', 'Rotation', 90); % Rotated vertical label
+% textAxes = axes('Position', [0, 0, 1, 1], 'Visible', 'off'); % Dummy invisible axes
+% text(0.07, 0.74, 'Geostrophic', 'FontSize', 12, 'FontWeight', 'bold', ...
+%     'HorizontalAlignment', 'center', 'Rotation', 90); % Rotated vertical label
+% text(0.07, 0.34, 'Wave', 'FontSize', 12, 'FontWeight', 'bold', ...
+%     'HorizontalAlignment', 'center', 'Rotation', 90); % Rotated vertical label
 
 end
