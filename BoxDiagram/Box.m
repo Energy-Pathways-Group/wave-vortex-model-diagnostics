@@ -41,6 +41,15 @@ classdef Box < handle
             %SETPOSITION Assign [x y] lower-left corner after construction.
             obj.Position = pos;
         end
+        
+        function shp = polyshape(self)
+            xmin = self.Position(1);
+            xmax = self.Position(1) + self.Size(1);
+            ymin = self.Position(2);
+            ymax = self.Position(2) + self.Size(2);
+            shp = polyshape([xmin xmax xmax xmin], [ymin ymin ymax ymax]);
+        end
+
         function h = draw(obj,ax)
             %DRAW Render the box at its current Position.
             if isempty(obj.Position)
