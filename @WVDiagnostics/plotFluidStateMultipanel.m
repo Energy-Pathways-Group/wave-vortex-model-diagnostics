@@ -103,8 +103,8 @@ else
 end
 
 
-tl = tiledlayout(2,nColumns,TileSpacing="tight");
-% % % tl = tiledlayout(1,nColumns,TileSpacing="tight");
+% % % tl = tiledlayout(2,nColumns,TileSpacing="tight");
+tl = tiledlayout(1,nColumns,TileSpacing="tight");
 
 title(tl, options.title, 'Interpreter', 'none')
 
@@ -120,13 +120,13 @@ TZ_A0_j_kR = wvt.transformToRadialWavenumber(TZ_A0_j_kl);
 zeta_z_g = wvt.diffX(wvt.v_g) - wvt.diffY(wvt.u_g);  % geostrophic
 zeta_z_w = wvt.diffX(wvt.v_w) - wvt.diffY(wvt.u_w);  % wave
 
-% % % % nested tiled layout allows common colorbar for subset of axes.
-% % % tl_inner = tiledlayout(tl,2,2,TileSpacing='tight');
-% % % tl_inner.Layout.TileSpan = [1,2];
+% nested tiled layout allows common colorbar for subset of axes.
+tl_inner = tiledlayout(tl,2,2,TileSpacing='tight');
+tl_inner.Layout.TileSpan = [1,2];
 
 % geostrophic surface vorticity
-ax = nexttile(tl,1);
-% % % ax = nexttile(tl_inner,1);
+% % % ax = nexttile(tl,1);
+ax = nexttile(tl_inner,1);
 val = zeta_z_g(:,:,end)/wvt.f;
 pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
 hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
@@ -141,8 +141,8 @@ colormap(ax, cmDivRWB);
 clim(ax, zeta_limits);
 
 % geostrophic vorticity section
-ax = nexttile(tl,nColumns+1);
-% % % ax = nexttile(tl_inner,3);
+% % % ax = nexttile(tl,nColumns+1);
+ax = nexttile(tl_inner,3);
 val = squeeze(zeta_z_g(:,iY,:)/wvt.f);
 pcolor(ax, wvt.x/1e3, wvt.z/1e3, val.'), shading interp,
 % title("geostrophic x-z vorticity")
@@ -154,13 +154,13 @@ colormap(ax, cmDivRWB);
 ylabel('Depth (km)')
 set(gca,'Layer','top','TickLength',[0.015 0.015])
 clim(ax, zeta_limits);
-cb = colorbar("southoutside");
-cb.Label.String = "$\zeta$/f";
-cb.Label.Interpreter = 'latex';
+% % % cb = colorbar("southoutside");
+% % % cb.Label.String = "$\zeta$/f";
+% % % cb.Label.Interpreter = 'latex';
 
 % wave surface vorticity
-ax = nexttile(tl,2);
-% % % ax = nexttile(tl_inner,2);
+% % % ax = nexttile(tl,2);
+ax = nexttile(tl_inner,2);
 val = zeta_z_w(:,:,end)/wvt.f;
 pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
 hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
@@ -176,8 +176,8 @@ set(gca,'YTick',xticks,'Layer','top','TickLength',[0.015 0.015])
 clim(ax, zeta_limits);
 
 % wave vorticity section
-ax = nexttile(tl,nColumns+2);
-% % % ax = nexttile(tl_inner,4);
+% % % ax = nexttile(tl,nColumns+2);
+ax = nexttile(tl_inner,4);
 val = squeeze(zeta_z_w(:,iY,:)/wvt.f);
 pcolor(ax, wvt.x/1e3, wvt.z/1e3, val.'), shading interp,
 % title("wave x-z vorticity")
@@ -189,21 +189,20 @@ xlabel('x-distance (km)')
 yticklabels([])
 set(gca,'Layer','top','TickLength',[0.015 0.015])
 clim(ax, zeta_limits);
-cb = colorbar("southoutside");
-cb.Label.String = "$\zeta$/f";
-cb.Label.Interpreter = 'latex';
-
-% % % cb = colorbar;
-% % % cb.Layout.Tile = 'south';
+% % % cb = colorbar("southoutside");
 % % % cb.Label.String = "$\zeta$/f";
 % % % cb.Label.Interpreter = 'latex';
 
+cb = colorbar;
+cb.Layout.Tile = 'south';
+cb.Label.String = "$\zeta$/f";
+cb.Label.Interpreter = 'latex';
+
 if options.shouldShowEnergySpectra
 
-    % % % % nested tiled layout allows common colorbar for subset of axes.
-    % % % tl_inner = tiledlayout(tl,2,1,TileSpacing='tight');
-    % % % tl_inner.Layout.Tile = 3;
-    % % % % tl_inner.Layout.TileSpan = [1,2];
+    % nested tiled layout allows common colorbar for subset of axes.
+    tl_inner = tiledlayout(tl,2,1,TileSpacing='tight');
+    tl_inner.Layout.Tile = 3;
 
     % % % % geostrophic energy spectrum
     % % % ax = nexttile(tl,3);
@@ -247,8 +246,8 @@ if options.shouldShowEnergySpectra
     % % % % hold off
 
     % geostrophic energy spectrum
-    ax = nexttile(tl,3);
-    % % % ax = nexttile(tl_inner,1);
+    % % % ax = nexttile(tl,3);
+    ax = nexttile(tl_inner,1);
     val = log10(TE_A0_j_kR);
     pcolor(ax,2*pi./kPseudoLocation/1000,2*pi./jPseudoLocation/1000,val), shading flat,
     set(gca,'XDir','reverse')
@@ -310,8 +309,8 @@ if options.shouldShowEnergySpectra
     % % % hold off
 
     % wave energy spectrum
-    ax = nexttile(tl,nColumns + 3);
-    % % % ax = nexttile(tl_inner,2);
+    % % % ax = nexttile(tl,nColumns + 3);
+    ax = nexttile(tl_inner,2);
     val = log10(TE_Apm_j_kR);
     pcolor(ax,2*pi./kPseudoLocation/1000,2*pi./jPseudoLocation/1000,val), shading flat,
     set(gca,'XDir','reverse')
