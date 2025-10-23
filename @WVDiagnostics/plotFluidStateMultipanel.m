@@ -37,7 +37,7 @@ zeta_limits = [-0.2 0.2];
 energy_limits = [-8 0];
 enstrophy_limits = [-16 -9];
 
-% Create wavelength axes
+% Create wavelength axes for wvt variables
 % We will pretend the "0" wavenumber is actually evenly spaced
 % from the nearest two wavenumbers
 kPseudoLocation = wvt.kRadial;
@@ -76,9 +76,9 @@ textColor = '[.5,.5,.5]';
 % iY = round(wvt.Nx/2);
 iY = 1;
 
-% create the lines of constant frequency
-[omegaN,n] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)));
-omegaJK = (omegaN./n)/wvt.f;
+% % % % % create the lines of constant frequency
+% % % % [omegaN,n] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)));
+% % % % omegaJK = (omegaN./n)/wvt.f;
 
 % create the lines of constant deformation radius
 deformationJK = repmat(sqrt(wvt.Lr2)./1000,1,length(wvt.kRadial));
@@ -130,7 +130,7 @@ ax = nexttile(tl_inner,1);
 val = zeta_z_g(:,:,end)/wvt.f;
 pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
 hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
-title("geostrophic vorticity")
+title("geostrophic vorticity \zeta_g")
 % title("geostrophic surface vorticity")
 axis square
 xticklabels([])
@@ -165,7 +165,7 @@ val = zeta_z_w(:,:,end)/wvt.f;
 pcolor(ax, wvt.x/1e3, wvt.y/1e3, val.'), shading interp,
 hold on; plot(wvt.x/1e3,ones(size(wvt.x))*wvt.y(iY)/1e3,'k:');hold off; % add line for x-z section
 % title("surface vorticity")
-title("wave vorticity")
+title("wave vorticity \zeta_w")
 axis square
 colormap(ax, cmDivRWB);
 yticklabels([])
@@ -195,7 +195,7 @@ clim(ax, zeta_limits);
 
 cb = colorbar;
 cb.Layout.Tile = 'south';
-cb.Label.String = "$\zeta$/f";
+cb.Label.String = "$(f)$"; %"$\zeta$/f";
 cb.Label.Interpreter = 'latex';
 
 if options.shouldShowEnergySpectra
@@ -203,47 +203,6 @@ if options.shouldShowEnergySpectra
     % nested tiled layout allows common colorbar for subset of axes.
     tl_inner = tiledlayout(tl,2,1,TileSpacing='tight');
     tl_inner.Layout.Tile = 3;
-
-    % % % % geostrophic energy spectrum
-    % % % ax = nexttile(tl,3);
-    % % % val = log10(TE_A0_j_kR);
-    % % % pcolor(ax,wvt.kRadial,wvt.j,val), shading flat,
-    % % % % % % pcolor(ax,radialWavelength,wvt.j,val), shading flat,
-    % % % % % % set(gca,'XDir','reverse')
-    % % % % % % set(gca,'XScale','log')
-    % % % % set(gca,'XScale','log')
-    % % % % set(gca,'YScale','log')
-    % % % xticklabels([])
-    % % % % title('geostrophic energy')
-    % % % title('energy spectrum')
-    % % % axis square
-    % % % clim(ax,energy_limits);
-    % % % xticks(ticks_x)
-    % % % % xticklabels(labels_x)
-    % % % % xlabel('wavelength (km)')
-    % % % % xlabel("wavenumber")
-    % % % ylabel("Vertical mode")
-    % % % set(gca, 'YAxisLocation', 'right','Layer','top','TickLength',[0.015 0.015]);
-    % % % colormap(ax, cmLinMono);
-    % % % % cb.Label.String = "log10(m^3 s^{-2})";
-    % % % % create some nice tick labels to show deformation radius
-    % % % yticksTemp = yticks;
-    % % % ticks_y = sqrt(wvt.Lr2)./1000;
-    % % % labels_y = cell(length(yticksTemp),1);
-    % % % for i=1:length(yticksTemp)
-    % % %     labels_y{i} = sprintf('%0.1f',ticks_y(yticksTemp(i)+1));
-    % % % end
-    % % % text(1.25*max(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',textColor,'HorizontalAlignment','center')
-    % % % text(1.25*max(xlim),1.05*max(ylim),'L_r (km)','Color',textColor,'HorizontalAlignment','center')
-    % % % % % % text(.3*min(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',textColor,'HorizontalAlignment','center')
-    % % % % % % text(.3*min(xlim),1.05*max(ylim),'L_r (km)','Color',textColor,'HorizontalAlignment','center')
-    % % % % % add deformation radius contours
-    % % % % set(gca,'layer','top'),
-    % % % % hold on
-    % % % % v = round(sqrt(wvt.Lr2(1:2:end))./1000*10)/10;
-    % % % % [C,h] = contour(wvt.kRadial,wvt.j',deformationJK,v,'LineWidth',1,'Color',textColor);
-    % % % % clabel(C,h,v,'Color',textColor,'LabelSpacing',400)
-    % % % % hold off
 
     % geostrophic energy spectrum
     % % % ax = nexttile(tl,3);
@@ -255,8 +214,8 @@ if options.shouldShowEnergySpectra
     set(gca,'YDir','reverse')
     set(gca,'YScale','log')
     xticklabels([])
-    % title('geostrophic energy spectrum')
-    title('geostrophic energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
+    title('geostrophic energy spectrum')
+    % title('geostrophic energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
     axis square
     clim(ax,energy_limits);
     ylabel("radius of deformation (km)")
@@ -264,49 +223,22 @@ if options.shouldShowEnergySpectra
     colormap(ax, cmLinMono);
     set(gca,'layer','top'),
     hold on
-    % add ke:pe ratio contours
+    % add ke:pe ratio contours. 
+    % Note: have to pad quantities to work right with our log-log axes. And here
+    % have to "double pad" to work right with pcolor's box shift and
+    % reversed axis direction. 
     fraction = self.geo_hke_jk./(self.geo_hke_jk+self.geo_pe_jk);
-    fractionPadded = cat(1,fraction(1,:),fraction);
-    fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
-    fractionJK = interpn(KPaddedWVD,JPaddedWVD,fractionPadded',KPseudoLocation,JPseudoLocation,"linear");
-    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),2*pi./jPseudoLocation/1000,fliplr(fractionJK'),options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
+    % fractionPadded = cat(1,fraction(1,:),fraction);
+    fractionPadded = cat(1,[fraction(1,:);fraction(1,:)],fraction(1:end-1,:));
+    % fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
+    fractionPadded = cat(2,[fractionPadded(:,1) fractionPadded(:,1)],fractionPadded(:,1:end-1));
+    fractionJK = interpn(KPaddedWVD,JPaddedWVD,fractionPadded.',KPseudoLocation,JPseudoLocation,"linear");
+    [C,h] = contour(ax,2*pi./KPseudoLocation/1000,2*pi./JPseudoLocation/1000,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
     clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
     % add pseudoWavelength 
-    [C,h] = contour(ax,2*pi./kPseudoLocation/1000,2*pi./jPseudoLocation/1000,2*pi./kPseudoRadial'/1000,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+    [C,h] = contour(ax,2*pi./KPseudoLocation/1000,2*pi./JPseudoLocation/1000,2*pi./kPseudoRadial/1000,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
     clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
     hold off
-
-    % % % % wave energy spectrum
-    % % % ax = nexttile(tl,nColumns + 3);
-    % % % val = log10(TE_Apm_j_kR);
-    % % % pcolor(ax,wvt.kRadial,wvt.j,val), shading flat,
-    % % % % % % pcolor(ax,radialWavelength,wvt.j,val), shading flat,
-    % % % % % % set(gca,'XDir','reverse')
-    % % % % % % set(gca,'XScale','log')
-    % % % % set(gca,'XScale','log')
-    % % % % set(gca,'YScale','log')
-    % % % % title('wave energy')
-    % % % % title('energy spectrum')
-    % % % axis square
-    % % % cb = colorbar('southoutside');
-    % % % clim(ax,energy_limits);
-    % % % xticks(ticks_x)
-    % % % xticklabels(labels_x)
-    % % % xlabel('wavelength (km)')
-    % % % clim(ax,energy_limits);
-    % % % % xlabel("wavenumber (rad m^{-1})")
-    % % % % xticklabels([])
-    % % % ylabel("Vertical mode")
-    % % % set(gca, 'YAxisLocation', 'right','Layer','top','TickLength',[0.015 0.015]);
-    % % % colormap(ax, cmLinMono);
-    % % % cb.Label.String = "log10(m^3 s^{-2})";
-    % % % % add frequency contours
-    % % % set(gca,'layer','top'),
-    % % % hold on
-    % % % v = [1.01 1.05 1.2 1.5 2 4 8 16];
-    % % % [C,h] = contour(wvt.kRadial(2:end),wvt.j',(omegaJK(:,2:end)),v,'LineWidth',1,'Color',textColor);
-    % % % clabel(C,h,v,'Color',textColor,'LabelSpacing',400)
-    % % % hold off
 
     % wave energy spectrum
     % % % ax = nexttile(tl,nColumns + 3);
@@ -320,8 +252,8 @@ if options.shouldShowEnergySpectra
     axis square
     cb = colorbar('southoutside');
     clim(ax,energy_limits);
-    % title('wave energy spectrum')
-    title('wave energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
+    title('wave energy spectrum')
+    % title('wave energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
     xlabel('horizontal wavelength (km)')
     % clim(ax,energy_limits);
     ylabel("radius of deformation (km)")
@@ -331,16 +263,20 @@ if options.shouldShowEnergySpectra
     set(gca,'layer','top'),
     hold on
     % add frequency contours
-    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),2*pi./jPseudoLocation/1000,fliplr(omegaJK),options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
+    % omegaPadded = cat(1,self.omega_jk(1,:),self.omega_jk);
+    omegaPadded = cat(1,[self.omega_jk(1,:);self.omega_jk(1,:)],self.omega_jk(1:end-1,:));
+    % omegaPadded = cat(2,omegaPadded(:,1),omegaPadded);
+    omegaPadded = cat(2,[omegaPadded(:,1) omegaPadded(:,1)],omegaPadded(:,1:end-1));
+    omegaJK = interpn(KPaddedWVD,JPaddedWVD,omegaPadded.',KPseudoLocation,JPseudoLocation,"linear");
+    [C,h] = contour(ax,2*pi./KPseudoLocation/1000,2*pi./JPseudoLocation/1000,omegaJK/self.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
     clabel(C,h,options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
     % add pseudoWavelength 
-    [C,h] = contour(ax,2*pi./kPseudoLocation/1000,2*pi./jPseudoLocation/1000,2*pi./kPseudoRadial'/1000,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+    [C,h] = contour(ax,2*pi./KPseudoLocation/1000,2*pi./JPseudoLocation/1000,2*pi./kPseudoRadial/1000,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
     clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
     hold off
 
 
 end
-% % % self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
 
 % Add a large label to the left of the first row (row 1)
 % textAxes = axes('Position', [0, 0, 1, 1], 'Visible', 'off'); % Dummy invisible axes
