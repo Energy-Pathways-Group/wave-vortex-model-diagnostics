@@ -324,6 +324,9 @@ text(ax,min(xlim)*1.05,max(ylim),'d)','FontSize',14,'HorizontalAlignment','left'
     function drawPatchForFluxWithColor(fluxAxis,flux,color)
         % find radialWavelength for 10%-90% forcing interval
         cv = abs(flux) / max(abs(flux));
+        if all(isfinite(cv)) == false
+            return
+        end
         % Remove duplicates values
         uniqueInd = [false; diff(cv) ~= 0]; % keep only points where cv changes
         firstOne = find(uniqueInd ~= 0, 1, 'first');
