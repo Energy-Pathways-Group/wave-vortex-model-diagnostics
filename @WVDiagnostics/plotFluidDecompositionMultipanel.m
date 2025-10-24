@@ -88,7 +88,7 @@ xticklabels([])
 yticklabels([])
 title(ax, "geostrophic")
 cb = colorbar("eastoutside");
-cb.Label.String = "$\zeta$/f";
+cb.Label.String = "vertical vorticity (f)";
 cb.Label.Interpreter = 'latex';
 
 ax = nexttile(tl,4);
@@ -106,7 +106,7 @@ makeVorticityXZPlot(zeta_z_g);
 xlabel('x-distance (km)')
 yticklabels([])
 cb = colorbar("eastoutside");
-cb.Label.String = "$\zeta$/f";
+cb.Label.String = "vertical vorticity (f)";
 cb.Label.Interpreter = 'latex';
 
 end
