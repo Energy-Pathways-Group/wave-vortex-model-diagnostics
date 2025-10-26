@@ -17,6 +17,7 @@ ks = self.sparseKRadialAxis;
 js = self.sparseJWavenumberAxis;
 [S_0, S_pm, mask_0, mask_pm] = self.sparseJKAxisBinMatrices();
 N = length(js)*length(ks);
+matrixSize = [length(js) length(ks)];
 
 groupName = "mirror-flux-2d-" + options.mirrorTriad;
 tName = "t_" + options.mirrorTriad;
