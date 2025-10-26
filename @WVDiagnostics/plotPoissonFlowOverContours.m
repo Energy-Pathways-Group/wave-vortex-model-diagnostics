@@ -30,11 +30,21 @@ end
 %     options.color = {options.color};
 % end
 
+if size(options.inertialFlux(1).flux,1) == length(wvd.jWavenumber)
+    jWavenumber = wvd.jWavenumber;
+    kRadial = wvd.kRadial;
+elseif size(options.inertialFlux(1).flux,1) == length(wvd.sparseJWavenumberAxis)
+    jWavenumber = wvd.sparseJWavenumberAxis;
+    kRadial = wvd.sparseKRadialAxis;
+else
+    error("The inertial flux has unknown dimensions")
+end
+
 % We will pretend the "0" wavenumber is actually evenly spaced
 % from the nearest two wavenumbers
-kPseudoLocation = wvd.kRadial;
+kPseudoLocation = kRadial;
 kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
-jPseudoLocation = wvd.jWavenumber;
+jPseudoLocation = jWavenumber;
 jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
 
 % For interpolation to work correctly we need to repeat the
@@ -45,18 +55,18 @@ jPadded= cat(1,0,jPseudoLocation);
 
 % We will use this axis to display. Widen the box so that it is
 % the same size as its neighbors.
-kMin = exp(-1.5*log(wvd.kRadial(3)) + 2.5*log(wvd.kRadial(2)));
-jMin = exp(-1.5*log(wvd.jWavenumber(3)) + 2.5*log(wvd.jWavenumber(2)));
+kMin = exp(-1.5*log(kRadial(3)) + 2.5*log(kRadial(2)));
+jMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
 
 % make K and J grid for log of variables in linear space
 N = 500;
 if isinf(options.kmax)
-    logKmax =  max(log10(wvd.kRadial(:)));
+    logKmax =  max(log10(kRadial(:)));
 else
     logKmax = log10(options.kmax);
 end
 if isinf(options.jmax)
-    logJmax =  max(log10(wvd.jWavenumber(:)));
+    logJmax =  max(log10(jWavenumber(:)));
 else
     logJmax = log10(options.jmax);
 end

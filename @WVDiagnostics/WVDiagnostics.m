@@ -191,7 +191,7 @@ classdef WVDiagnostics < handle
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Fluxes in space, [kPseudoRadialSparse t]
+        % Fluxes in space, [sparseKRadialAxis 1]
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -205,11 +205,13 @@ classdef WVDiagnostics < handle
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Fluxes in space, [j kRadial]
+        % Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         [M_wwg, F_wwg, ks, js] = quadraticEnergyMirrorTriadFluxes2D(self,options)
+
+        [inertial_fluxes_g, inertial_fluxes_w, ks, js] = quadraticEnergyPrimaryTriadFluxesTemporalAverage2D(self,options)
 
         wwg = quadraticEnergyTriadFluxWWGWave(self)
 
@@ -230,7 +232,7 @@ classdef WVDiagnostics < handle
         [kePeAxis,bins_kepe] = sparseKePeAxis(self)
         k = sparseKRadialAxis(self)
         j = sparseJWavenumberAxis(self)
-        [j,k,bins_0,bins_pm] = sparseJKAxis(self)
+        [S_0, S_pm, mask_0, mask_pm] = sparseJKAxisBinMatrices(self)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %

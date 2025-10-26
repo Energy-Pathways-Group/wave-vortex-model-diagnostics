@@ -79,4 +79,4 @@ toc
 
 figure
 pcolor(ks,js,mean(F_wwg,3)), shading flat, xscale('log'), yscale('log')
-clim(0.2*[-1 1]*max(max(abs(mean(F,3)))))
+clim(0.2*[-1 1]*max(max(abs(mean(F_wwg,3)))))

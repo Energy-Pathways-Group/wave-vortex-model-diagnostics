@@ -4,6 +4,7 @@ arguments
     options.stride = 1
     options.timeIndices
     options.mirrorTriad {mustBeMember(options.mirrorTriad, ["wwg","ggw"])} = "wwg";
+    options.shouldOverwriteExisting = false;
 end
 
 if ~exist(self.diagpath,"file")
@@ -12,8 +13,9 @@ end
 diagfile = self.diagfile;
 wvt = self.wvt;
 
-[js,ks,bins_0,bins_pm] = self.sparseJKAxis;
-matrixSize = [length(js) length(ks)];
+ks = self.sparseKRadialAxis;
+js = self.sparseJWavenumberAxis;
+[S_0, S_pm, mask_0, mask_pm] = self.sparseJKAxisBinMatrices();
 N = length(js)*length(ks);
 
 groupName = "mirror-flux-2d-" + options.mirrorTriad;
@@ -31,21 +33,30 @@ if diagfile.hasGroupWithName(groupName)
     % If existing file
     %%%%%%%%%%%%%%%%%%
     group = diagfile.groupWithName(groupName);
-    t = group.readVariables(tName);
-    [found, idx] = ismember(t, self.t_wv);
-    if ~all(found)
-        error('Some entries of mirror-fluxes-2d/t are not exactly in t_wv.');
-    end
-    if length(t) > 1
-        stride = idx(2)-idx(1);
+    if options.shouldOverwriteExisting
+        outputIndexOffset = 0;
+        if ~isfield(options,"timeIndices")
+            timeIndices = 1:options.stride:length(self.t_wv);
+        else
+            timeIndices = options.timeIndices;
+        end
     else
-        stride = options.stride;
+        t = group.readVariables(tName);
+        [found, idx] = ismember(t, self.t_wv);
+        if ~all(found)
+            error('Some entries of mirror-fluxes-2d/t are not exactly in t_wv.');
+        end
+        if length(t) > 1
+            stride = idx(2)-idx(1);
+        else
+            stride = options.stride;
+        end
+        timeIndices = (idx(end)+stride):stride:length(self.t_wv);
+        if isfield(options,"timeIndices")
+            timeIndices = intersect(options.timeIndices,timeIndices);
+        end
+        outputIndexOffset = length(t);
     end
-    timeIndices = (idx(end)+stride):stride:length(self.t_wv);
-    if isfield(options,"timeIndices")
-        timeIndices = intersect(options.timeIndices,timeIndices);
-    end
-    outputIndexOffset = length(t);
 
     Pi_var = group.variableWithName(triadMirrorName);
     F_var = group.variableWithName(triadPrimaryName);
@@ -78,25 +89,6 @@ else
     dimensionNames = ["js", "ks", tName];
     Pi_var = group.addVariable(triadMirrorName,dimensionNames,type="double",isComplex=false);
     F_var = group.addVariable(triadPrimaryName,dimensionNames,type="double",isComplex=false);
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Build the wavenumber/mode mask
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-valid = ~isnan(bins_0);
-S_0 = sparse(find(valid), bins_0(valid), 1, numel(wvt.Ap), N, nnz(valid));
-
-valid = ~isnan(bins_pm);
-S_pm = sparse(find(valid), bins_pm(valid), 1, numel(wvt.Ap), N, nnz(valid));
-
-mask_0 = false(wvt.Nj,wvt.Nkl,N);
-mask_pm = false(wvt.Nj,wvt.Nkl,N);
-for iK = 1:N
-    mask_0(:,:,iK) = (bins_0 <= iK);
-    mask_pm(:,:,iK) = (bins_pm <= iK);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
