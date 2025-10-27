@@ -1,7 +1,10 @@
-function [inertial_fluxes_g, inertial_fluxes_w, ks, js] = quadraticEnergyPrimaryTriadFluxesTemporalAverage2D(self,options)
+function [inertial_fluxes_g, inertial_fluxes_w, k, j] = quadraticEnergyPrimaryTriadFluxesTemporalAverage2D(self,options)
+% outputGrid determines whether or not the fluxes get downsampled to the
+% sparse grid, or up-sampled to the full grid.
 arguments
     self WVDiagnostics
-    options.timeIndices = Inf;
+    options.timeIndices = Inf
+    options.outputGrid {mustBeMember(options.outputGrid, ["sparse","full"])} = "full";
 end
 if isinf(options.timeIndices)
     filter_time = @(v) mean(v,3);
@@ -15,17 +18,32 @@ ks = self.sparseKRadialAxis;
 [Js,Ks] = ndgrid(js,ks);
 matrixSize = [length(js) length(ks)];
 
-flux_interp = @(v) diff(diff( cat(2,zeros(length(js)+1,1),cat(1,zeros(1,length(ks)),interpn(J,K,cumsum(cumsum(v,1),2),Js,Ks))), 1,1 ),1,2);
+if options.outputGrid == "sparse"
+    flux_interp_full = @(v) diff(diff( cat(2,zeros(length(js)+1,1),cat(1,zeros(1,length(ks)),interpn(J,K,cumsum(cumsum(v,1),2),Js,Ks))), 1,1 ),1,2);
+    flux_interp_sparse = @(v) v;
+    k = ks;
+    j = js;
+else
+    repeat_last_row_col = @(v) v([1:end end], [1:end end]);
+    zero_pad = @(v) [[0, zeros(1,size(v,2))]; [zeros(size(v,1),1), v]];
+    js_pad = cat(1,js,self.jWavenumber(end));
+    ks_pad = cat(1,ks,self.kRadial(end));
+    [Js_pad,Ks_pad] = ndgrid(js_pad,ks_pad);
+    flux_interp_full = @(v) v;
+    flux_interp_sparse = @(v) diff(diff( zero_pad(interpn(Js_pad,Ks_pad,repeat_last_row_col(cumsum(cumsum(v,1),2)),J,K)), 1,1 ),1,2);
+    k = self.kRadial;
+    j = self.jWavenumber;
+end
 
 triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave];
 fluxes_g = self.filterFluxesForReservoir(self.quadraticEnergyTriadFluxes(energyReservoirs=EnergyReservoir.geostrophic_mda,triadComponents=triadComponents),filter=filter_time);
 for idx=1:length(fluxes_g)
-    fluxes_g(idx).flux = flux_interp(fluxes_g(idx).te_gmda);
+    fluxes_g(idx).flux = flux_interp_full(fluxes_g(idx).te_gmda);
 end
 
 fluxes_w = self.filterFluxesForReservoir(self.quadraticEnergyTriadFluxes(energyReservoirs=EnergyReservoir.wave,triadComponents=triadComponents),filter=filter_time);
 for idx=1:length(fluxes_w)
-    fluxes_w(idx).flux = flux_interp(fluxes_w(idx).te_wave);
+    fluxes_w(idx).flux = flux_interp_full(fluxes_w(idx).te_wave);
 end
 
 if ~self.diagfile.hasGroupWithName("mirror-flux-2d-wwg")
@@ -34,6 +52,7 @@ if ~self.diagfile.hasGroupWithName("mirror-flux-2d-wwg")
 else
     M_wwg = mean(self.quadraticEnergyMirrorTriadFluxes2D(timeIndices=options.timeIndices,mirrorTriad="wwg"),3);
 end
+M_wwg = flux_interp_sparse(M_wwg);
 
 if ~self.diagfile.hasGroupWithName("mirror-flux-2d-ggw")
     M_ggw = zeros(matrixSize);
@@ -41,6 +60,7 @@ if ~self.diagfile.hasGroupWithName("mirror-flux-2d-ggw")
 else
     M_ggw = mean(self.quadraticEnergyMirrorTriadFluxes2D(timeIndices=options.timeIndices,mirrorTriad="ggw"),3);
 end
+M_ggw = flux_interp_sparse(M_ggw);
 
 inertial_fluxes_g(1).flux = fluxes_g([fluxes_g.name] == "gmda_gmda").flux;
 inertial_fluxes_g(1).name = "ggg";
