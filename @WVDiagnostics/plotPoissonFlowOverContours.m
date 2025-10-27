@@ -87,79 +87,88 @@ end
 
 filled = true;
 
-nData = length(options.forcingFlux);
-ax = gobjects(nData,1);
-H = gobjects(0); % empty container for plot element handles
+if isfield(options,"forcingFlux")
+    nData = length(options.forcingFlux);
+    ax = gobjects(nData,1);
+    H = gobjects(0); % empty container for plot element handles
 
-% loop over forcing fluxes to plot
-for k=1:nData
-    ax(k) = axes;
+    % loop over forcing fluxes to plot
+    for k=1:nData
+        ax(k) = axes;
 
-    % add contour for IO and MDA modes
-    if k==1
-        IOMDA = zeros(size(KLinLog));
-        IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
-        IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
-        contourf(ax(k),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
-        hold on
-    end
-
-    forcingFlux = options.forcingFlux(k).flux;
-    fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
-    fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
-    fluxLinLog = interpn(KPadded,JPadded,(fluxPadded.'),10.^KLinLog,10.^JLinLog,"linear");
-
-    color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.forcingFlux(k).relativeAmplitude;
-    cmap = WVDiagnostics.symmetricTintMap(options.forcingFlux(k).color);
-    nLevels = 1+ceil(options.forcingFlux(k).relativeAmplitude*options.nLevels);
-    maxAbs  = max(abs(forcingFlux(:)));
-    posLevels = linspace(0, maxAbs, nLevels+1);   posLevels(1)  = [];  % strictly positive
-    negLevels = linspace(-maxAbs, 0, nLevels+1);  negLevels(end) = []; % strictly negative
-
-    % contour and contourf forcing fluxes
-    if filled
-        % zero out/nan stuff below out contour threshold
-        fluxLinLogTmp = fluxLinLog;
-        fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
-        if options.forcingFlux(k).alpha < 1
-            [~,H(length(H)+1)] = contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha, DisplayName=options.forcingFlux(k).fancyName); hold on
-        else
-            [~,H(length(H)+1)] = contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none', DisplayName=options.forcingFlux(k).fancyName); hold on
+        % add contour for IO and MDA modes
+        if k==1
+            IOMDA = zeros(size(KLinLog));
+            IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
+            IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
+            contourf(ax(k),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
+            hold on
         end
-        if nLevels>11 % cap on number of contour lines to draw.
-            skip = floor(nLevels/10);
+
+        forcingFlux = options.forcingFlux(k).flux;
+        fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
+        fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
+        fluxLinLog = interpn(KPadded,JPadded,(fluxPadded.'),10.^KLinLog,10.^JLinLog,"linear");
+
+        color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.forcingFlux(k).relativeAmplitude;
+        cmap = WVDiagnostics.symmetricTintMap(options.forcingFlux(k).color);
+        nLevels = 1+ceil(options.forcingFlux(k).relativeAmplitude*options.nLevels);
+        maxAbs  = max(abs(forcingFlux(:)));
+        posLevels = linspace(0, maxAbs, nLevels+1);   posLevels(1)  = [];  % strictly positive
+        negLevels = linspace(-maxAbs, 0, nLevels+1);  negLevels(end) = []; % strictly negative
+
+        % contour and contourf forcing fluxes
+        if filled
+            % zero out/nan stuff below out contour threshold
+            fluxLinLogTmp = fluxLinLog;
+            fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
+            if options.forcingFlux(k).alpha < 1
+                [~,H(length(H)+1)] = contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha, DisplayName=options.forcingFlux(k).fancyName); hold on
+            else
+                [~,H(length(H)+1)] = contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none', DisplayName=options.forcingFlux(k).fancyName); hold on
+            end
+            if nLevels>11 % cap on number of contour lines to draw.
+                skip = floor(nLevels/10);
+            else
+                skip = 1;
+            end
+            % contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
+            contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
+            % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
+            contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.3, DisplayName=options.forcingFlux(k).fancyName);
+
         else
-            skip = 1;
+            contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
+            contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-',LineWidth=1.0)
         end
-        % contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
-        contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
-        % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
-        contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.3, DisplayName=options.forcingFlux(k).fancyName);
+        colormap(ax(k),cmap)
+        clim(color_axis_limits)
 
-    else
-        contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
-        contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-',LineWidth=1.0)
+        % this seems to have to be placed at the bottom
+        ax(k).Color = 'none';
+        set(ax(k),'XTickLabel',[]);
+        set(ax(k),'YTickLabel',[]);
+        set(ax(k),'XTick',[]);
+        set(ax(k),'YTick',[]);
+        if k>1
+            ax(k).Position = ax(1).Position;      % match positions
+            linkaxes([ax(1) ax(k)])               % link panning/zooming
+        end
     end
-    colormap(ax(k),cmap)
-    clim(color_axis_limits)
 
-    % this seems to have to be placed at the bottom
-    ax(k).Color = 'none';
-    set(ax(k),'XTickLabel',[]);
-    set(ax(k),'YTickLabel',[]);
-    set(ax(k),'XTick',[]);
-    set(ax(k),'YTick',[]);
-    if k>1
-        ax(k).Position = ax(1).Position;      % match positions
-        linkaxes([ax(1) ax(k)])               % link panning/zooming
-    end
+    % add coutour for damping scale
+    ax(k+1) = axes;
+    ax(k+1).Color = 'none';                 % transparent background
+    ax(k+1).Position = ax(1).Position;      % match positions
+    linkaxes([ax(1) ax(k+1)])               % link panning/zooming
+else
+    k=0;
+    ax = axes;
+    ax(k+1).Color = 'none';                 % transparent background
+    H = gobjects(0);
 end
 
-% add coutour for damping scale
-ax(k+1) = axes;
-ax(k+1).Color = 'none';                 % transparent background
-ax(k+1).Position = ax(1).Position;      % match positions
-linkaxes([ax(1) ax(k+1)])               % link panning/zooming
+
 kj = 10.^KLinLog; kr = 10.^ JLinLog;
 Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
@@ -251,11 +260,11 @@ for k=1:length(options.inertialFlux)
     Vprime(Mag/MaxMag < 1/20) = NaN;
     if isfield(options,"quiverScale")
         if isfield(options.inertialFlux(k),"color")
-            quiver(ax(k+1),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=options.inertialFlux(k).color,LineWidth=3.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+            quiver(ax(k),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=options.inertialFlux(k).color,LineWidth=3.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
         end
-        quiver(ax(k+1),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=0*[1 1 1],LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+        quiver(ax(k),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=0*[1 1 1],LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
     else
-        quiver(ax(k+1),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+        quiver(ax(k),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
     end
 
 end
