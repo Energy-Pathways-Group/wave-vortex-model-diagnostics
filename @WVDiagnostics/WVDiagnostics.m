@@ -655,6 +655,8 @@ fig = plotPoissonFlowOverContours(wvd,options)
             Kh = sqrt(kj.^2 + kr.^2);
             allKs = unique(reshape(abs(Kh),[],1),'sorted');
             deltaK = max(diff(allKs));
+            % deltaK = max(diff(self.jWavenumber)); % this eliminates the
+            % spikign that emerges and might be a better choice
             kAxis_ = 0:deltaK:(max(allKs)+deltaK/2);
             % This choices of axis spacing ensures that there will be no
             % gaps in the resulting spectrum.
