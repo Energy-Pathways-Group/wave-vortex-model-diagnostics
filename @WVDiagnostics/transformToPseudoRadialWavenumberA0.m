@@ -12,16 +12,15 @@ function [varargout] = transformToPseudoRadialWavenumberA0(self,varargin)
 
 jWavenumber = 1./sqrt(self.Lr2);
 jWavenumber(1) = 0; % barotropic mode is a mean?
-% idx = find(wvt.kRadial<jWavenumber(2));
-% kPseudoRadial = cat(1,wvt.kRadial(idx),jWavenumber(2:end));
-% kPseudoRadial = jWavenumber;
 [kj,kr] = ndgrid(jWavenumber,self.kRadial);
 Kh = sqrt(kj.^2 + kr.^2);
 
 k = self.kPseudoRadial;
-dk = k(2)-k(1);
+edges  = [-Inf; 0.5*(k(1:end-1) + k(2:end)); +Inf];
+bin = discretize(Kh, edges);
+valid = ~isnan(bin);
+S = sparse(find(valid), bin(valid), 1, numel(Kh), numel(k), nnz(valid));
 
-nK = length(k);
 
 varargout = cell(size(varargin));
 spectralMatrixSize = [length(self.j) length(self.kRadial)];
@@ -30,16 +29,8 @@ for iVar=1:length(varargin)
         error('The input matrix must be of size [Nj NkRadial]');
     end
     
-    varargout{iVar} = zeros([nK 1]);
+    varargout{iVar} = reshape((varargin{iVar}(:)).' * S,[],1);
 end
 
-totalIndices = false(size(Kh));
-for iK = 1:1:nK
-    indicesForK = k(iK)-dk/2 <= Kh & Kh < k(iK)+dk/2;
-    for iVar=1:length(varargin)
-        varargout{iVar}(iK) =  sum(varargin{iVar}(indicesForK));
-    end
-    totalIndices = totalIndices | indicesForK;
-end
 
 end

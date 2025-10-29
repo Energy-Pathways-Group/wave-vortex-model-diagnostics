@@ -20,6 +20,7 @@ classdef WVDiagnostics < handle
         z_flux_scale_units = "m f^2/yr"
         zscale
         zscale_units = "m f^2";
+        pseudoRadialBinning (1,1) string {mustBeMember(pseudoRadialBinning,["k2+j2","adaptive"])} = "k2+j2"
     end
 
     properties (Access=private)
@@ -504,6 +505,10 @@ fig = plotPoissonFlowOverContours(wvd,options)
                 else
                     self.wvt_aa_cache = self.wvt.waveVortexTransformWithExplicitAntialiasing();
                 end
+                self.wvt_aa_cache.addOperation(EtaTrueOperation());
+                self.wvt_aa_cache.addOperation(APEOperation(self.wvt_aa_cache));
+                self.wvt_aa_cache.addOperation(APVOperation());
+                self.wvt_aa_cache.addOperation(SpatialForcingOperation(self.wvt_aa_cache));
             end
             wvt_aa = self.wvt_aa_cache;
         end
@@ -651,16 +656,29 @@ fig = plotPoissonFlowOverContours(wvd,options)
         end
 
         function kPseudoRadial = get.kPseudoRadial(self)
-            [kj,kr] = ndgrid(self.jWavenumber,self.kRadial);
-            Kh = sqrt(kj.^2 + kr.^2);
-            allKs = unique(reshape(abs(Kh),[],1),'sorted');
-            deltaK = max(diff(allKs));
-            % deltaK = max(diff(self.jWavenumber)); % this eliminates the
-            % spikign that emerges and might be a better choice
-            kAxis_ = 0:deltaK:(max(allKs)+deltaK/2);
-            % This choices of axis spacing ensures that there will be no
-            % gaps in the resulting spectrum.
+            if self.pseudoRadialBinning == "k2+j2"
+                [kj,kr] = ndgrid(self.jWavenumber,self.kRadial);
+                Kh = sqrt(kj.^2 + kr.^2);
+                allKs = unique(reshape(abs(Kh),[],1),'sorted');
+                deltaK = max(diff(allKs));
+
+                kAxis_ = 0:deltaK:(max(allKs)+deltaK/2);
+            elseif self.pseudoRadialBinning == "adaptive"
+                % n = find(self.kRadial < self.jWavenumber(2),1,"last");
+                n = find(self.kRadial > self.jWavenumber(2),1,"first");
+                kAxis_ = cat(1,self.kRadial(1:n),self.jWavenumber(3:end));
+            end
+
             kPseudoRadial = reshape(kAxis_,[],1);
+
+            % kPseudoRadial = reshape(kAxis_,[],1);
+            % 
+            % n = find(kPseudoRadial < self.jWavenumber(2),1,"last");
+            % kPseudoRadial = cat(1,kPseudoRadial(1:n),self.jWavenumber(2:end));
+
+            % n = find(self.kRadial < self.jWavenumber(2),1,"last");
+            % kPseudoRadial = cat(1,self.kRadial(1:n),self.jWavenumber(2:end));
+
         end
 
         function omega = get.omegaAxis(self)

@@ -124,7 +124,7 @@ end
 radialWavelengthSparse = 2*pi./kp/1000;
 radialWavelengthSparse(1) = 1.5*radialWavelengthSparse(2);
 radialWavelength = 2*pi./self.kPseudoRadial/1000;
-radialWavelength(1) = 1.5*radialWavelength(2);
+radialWavelength(1) = radialWavelengthSparse(1); %1.5*radialWavelength(2);
 
 filter = @(v) cumsum(v)/self.flux_scale;
 
