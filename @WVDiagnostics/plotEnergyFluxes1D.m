@@ -258,7 +258,7 @@ ax.XScale = "log";
 ax.XDir = "reverse";
 ax.XLim = [min(radialWavelengthSparse) max(radialWavelengthSparse)];
 ax.YLim = yLimits;
-ax.XLabel.String = "wavelength (km)";
+ax.XLabel.String = "pseudo-wavelength (km)";
 ax.YLabel.String = "wave energy flux (" + self.flux_scale_units + ")";
 
 lgd2 = legend(Location="southwest",Interpreter="latex");
