@@ -135,7 +135,7 @@ omegaAxisSparse = omegaAxisSparse/wvt.f;
 omegaAxisSparse = [0.9;omegaAxisSparse]; % add point below f
 filter_omega = @(v) cumsum([0;v])/self.flux_scale;
 
-fig = figure(Visible=options.visible,Units="points",Position=[50 50 900 600]);
+fig = figure(Visible=options.visible,Units="points",Position=[50 50 800 500]);
 fig.PaperPositionMode = "auto";
 fig.Color = "w";
 tl = tiledlayout(fig,GridSize=[2 2],TileSpacing="compact",Padding="compact");
@@ -178,7 +178,8 @@ plot(ax,radialWavelength,filter(ddt_TE_A0),'c',LineWidth=options.forcingLineWidt
 
 ax.XScale = "log";
 ax.XDir = "reverse";
-ax.XTickLabels = [];
+% ax.XTickLabels = [];
+ax.XLabel.String = "pseudo-wavelength (km)";
 ax.XLim = [min(radialWavelengthSparse) max(radialWavelengthSparse)];
 ax.YLim = yLimits;
 ax.YLabel.String = "geostrophic energy flux (" + self.flux_scale_units + ")";

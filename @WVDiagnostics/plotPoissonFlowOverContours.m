@@ -135,7 +135,7 @@ if isfield(options,"forcingFlux")
             % contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
             contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
             % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
-            contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.3, DisplayName=options.forcingFlux(k).fancyName);
+            contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.5, DisplayName=options.forcingFlux(k).fancyName);
 
         else
             contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
@@ -167,6 +167,7 @@ else
     ax(k+1).Color = 'none';                 % transparent background
     H = gobjects(0);
 end
+pause(0.5); % wait for it to draw... helps element order.
 
 
 kj = 10.^KLinLog; kr = 10.^ JLinLog;
@@ -213,6 +214,7 @@ if options.addKEPEContours
     clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
 end
 
+pause(0.5); % wait for it to draw... helps element order.
 for k=1:length(options.inertialFlux)
 
     % compute quiver arrows for inertial flux
@@ -260,11 +262,14 @@ for k=1:length(options.inertialFlux)
     Vprime(Mag/MaxMag < 1/20) = NaN;
     if isfield(options,"quiverScale")
         if isfield(options.inertialFlux(k),"color")
-            quiver(ax(k),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=options.inertialFlux(k).color,LineWidth=3.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+            quiv = quiver(ax(k),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=options.inertialFlux(k).color,LineWidth=3.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+            uistack(quiv,'top');
         end
-        quiver(ax(k),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=0*[1 1 1],LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+        quiv = quiver(ax(k),logX,logY,options.quiverScale*Uprime,options.quiverScale*Vprime,"off",Color=0*[1 1 1],LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+        uistack(quiv,'top');
     else
-        quiver(ax(k),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+        quiv = quiver(ax(k),logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale=2,LineWidth=1.0,Alignment=alignment,MaxHeadSize=0.8, DisplayName="inertial flux", HandleVisibility='off');
+        uistack(quiv,'top');
     end
 
 end
