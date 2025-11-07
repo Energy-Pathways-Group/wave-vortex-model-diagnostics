@@ -39,9 +39,6 @@ if exist(self.diagpath,"file") && ~isfield(options,"filename")
 
     outputIndexOffset = length(self.t_diag);
 
-    wvt.addOperation(EtaTrueOperation());
-    wvt.addOperation(APEOperation(wvt));
-    wvt.addOperation(APVOperation());
     wvt.addOperation(SpatialForcingOperation(wvt));
     int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
     
@@ -120,9 +117,6 @@ else
         timeIndices = options.timeIndices;
     end
 
-    wvt.addOperation(EtaTrueOperation());
-    wvt.addOperation(APEOperation(wvt));
-    wvt.addOperation(APVOperation());
     wvt.addOperation(SpatialForcingOperation(wvt));
     int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 
