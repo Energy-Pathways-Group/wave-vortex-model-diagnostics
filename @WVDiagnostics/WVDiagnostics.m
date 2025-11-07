@@ -505,9 +505,6 @@ fig = plotPoissonFlowOverContours(wvd,options)
                 else
                     self.wvt_aa_cache = self.wvt.waveVortexTransformWithExplicitAntialiasing();
                 end
-                self.wvt_aa_cache.addOperation(EtaTrueOperation());
-                self.wvt_aa_cache.addOperation(APEOperation(self.wvt_aa_cache));
-                self.wvt_aa_cache.addOperation(APVOperation());
                 self.wvt_aa_cache.addOperation(SpatialForcingOperation(self.wvt_aa_cache));
             end
             wvt_aa = self.wvt_aa_cache;
@@ -785,9 +782,6 @@ fig = plotPoissonFlowOverContours(wvd,options)
 
 
             [self.wvt, self.wvfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=Inf,shouldReadOnly=true);
-            self.wvt.addOperation(EtaTrueOperation());
-            self.wvt.addOperation(APEOperation(self.wvt));
-            self.wvt.addOperation(APVOperation());
             self.wvt.addOperation(SpatialForcingOperation(self.wvt));
 
             [fpath,fname,~] = fileparts(filename);
