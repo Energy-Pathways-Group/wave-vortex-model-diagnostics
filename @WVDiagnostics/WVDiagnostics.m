@@ -52,12 +52,11 @@ classdef WVDiagnostics < handle
 
     methods
         createDiagnosticsFile(self,options)
-        createWWGTriadDiagnostic(self,options)
-        createDampedRegionDiagnostics(self,options)
         create1DMirrorFluxes(self,options)
         create2DMirrorFluxes(self,options)
-
         createReservoirGroup(self,options) % groupName, flowComponents
+
+        % these are support functions for createReservoirGroup
         [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
         addTriadFluxesForReservoirGroupAtTime(self,options) %triadVar, flowComponents, wvt, outputIndex
         addForcingFluxesForReservoirGroupAtTime(self,options) %forcingVar, flowComponents, wvt, outputIndex
