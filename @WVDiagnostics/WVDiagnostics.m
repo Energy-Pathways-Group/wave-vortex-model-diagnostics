@@ -52,12 +52,11 @@ classdef WVDiagnostics < handle
 
     methods
         createDiagnosticsFile(self,options)
-        createWWGTriadDiagnostic(self,options)
-        createDampedRegionDiagnostics(self,options)
         create1DMirrorFluxes(self,options)
         create2DMirrorFluxes(self,options)
-
         createReservoirGroup(self,options) % groupName, flowComponents
+
+        % these are support functions for createReservoirGroup
         [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
         addTriadFluxesForReservoirGroupAtTime(self,options) %triadVar, flowComponents, wvt, outputIndex
         addForcingFluxesForReservoirGroupAtTime(self,options) %forcingVar, flowComponents, wvt, outputIndex
@@ -505,9 +504,6 @@ fig = plotPoissonFlowOverContours(wvd,options)
                 else
                     self.wvt_aa_cache = self.wvt.waveVortexTransformWithExplicitAntialiasing();
                 end
-                self.wvt_aa_cache.addOperation(EtaTrueOperation());
-                self.wvt_aa_cache.addOperation(APEOperation(self.wvt_aa_cache));
-                self.wvt_aa_cache.addOperation(APVOperation());
                 self.wvt_aa_cache.addOperation(SpatialForcingOperation(self.wvt_aa_cache));
             end
             wvt_aa = self.wvt_aa_cache;
@@ -785,9 +781,6 @@ fig = plotPoissonFlowOverContours(wvd,options)
 
 
             [self.wvt, self.wvfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=Inf,shouldReadOnly=true);
-            self.wvt.addOperation(EtaTrueOperation());
-            self.wvt.addOperation(APEOperation(self.wvt));
-            self.wvt.addOperation(APVOperation());
             self.wvt.addOperation(SpatialForcingOperation(self.wvt));
 
             [fpath,fname,~] = fileparts(filename);
