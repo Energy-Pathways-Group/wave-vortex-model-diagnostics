@@ -112,7 +112,11 @@ else
     else
         [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf,shouldReadOnly=true);
     end
-    tDim = ncfile.readVariables('wave-vortex/t');
+    if ncfile.hasVariableWithName('wave-vortex/t')
+        tDim = ncfile.readVariables('wave-vortex/t');
+    else
+        tDim = ncfile.readVariables('t');
+    end
 
     if ~isfield(options,"timeIndices")
         timeIndices = 1:options.stride:length(tDim);
