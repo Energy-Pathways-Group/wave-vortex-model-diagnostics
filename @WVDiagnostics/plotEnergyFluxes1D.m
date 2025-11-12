@@ -223,7 +223,7 @@ ax.XTick = interp1(kePeAxis,kePeAxisSimple,options.keFractions);
 ax.XTickLabels = string(options.keFractions);
 ax.XLim = [kePeAxisSimple(1) kePeAxisSimple(end)];
 ax.YLim = yLimits;
-ax.XLabel.String = "ke/(ke+pe)";
+ax.XLabel.String = "KE/(KE+APE)";
 ax.YTickLabels = [];
 
 text(ax,min(xlim)*1.05,max(ylim),'b)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')

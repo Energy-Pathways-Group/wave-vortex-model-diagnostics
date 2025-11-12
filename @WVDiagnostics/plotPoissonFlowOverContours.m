@@ -304,7 +304,7 @@ h.YAxis.MinorTickValues = (minor_y_wn);
 
 % add labels
 xlabel("horizontal wavelength (km)")
-ylabel("wavelength of deformation (km)")
+ylabel("deformation wavelength (km)")
 
 % legend
 % Either give legend name with DisplayName='text' or hide with HandleVisibility='off'
