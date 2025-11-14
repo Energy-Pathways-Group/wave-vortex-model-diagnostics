@@ -1014,6 +1014,20 @@ fig = plotPoissonFlowOverContours(wvd,options)
             filtered_fluxes = fluxes;
         end
 
+        function v = version()
+            % Locate folder containing this class file
+            classFolder = fileparts(mfilename('fullpath'));
+            packageRoot = fileparts(classFolder);
+
+            % Path to mpackage.json
+            jsonFile = fullfile(packageRoot, 'resources', 'mpackage.json');
+
+            % Read + decode JSON
+            info = jsondecode(fileread(jsonFile));
+
+            % Extract version field
+            v = info.version;
+        end
 
     end
 end
