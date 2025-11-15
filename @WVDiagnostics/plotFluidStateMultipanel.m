@@ -1,3 +1,30 @@
+% Plot multipanel summary of fluid state and spectra
+%
+% Create a compact multipanel figure showing horizontal (x-y) maps and
+% vertical (x-z) sections of vertical vorticity for the total flow, the
+% wave component, and the geostrophic component at a specified model time.
+% Optionally includes log-energy spectra with KE/PE and frequency/wavelength
+% contours. Axes are annotated in kilometers and depth in kilometers; color
+% limits and annotation ticks are handled internally.
+%
+% - Topic: Figures / fluid diagnostics
+% - Declaration: fig = plotFluidStateMultipanel(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter options.iTime: (optional) Time index to display; when provided sets self.iTime (default: self.iTime)
+% - Parameter options.title: (optional) Figure title; default uses the model time in days
+% - Parameter options.shouldShowEnergySpectra: (optional, logical) Include energy spectra panel (default: true)
+% - Parameter options.shouldShowTotalFields: (optional, logical) Also show total fields alongside decomposed fields (default: false)
+% - Parameter options.figureHandle: (optional) Existing figure handle to draw into (default: create new figure)
+% - Parameter options.wavelengths: (optional) Vector of pseudo-wavelength contour values (km) used in spectral panels
+% - Parameter options.wavelengthColor: (optional) RGB color for wavelength contour labels (default: [.5,.5,.5])
+% - Parameter options.frequencies: (optional) Vector of nondimensional frequency contours (in units of f) for spectral panels
+% - Parameter options.frequencyColor: (optional) RGB color for frequency contour labels (default: [.7,.7,.7])
+% - Parameter options.keFractions: (optional) Vector of KE/(KE+PE) fractional contour levels for spectral panels
+% - Parameter options.keFractionColor: (optional) RGB color for KE-fraction contour labels (default: [.7,.7,.7])
+% - Parameter options.labelSpacing: (optional) Label spacing passed to clabel for contour annotation (default: 1000)
+% - Parameter options.lineWidth: (optional) Line width for contour overlays (default: 1)
+% - Returns fig: Handle to the generated figure
 function fig = plotFluidStateMultipanel(self,options)
 arguments
     self WVDiagnostics
@@ -9,10 +36,8 @@ arguments
     options.figureHandle
     options.wavelengths = [1,2,5,10,20,50,100,200,500];
     options.wavelengthColor = [.5,.5,.5];
-    % options.addFrequencyContours = false;
     options.frequencies = [1.01 1.05 1.2 2 4 8 16];
     options.frequencyColor = [.7,.7,.7];
-    % options.addKEPEContours = false;
     options.keFractions = [.01,.1,.25,.5,.75,.9,.99];
     options.keFractionColor = [.7,.7,.7];
     options.labelSpacing = 1000;

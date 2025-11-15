@@ -1,15 +1,18 @@
 function fig = plotEnstrophyTriadFluxOverTime(self,options)
-% Plot forcing flux for each reservoir over time
+% Plot enstrophy triad fluxes over time.
 %
-% filter=@(v,t) movmean(v,51)
-%
-% Plots the energy flux into each reservoir from external forcing as a function of time.
+% Plots time series of enstrophy triad fluxes computed with the quadratic
+% approximation for the specified triad components. An optional filter may
+% be applied to each time series before plotting. Axis labels use the class
+% scaling properties (tscale, tscale_units, z_flux_scale, z_flux_scale_units).
 %
 % - Topic: Figures (over time)
-% - Declaration: fig = plotForcingFluxOverTime(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-% - Parameter options.visible: figure visibility (default: "on")
-% - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
+% - Declaration: fig = plotEnstrophyTriadFluxOverTime(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter options.triadComponents: (optional) vector of TriadFlowComponent objects to include (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
+% - Parameter options.timeIndices: (optional) Indices of model times to use (default: Inf -> all times)
+% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter options.filter: (optional) Function handle accepting (v,t) used to preprocess each flux series before plotting (default: @(v,t) v)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

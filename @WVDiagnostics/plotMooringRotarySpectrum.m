@@ -1,4 +1,26 @@
 function fig = plotMooringRotarySpectrum(self,options)
+% Plot rotary spectra from mooring velocity time series.
+%
+% This function assuminges mooring horizontal velocity time series are saved to file.
+%
+% This function uses mspec from jLab.
+%
+% Compute and plot negative and positive rotary spectra from mooring
+% horizontal velocity records stored in the WVModel output. Reads mooring
+% time and velocity variables from self.wvfile, computes multitaper rotary
+% spectra for each depth, averages over mooring IDs, and draws a two-panel
+% log-log figure of negative and positive rotary spectra. Annotates plots
+% with inertial frequency (f), M2 tidal frequency, f+M2, and min/max buoyancy
+% frequency (N). Legend, panel titles, and overall title are optional.
+%
+% - Topic: Mooring diagnostics / spectra
+% - Declaration: fig = plotMooringRotarySpectrum(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter options.title: (optional) Overall figure title (default: "total velocity"; set to "none" to suppress)
+% - Parameter options.shouldShowLegend: (optional, logical) Show legend (default: true)
+% - Parameter options.shouldShowSpectralTitles: (optional, logical) Show per-panel titles (default: true)
+% - Returns fig: Handle to the generated figure
 arguments
     self WVDiagnostics
     options.visible = "on"

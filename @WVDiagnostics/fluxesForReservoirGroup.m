@@ -162,4 +162,20 @@ else
 end
 end
 
+function [T_b_a, T_c_a, T_c_b] = transfersFromMixedTriadComponents(T_b_c_a,T_a_c_b,T_a_b_c)
+if abs(T_a_b_c) >= abs(T_b_c_a) && abs(T_a_b_c) >= abs(T_a_c_b)
+    T_b_a = 0;
+    T_c_a = T_b_c_a;
+    T_c_b = T_a_c_b;
+elseif abs(T_a_c_b) >= abs(T_b_c_a) && abs(T_a_c_b) >= abs(T_a_b_c)
+    T_b_a = T_b_c_a;
+    T_c_a = 0;
+    T_c_b = -T_a_b_c;
+else
+    T_b_a = -T_a_c_b;
+    T_c_a = -T_a_b_c;
+    T_c_b = 0;
+end
+end
+
 end

@@ -1,4 +1,16 @@
 function createReservoirGroup(self,options)
+% Create a reservoir group in the diagnostics NetCDF and populate it.
+%
+% Create (or open) a diagnostics group containing reservoir definitions as defined by specified flow components.
+% The function will create variables and dimensions as needed, then loop over
+% the requested time indices to compute and write reservoir diagnostics.
+%
+% - Topic: Groups / diagnostics
+% - Declaration: createReservoirGroup(self,options)
+% - Parameter options.outputfile: (optional) NetCDFGroup to write into (default: self.diagfile).
+% - Parameter options.name: (optional) Name of the reservoir group (default: "reservoir-damped-wave-geo").
+% - Parameter options.flowComponents: (optional) WVFlowComponent array specifying reservoirs to create.
+% - Parameter options.timeIndices: (optional) Time indices to process (default: all times in diagnostics file).
 arguments
     self WVDiagnostics
     options.outputfile NetCDFGroup

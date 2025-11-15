@@ -1,19 +1,29 @@
 function [fig, boxDiagram] = plotSourcesSinksForReservoirGroup(self,options)
-% Plot sources, sinks, and reservoirs diagram
+% Plot sources, sinks, and reservoirs diagram for a reservoir group.
 %
-% Generates a diagram showing energy sources, sinks, and reservoirs, including fluxes between them.
+% Generate a box-and-arrow diagram showing energy sources, sinks, reservoirs,
+% and fluxes between them for a named reservoir group stored in the diagnostics
+% NetCDF. Reads reservoir, forcing and inertial flux summaries for the requested
+% timeIndices, formats labels and units using class scaling properties, and
+% returns a drawn figure and the underlying BoxDiagram object.
 %
-% - Topic: Figures (over time)
-% - Declaration: fig = plotSourcesSinksReservoirsDiagram(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave])
-% - Parameter options.customNames: dictionary for custom names
-% - Parameter options.fluxTolerance: tolerance for displaying fluxes (default: 1e-2)
-% - Parameter options.shouldShowUnits: show units in labels (default: true)
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
-% - Parameter options.shouldShowReservoirEnergy: show reservoir energy (default: true)
-% - Parameter options.title: diagram title (default: "Energy Pathways")
-% - Parameter options.visible: figure visibility (default: "on")
+% - Topic: Figures / diagnostics summary
+% - Declaration: [fig, boxDiagram] = plotSourcesSinksForReservoirGroup(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter options.name: (optional) Name of reservoir group to plot (default: "reservoir-damped-wave-geo")
+% - Parameter options.customNames: (optional) dictionary mapping internal names to display names (default: configureDictionary("string","cell"))
+% - Parameter options.customColors: (optional) dictionary mapping roles/names to RGB colors (default: dictionary with "source" and "sink" entries)
+% - Parameter options.customReservoirOrder: (optional) cell/array specifying reservoir ordering for layout (default: use group order)
+% - Parameter options.customForcing: (optional) list of forcing names to include (default: all)
+% - Parameter options.fluxTolerance: (optional) Minimum flux magnitude (in class flux units) to display arrows/labels (default: 1e-2)
+% - Parameter options.shouldShowUnits: (optional, logical) Include units in labels (default: true)
+% - Parameter options.timeIndices: (optional) Time indices to average over (default: Inf -> all times)
+% - Parameter options.shouldShowReservoirEnergy: (optional, logical) Show reservoir energy as sublabels (default: true)
+% - Parameter options.shouldShowExactValues: (optional, logical) Show exact total forcing values as sublabels (default: true)
+% - Parameter options.title: (optional) Diagram title (default: "Energy Pathways")
+% - Parameter options.visible: (optional) Figure visibility (default: "on")
 % - Returns fig: handle to the generated figure
+% - Returns boxDiagram: BoxDiagram object used to draw the diagram (can be re-used or modified)
 arguments
     self WVDiagnostics
     options.name string = "reservoir-damped-wave-geo"

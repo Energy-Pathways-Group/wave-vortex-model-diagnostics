@@ -5,7 +5,9 @@ function fig = plotEnstrophyOverTime(self,options)
 %
 % - Topic: Figures (over time)
 % - Declaration: fig = plotEnstrophyOverTime(self,options)
-% - Parameter options.visible: figure visibility (default: "on")
+% - Parameter self: WVDiagnostics object
+% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter options.timeIndices: (optional) Indices of model times to plot/average (default: Inf -> all times)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

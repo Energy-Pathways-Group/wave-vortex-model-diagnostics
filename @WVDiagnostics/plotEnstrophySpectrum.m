@@ -1,12 +1,21 @@
 function fig = plotEnstrophySpectrum(self,options)
-% Plot the geostrophic enstrophy spectrum at a given time
+% Plot the enstrophy spectrum at a given time
 %
-% Makes a geostrophic enstrophy spectrum at a given time
+% Produces a multiplanel figure of geostrophic and apv enstrophy diagnostics at a
+% specified time index. Shows available potential enstrophy (APV), the
+% quadratic (QGPV) approximation, their difference, plus modal and radial
+% spectra. Supports a 2x2 "four-panel" layout or a single-panel
+% pseudo-radial projection ("kPseudoRadial").
 %
 % - Topic: Figures (over time)
-% - Declaration: fig = plotEnergySpectrum(self,options)
-% - Parameter options.iTime: time index in model output file
-% - Parameter options.visible: figure visibility (default: "on")
+% - Declaration: fig = plotEnstrophySpectrum(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter options.iTime: (optional) time index in model output file (default: self.iTime)
+% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter options.title: (optional) Figure title (default: 'Enstrophy Spectrum')
+% - Parameter options.clim: (optional) Color limits for log10 pcolor panels (default: [-13 -7])
+% - Parameter options.figureHandle: (optional) Existing figure handle to draw into (default: create new figure)
+% - Parameter options.style: (optional) Plot style, one of "four-panel" or "kPseudoRadial" (default: "four-panel")
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

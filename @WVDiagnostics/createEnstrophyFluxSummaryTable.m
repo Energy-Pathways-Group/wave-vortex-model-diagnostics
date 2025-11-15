@@ -1,19 +1,17 @@
 function tableString = createEnstrophyFluxSummaryTable(self,options)
-% Plot sources, sinks, and reservoirs diagram
+% Create a LaTeX table summarizing enstrophy source/sink fluxes.
 %
-% Generates a diagram showing energy sources, sinks, and reservoirs, including fluxes between them.
+% Generates a LaTeX-formatted table listing enstrophy sources, sinks and totals
+% using spatial-temporally averaged enstrophy flux diagnostics. The table
+% reports both APV (exact) and quadratic (QGPV) flux measures and formats
+% columns so ampersands are aligned for human-readable LaTeX output.
 %
-% - Topic: Figures (over time)
-% - Declaration: fig = plotSourcesSinksReservoirsDiagram(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave])
-% - Parameter options.customNames: dictionary for custom names
-% - Parameter options.fluxTolerance: tolerance for displaying fluxes (default: 1e-2)
-% - Parameter options.shouldShowUnits: show units in labels (default: true)
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
-% - Parameter options.shouldShowReservoirEnergy: show reservoir energy (default: true)
-% - Parameter options.title: diagram title (default: "Energy Pathways")
-% - Parameter options.visible: figure visibility (default: "on")
-% - Returns fig: handle to the generated figure
+% - Topic: Tables / diagnostics summary
+% - Declaration: tableString = createEnstrophyFluxSummaryTable(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter options.customNames: dictionary mapping diagnostic names to custom labels (default: configureDictionary("string","string"))
+% - Parameter options.timeIndices: (optional) time indices to average over (default: Inf -> all times)
+% - Returns tableString: string containing the LaTeX table
 arguments
     self WVDiagnostics
     options.customNames = configureDictionary("string","string")

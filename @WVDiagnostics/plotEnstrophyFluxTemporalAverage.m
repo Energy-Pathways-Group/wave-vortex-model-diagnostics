@@ -1,17 +1,23 @@
 function fig = plotEnstrophyFluxTemporalAverage(self,options)
-% Plot the wave/geostrophic energy spectra at a given time
+% Plot temporally averaged enstrophy flux diagnostics.
 %
-% Makes a nice multiplanel plot of the wave and geostrophic spectra at a
-% given time.
+% Compute and plot temporally averaged enstrophy flux diagnostics (exact or
+% quadratic approximation) on a chosen projection. Supports 'jk' (j vs
+% radial wavelength) pcolor plots, 1D summaries along j or k axes, and a
+% pseudo-isotropic radial projection. Allows applying a filter to the data,
+% customizing the colormap and saturation, and controlling figure visibility.
 %
-% - Topic: Figures (over time)
-% - Declaration: fig = plotEnergySpectrum(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-% - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
-% - Parameter options.visible: figure visibility (default: "on")
-% - Parameter options.fluxGroups: Cell array of row indices indicating fluxes to sum. Check fluxes.name to see indices. (Default: []. Example: {5,[2,3,4],6,[7,8,9]};)
-% - Parameter options.simpleName: Cell array of simple name strings for fluxGroups. (Default: []. Example: {"forcing","damping","g\nablag","g\nablaw+w\nablag+w\nablaw"};)
+% - Topic: Figures / temporal averages
+% - Declaration: fig = plotEnstrophyFluxTemporalAverage(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter options.timeIndices: (optional) Time indices to average over (default: Inf -> all times)
+% - Parameter options.approximation: (optional) {'quadratic','exact'} approximation to use (default: 'exact')
+% - Parameter options.axes: (optional) Plot projection; one of {'jk','j','jWavenumber','k','k-pseudo-isotropic'} (default: 'jk')
+% - Parameter options.filter: (optional) Function handle applied to plotted data (default: @(v) v)
+% - Parameter options.colormap: (optional) Colormap for 'jk' axes (default: WVDiagnostics.crameri('-bam'))
+% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter options.overSaturationFactor: (optional) Scalar or two-element colormap limits (default: 10)
+% - Parameter options.simpleName: (optional) Cell array of simple name strings for flux panels (default: [])
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics
