@@ -1,4 +1,31 @@
 function fig = plotPoissonFlowOverContours(wvd,options)
+% Plot Poisson Flow Over Contours.
+%
+% plotPoissonFlowOverContours is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Figures — Diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: fig = plotPoissonFlowOverContours(wvd,options)
+% - Parameter wvd: WVDiagnostics object
+% - Parameter visible: (optional) input argument `visible` (default: "on")
+% - Parameter inertialFlux: input argument `inertialFlux`
+% - Parameter vectorDensityLinearTransitionWavenumber: (optional) input argument `vectorDensityLinearTransitionWavenumber` (default: Inf)
+% - Parameter forcingFlux: input argument `forcingFlux`
+% - Parameter wavelengths: (optional) input argument `wavelengths` (default: [1,2,5,10,20,50,100,200,500])
+% - Parameter wavelengthColor: (optional) input argument `wavelengthColor` (default: [.5,.5,.5])
+% - Parameter addFrequencyContours: (optional) input argument `addFrequencyContours` (default: false)
+% - Parameter frequencies: (optional) input argument `frequencies` (default: [1.01 1.05 1.2 2 4 8 16])
+% - Parameter frequencyColor: (optional) input argument `frequencyColor` (default: [.7,.7,.7])
+% - Parameter addKEPEContours: (optional) input argument `addKEPEContours` (default: false)
+% - Parameter keFractions: (optional) input argument `keFractions` (default: [.01,.1,.25,.5,.75,.9,.99])
+% - Parameter keFractionColor: (optional) input argument `keFractionColor` (default: [.7,.7,.7])
+% - Parameter labelSpacing: (optional) input argument `labelSpacing` (default: 1000)
+% - Parameter lineWidth: (optional) input argument `lineWidth` (default: 1)
+% - Parameter kmax: (optional) input argument `kmax` (default: Inf)
+% - Parameter jmax: (optional) input argument `jmax` (default: Inf)
+% - Parameter quiverScale: input argument `quiverScale`
+% - Parameter figureHandle: input argument `figureHandle`
+% - Parameter nLevels: (optional) input argument `nLevels` (default: 10)
+% - Returns fig: Figure handle for the generated plot
 arguments
     wvd WVDiagnostics
     options.visible = "on"

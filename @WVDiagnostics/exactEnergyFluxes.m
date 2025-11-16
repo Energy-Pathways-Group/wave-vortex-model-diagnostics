@@ -1,12 +1,14 @@
 function energy_fluxes = exactEnergyFluxes(self)
-% Return the exact energy flux from the forcing terms, [j kRadial t]
+% Return the exact energy flux from the forcing terms, [j kRadial t].
 %
+% Return the exact energy flux from the forcing terms, [j kRadial t]
 % Returns the exact energy fluxes from external forcing and nonlinear
 % advection.
 %
-% - Topic: Fluxes over time, [t 1]
+% - Topic: Diagnostics — Energy fluxes — General — Fluxes, [j kRadial t]
 % - Declaration: forcing_fluxes = exactEnergyFluxes(self)
-% - Returns forcing_fluxes: struct array with exact fluxes
+% - Parameter self: WVDiagnostics object
+% - Returns energy_fluxes: diagnosed flux values
 arguments
     self WVDiagnostics
 end

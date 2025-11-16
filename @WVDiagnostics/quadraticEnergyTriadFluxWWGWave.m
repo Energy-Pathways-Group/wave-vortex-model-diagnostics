@@ -1,4 +1,16 @@
 function wwg = quadraticEnergyTriadFluxWWGWave(self)
+% Quadratic Energy Triad Flux WWGWave.
+%
+% quadraticEnergyTriadFluxWWGWave is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: wwg = quadraticEnergyTriadFluxWWGWave(self)
+% - Parameter self: WVDiagnostics object
+% - Returns wwg: output value `wwg`
+arguments
+    self
+end
+
 [fpath,fname,~] = fileparts(self.wvpath);
 if isempty(fpath)
     fpath = pwd;

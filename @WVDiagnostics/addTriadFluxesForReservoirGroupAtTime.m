@@ -1,4 +1,15 @@
 function addTriadFluxesForReservoirGroupAtTime(self,options)
+% Add Triad Fluxes For Reservoir Group At Time.
+%
+% addTriadFluxesForReservoirGroupAtTime is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Diagnostics — Flux diagnostics — Triad interactions
+% - Declaration: addTriadFluxesForReservoirGroupAtTime(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter triadVar: input argument `triadVar`
+% - Parameter flowComponents: input argument `flowComponents`
+% - Parameter wvt: WVDiagnostics object
+% - Parameter outputIndex: input argument `outputIndex`
 arguments
     self WVDiagnostics
     options.triadVar

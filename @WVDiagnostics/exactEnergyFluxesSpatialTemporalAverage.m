@@ -1,11 +1,13 @@
 function forcing_fluxes = exactEnergyFluxesSpatialTemporalAverage(self,options)
-% Compute spatial-temporal average of the exact forcing fluxes
+% Compute spatial-temporal average of the exact forcing fluxes.
 %
+% Compute spatial-temporal average of the exact forcing fluxes
 % Returns the spatial-temporal average of the exact energy fluxes from external forcing
 %
-% - Topic: Flux averages, scalar
+% - Topic: Diagnostics — Energy fluxes — Time/space averages — Flux averages, scalar [1 1]
 % - Declaration: forcing_fluxes = exactEnergyFluxesSpatialTemporalAverage(self,options)
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices for time averaging (default: Inf)
 % - Returns forcing_fluxes: struct array with averaged fluxes
 arguments
     self WVDiagnostics

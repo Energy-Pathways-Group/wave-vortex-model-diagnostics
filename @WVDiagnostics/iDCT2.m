@@ -1,10 +1,19 @@
 function matrix = iDCT2(N)
-% InverseCosineTransformMatrix_DCT2  Inverse of forward DCT-II matrix
+% InverseCosineTransformMatrix_DCT2  Inverse of forward DCT-II matrix.
 %
+% InverseCosineTransformMatrix_DCT2  Inverse of forward DCT-II matrix
 % This inverts CosineTransformForwardMatrix_DCT2 when the forward uses the
 % 2/N scaling above (with no extra row halving).
-%
 % Implementation: DCT-III with DC (first) COLUMN halved.
+%
+% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: matrix = iDCT2(N)
+% - Parameter N: input argument `N`
+% - Returns matrix: output value `matrix`
+arguments
+    N
+end
+
 
 matrix = zeros(N,N);
 

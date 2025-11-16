@@ -1,11 +1,15 @@
 function [energy_fluxes, t] = exactEnergyFluxesOverTime(self,options)
-% Exact energy fluxes over time
+% Exact energy fluxes over time.
 %
+% Exact energy fluxes over time
 % Returns the exact energy fluxes from external forcing for each time step.
 %
-% - Topic: Fluxes over time, [t 1]
+% - Topic: Diagnostics — Energy fluxes — General — Fluxes over time, [t 1]
 % - Declaration: forcing_fluxes = exactEnergyFluxesOverTime(self)
-% - Returns forcing_fluxes: struct array with exact fluxes
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
+% - Returns energy_fluxes: diagnosed flux values
+% - Returns t: Summary table of energy flux diagnostics
 arguments
     self WVDiagnostics
     options.timeIndices = Inf;

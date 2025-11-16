@@ -1,8 +1,18 @@
 function matrix = iDCT1(n)
-% CosineTransformBackMatrix  Discrete Cosine Transform (DCT-I) matrix
+% CosineTransformBackMatrix  Discrete Cosine Transform (DCT-I) matrix.
 %
+% CosineTransformBackMatrix  Discrete Cosine Transform (DCT-I) matrix
 % This matrix exactly matches CosineTransformBack. See its documentation
 % for details.
+%
+% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: matrix = iDCT1(n)
+% - Parameter n: input argument `n`
+% - Returns matrix: output value `matrix`
+arguments
+    n
+end
+
 
 matrix = zeros(n,n);
 

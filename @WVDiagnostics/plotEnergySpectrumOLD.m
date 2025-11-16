@@ -1,13 +1,15 @@
 function fig = plotEnergySpectrumOLD(self,options)
-% Plot the wave/geostrophic energy spectra at a given time
+% Plot the wave/geostrophic energy spectra at a given time.
 %
+% Plot the wave/geostrophic energy spectra at a given time
 % Makes a nice multiplanel plot of the wave and geostrophic spectra at a
 % given time.
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Spectra — Potential energy
 % - Declaration: fig = plotEnergySpectrum(self,options)
-% - Parameter options.iTime: time index in model output file
-% - Parameter options.visible: figure visibility (default: "on")
+% - Parameter self: WVDiagnostics object
+% - Parameter iTime: time index in model output file
+% - Parameter visible: (optional) figure visibility (default: "on")
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

@@ -1,8 +1,18 @@
 function matrix = DCT1(N)
-% CosineTransformForwardMatrix  Discrete Cosine Transform (DCT-I) matrix
+% CosineTransformForwardMatrix  Discrete Cosine Transform (DCT-I) matrix.
 %
+% CosineTransformForwardMatrix  Discrete Cosine Transform (DCT-I) matrix
 % This matrix exactly matches CosineTransformForward. See its documentation
 % for details.
+%
+% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: matrix = DCT1(N)
+% - Parameter N: input argument `N`
+% - Returns matrix: output value `matrix`
+arguments
+    N
+end
+
 
 matrix = zeros(N,N);
 

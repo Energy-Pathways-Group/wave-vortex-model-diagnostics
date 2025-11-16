@@ -1,17 +1,17 @@
 function createDiagnosticsFile(self,options)
 % Create a new diagnostics file and compute diagnostics from WVModel output.
 %
+% Create a new diagnostics file and compute diagnostics from WVModel output.
 % Initializes a diagnostics NetCDF file, computes and stores energy, enstrophy, APE, APV, and flux diagnostics for each time step.
 %
-% - Topic: Diagnostics file creation
+% - Topic: Diagnostics — General — Misc
 % - Declaration: createDiagnosticsFile(self,options)
 % - Parameter self: WVDiagnostics object.
-% - Parameter options.stride: (optional) Stride for time sampling (default: 1).
-% - Parameter options.timeIndices: (optional) Indices of time steps to process.
-% - Parameter options.filename: (optional) Output path for the diagnostics file.
-% - Parameter options.shouldMeasureAntialiasingFlux: (optional, logical) If true, computes antialiasing flux diagnostics (default: false).
-% - Parameter options.shouldUseHigherOrderFlux: (optional, logical) If true, uses higher-order flux calculation (default: false).
-% - Returns: None. Writes diagnostics to a NetCDF file at self.diagpath.
+% - Parameter stride: (optional) Stride for time sampling (default: 1).
+% - Parameter timeIndices: Indices of time steps to process.
+% - Parameter filename: Output path for the diagnostics file.
+% - Parameter shouldMeasureAntialiasingFlux: (optional) (optional, logical) If true, computes antialiasing flux diagnostics (default: false).
+% - Parameter shouldUseHigherOrderFlux: (optional) (optional, logical) If true, uses higher-order flux calculation (default: false).
 arguments
     self WVDiagnostics
     options.stride = 1

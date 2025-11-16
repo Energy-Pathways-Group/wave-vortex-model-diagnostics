@@ -1,10 +1,19 @@
 function matrix = iDST2(N)
-% InverseSineTransformMatrix_DST2  Inverse of forward DST-II matrix
+% InverseSineTransformMatrix_DST2  Inverse of forward DST-II matrix.
 %
+% InverseSineTransformMatrix_DST2  Inverse of forward DST-II matrix
 % This inverts SineTransformForwardMatrix_DST2 when the forward uses the
 % 2/N scaling above (with no endpoint tweaks).
-%
 % Implementation: DST-III with the LAST column halved (k = N).
+%
+% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: matrix = iDST2(N)
+% - Parameter N: input argument `N`
+% - Returns matrix: output value `matrix`
+arguments
+    N
+end
+
 
 matrix = zeros(N,N);
 

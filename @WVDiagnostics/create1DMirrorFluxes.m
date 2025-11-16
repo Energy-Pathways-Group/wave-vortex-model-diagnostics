@@ -1,6 +1,7 @@
 function create1DMirrorFluxes(self,options)
 % Create 1D mirror flux diagnostics and write them to the diagnostics NetCDF.
 %
+% Create 1D mirror flux diagnostics and write them to the diagnostics NetCDF.
 % Adds 1D mirror-flux variables (kp, omegaAxis, kePeAxis) to an existing diagnostics
 % NetCDF file and computes mirror flux summaries (e.g. F_wwg_kp, pi_w_wwg_kp,
 % F_ggw_kp, pi_g_ggw_kp, and the corresponding omega/kePe projections) from the
@@ -8,10 +9,11 @@ function create1DMirrorFluxes(self,options)
 % required dimensions/variables if they do not already exist and then populate
 % the variables for each requested time index.
 %
-% - Topic: Diagnostics file post-processing
+% - Topic: Diagnostics — Flux diagnostics — General
 % - Declaration: create1DMirrorFluxes(self,options)
-% - Parameter options.stride: (optional) Stride for time sampling (default: 1).
-% - Parameter options.timeIndices: (optional) Indices of time steps to process (default: all times in diagnostics file).
+% - Parameter self: WVDiagnostics object
+% - Parameter stride: (optional) Stride for time sampling (default: 1).
+% - Parameter timeIndices: Indices of time steps to process (default: all times in diagnostics file).
 arguments
     self WVDiagnostics
     options.stride = 1

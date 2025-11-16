@@ -1,13 +1,15 @@
 function [reservoirs, t] = quadraticEnergyOverTime(self,options)
-% Compute energy for each reservoir over time
+% Compute energy for each reservoir over time.
 %
+% Compute energy for each reservoir over time
 % Returns the energy in each specified reservoir as a function of time.
 %
-% - Topic: Figures (over time)
+% - Topic: Diagnostics — Energy — Time series
 % - Declaration: [reservoirs, t] = quadraticEnergyOverTime(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-% - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
-% - Parameter options.timeIndices: indices for time selection (default: Inf)
+% - Parameter self: WVDiagnostics object
+% - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave, total]) (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total])
+% - Parameter shouldIncludeExactTotalEnergy: (optional) include exact total energy (default: true) (default: false)
+% - Parameter timeIndices: (optional) indices for time selection (default: Inf)
 % - Returns reservoirs: struct array with energy for each reservoir
 % - Returns t: time vector
 arguments

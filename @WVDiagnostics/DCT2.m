@@ -1,14 +1,22 @@
 function matrix = DCT2(N)
-% CosineTransformForwardMatrix_DCT2  Discrete Cosine Transform (DCT-II) matrix
+% CosineTransformForwardMatrix_DCT2  Discrete Cosine Transform (DCT-II) matrix.
 %
+% CosineTransformForwardMatrix_DCT2  Discrete Cosine Transform (DCT-II) matrix
 % Forward scaling: 2/N (no extra endpoint halving here).
 % With this choice, the inverse (DCT-III) is the plain cosine matrix with
 % the DC (first) COLUMN halved.
-%
 % If X = CosineTransformForwardMatrix_DCT2(N) * x, then
-%    x = InverseCosineTransformMatrix_DCT2(N) * X.
-%
+% x = InverseCosineTransformMatrix_DCT2(N) * X.
 % See also: InverseCosineTransformMatrix_DCT2
+%
+% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: matrix = DCT2(N)
+% - Parameter N: input argument `N`
+% - Returns matrix: output value `matrix`
+arguments
+    N
+end
+
 
 matrix = zeros(N,N);
 

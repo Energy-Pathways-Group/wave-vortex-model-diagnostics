@@ -1,8 +1,17 @@
 function [x, t] = SineTransformBack( f, xbar, varargin )
+% SineTransformBack  Fast Discrete Inverse Sine Transform.
+%
 % SineTransformBack  Fast Discrete Inverse Sine Transform
-% 
 % by default we're assuming that you're only doing resolved frequencies...
 % so no nyquist and no zero.
+%
+% - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: [x, t] = SineTransformBack( f, xbar, varargin )
+% - Parameter f: input argument `f`
+% - Parameter xbar: input argument `xbar`
+% - Parameter varargin: input argument `varargin`
+% - Returns x: output value `x`
+% - Returns t: Table summarizing diagnostic quantities
 
 if length(varargin) >= 1
     dim = varargin{1};

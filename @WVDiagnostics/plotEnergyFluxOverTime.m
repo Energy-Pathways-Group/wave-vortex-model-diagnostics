@@ -1,18 +1,19 @@
 function fig = plotEnergyFluxOverTime(self,options)
 % Plot energy fluxes for reservoirs as a function of time.
 %
+% Plot energy fluxes for reservoirs as a function of time.
 % Draws time series of energy fluxes (exact or quadratic approximation) into
 % specified energy reservoirs. Supports selecting reservoirs, time indices,
 % applying a filter to series prior to plotting, and configuring figure visibility.
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Time series — Diagnostics
 % - Declaration: fig = plotEnergyFluxOverTime(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.approximation: (optional) {'exact','quadratic'} which approximation to use (default: 'exact')
-% - Parameter options.energyReservoirs: (optional) vector of EnergyReservoir objects to include (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total])
-% - Parameter options.timeIndices: (optional) Indices of model times to plot/average (default: Inf -> all times)
-% - Parameter options.filter: (optional) Function handle to apply to flux series before plotting (default: @(v) v)
-% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter approximation: (optional) {'exact','quadratic'} which approximation to use (default: 'exact')
+% - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects to include (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total])
+% - Parameter timeIndices: (optional) Indices of model times to plot/average (default: Inf -> all times)
+% - Parameter visible: (optional) Figure visibility (default: "on")
+% - Parameter filter: (optional) Function handle to apply to flux series before plotting (default: @(v) v)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

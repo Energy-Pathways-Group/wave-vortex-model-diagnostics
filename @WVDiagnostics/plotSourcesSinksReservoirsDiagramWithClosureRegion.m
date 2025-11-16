@@ -1,18 +1,22 @@
 function fig = plotSourcesSinksReservoirsDiagramWithClosureRegion(self,options)
-% Plot sources, sinks, and reservoirs diagram
+% Plot sources, sinks, and reservoirs diagram.
 %
+% Plot sources, sinks, and reservoirs diagram
 % Generates a diagram showing energy sources, sinks, and reservoirs, including fluxes between them.
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Diagnostics — General
 % - Declaration: fig = plotSourcesSinksReservoirsDiagram(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave])
-% - Parameter options.customNames: dictionary for custom names
-% - Parameter options.fluxTolerance: tolerance for displaying fluxes (default: 1e-2)
-% - Parameter options.shouldShowUnits: show units in labels (default: true)
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
-% - Parameter options.shouldShowReservoirEnergy: show reservoir energy (default: true)
-% - Parameter options.title: diagram title (default: "Energy Pathways")
-% - Parameter options.visible: figure visibility (default: "on")
+% - Parameter self: WVDiagnostics object
+% - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave]) (default: [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave])
+% - Parameter customNames: (optional) dictionary for custom names (default: configureDictionary("string","string"))
+% - Parameter fluxTolerance: (optional) tolerance for displaying fluxes (default: 1e-2)
+% - Parameter shouldShowUnits: (optional) show units in labels (default: true)
+% - Parameter timeIndices: (optional) indices for time averaging (default: Inf)
+% - Parameter shouldShowReservoirEnergy: (optional) show reservoir energy (default: true)
+% - Parameter shouldShowExactValues: (optional) input argument `shouldShowExactValues` (default: true)
+% - Parameter shouldSeparateClosureRegion: (optional) input argument `shouldSeparateClosureRegion` (default: true)
+% - Parameter title: (optional) diagram title (default: "Energy Pathways")
+% - Parameter visible: (optional) figure visibility (default: "on")
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

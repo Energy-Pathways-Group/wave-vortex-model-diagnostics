@@ -1,4 +1,6 @@
 function E0 = waveWaveGeostrophicEnergy(wvt,mask)
+% Note that.
+%
 % Note that
 % energy = waveWaveGeostrophicEnergy(wvt,1,1);
 % should produce the same answer as
@@ -6,6 +8,17 @@ function E0 = waveWaveGeostrophicEnergy(wvt,mask)
 % [Fp_w,Fm_w,F0_w] = wvt.nonlinearFluxForFlowComponents(flow,flow);
 % [Ep_w,Em_w,E0_w] = wvt.energyFluxFromNonlinearFlux(Fp_w,Fm_w,F0_w);
 % sum(E0_w(:))
+%
+% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: E0 = waveWaveGeostrophicEnergy(wvt,mask)
+% - Parameter wvt: WVDiagnostics object
+% - Parameter mask: input argument `mask`
+% - Returns E0: output value `E0`
+arguments
+    wvt
+    mask
+end
+
 
     Apt = wvt.Apt;
     Amt = wvt.Amt;

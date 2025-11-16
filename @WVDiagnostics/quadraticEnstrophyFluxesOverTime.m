@@ -1,12 +1,15 @@
 function [enstrophy_fluxes,t] = quadraticEnstrophyFluxesOverTime(self,options)
-% Compute enstrophy fluxes over time
+% Compute enstrophy fluxes over time.
 %
+% Compute enstrophy fluxes over time
 % Returns the enstrophy fluxes from external forcing
 %
-% - Topic: Fluxes over time, [t 1]
+% - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes over time, [t 1]
 % - Declaration: enstrophy_fluxes = quadraticEnstrophyFluxesOverTime(self,options)
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices for time averaging (default: Inf)
 % - Returns enstrophy_fluxes: struct array with averaged fluxes
+% - Returns t: Summary table of enstrophy flux diagnostics
 arguments
     self WVDiagnostics
     options.timeIndices = Inf;

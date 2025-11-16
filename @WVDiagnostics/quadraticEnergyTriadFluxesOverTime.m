@@ -1,13 +1,17 @@
 function [inertial_fluxes,t] = quadraticEnergyTriadFluxesOverTime(self,options)
-% Compute inertial fluxes over time
+% Compute inertial fluxes over time.
 %
+% Compute inertial fluxes over time
 % Returns the energy fluxes due to inertial interactions for each reservoir as a function of time.
 %
-% - Topic: Fluxes over time, [t 1]
+% - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes over time, [t 1]
 % - Declaration: inertial_fluxes = quadraticEnergyTriadFluxesOverTime(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-% - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
+% - Parameter self: WVDiagnostics object
+% - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave, total]) (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total])
+% - Parameter triadComponents: (optional) vector of TriadFlowComponent objects (default: [geostrophic_mda, wave]) (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
 % - Returns inertial_fluxes: struct array with fluxes over time
+% - Returns t: Summary table of energy flux diagnostics
 arguments
     self WVDiagnostics
     options.energyReservoirs = [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total];

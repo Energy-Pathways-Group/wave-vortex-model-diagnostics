@@ -1,28 +1,29 @@
 function fig = plotEnergyFluxTemporalAverage(self,options)
 % Plot temporally averaged energy flux diagnostics.
 %
+% Plot temporally averaged energy flux diagnostics.
 % Compute and plot temporally averaged energy flux diagnostics (exact or
 % quadratic approximation) on a chosen axes projection. Supports grouping
 % fluxes, overlaying frequency/ratio contours, and customizing colormap,
 % saturation, and figure visibility.
 %
-% - Topic: Figures / temporal averages
+% - Topic: Figures — Diagnostics — General
 % - Declaration: fig = plotEnergyFluxTemporalAverage(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.approximation: (optional) {'quadratic','exact'} approximation to use (default: 'quadratic')
-% - Parameter options.energyReservoir: (optional) EnergyReservoir to plot (default: EnergyReservoir.total)
-% - Parameter options.triadComponents: (optional) TriadFlowComponent vector for inertial flux selection (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
-% - Parameter options.showForcingFluxes: (optional, logical) Include forcing fluxes when using quadratic approximation (default: true)
-% - Parameter options.timeIndices: (optional) Time indices to average over (default: Inf -> all times)
-% - Parameter options.axes: (optional) Plot projection, one of {'jk','j','jWavenumber','k','k-pseudo-isotropic','omega'} (default: 'jk')
-% - Parameter options.filter: (optional) Function handle applied to plotted data (default: @(v) v)
-% - Parameter options.shouldOverlayWaveFrequencies: (optional, logical) Overlay wave-frequency contours on 'jk' axes (default: false)
-% - Parameter options.shouldOverlayGeostrophicKineticPotentialRatioContours: (optional, logical) Overlay geostrophic KE/PE fraction contours (default: true)
-% - Parameter options.colormap: (optional) Colormap to use for 'jk' axes (default: WVDiagnostics.crameri('-bam'))
-% - Parameter options.visible: (optional) Figure visibility (default: "on")
-% - Parameter options.overSaturationFactor: (optional) Scalar or two-element colormap limits (default: 10)
-% - Parameter options.fluxGroups: (optional) Cell array of index groups to combine for plotting (default: [])
-% - Parameter options.simpleName: (optional) Cell array of simple names for fluxGroups (default: [])
+% - Parameter approximation: (optional) {'quadratic','exact'} approximation to use (default: 'quadratic')
+% - Parameter energyReservoir: (optional) EnergyReservoir to plot (default: EnergyReservoir.total)
+% - Parameter triadComponents: (optional) TriadFlowComponent vector for inertial flux selection (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
+% - Parameter showForcingFluxes: (optional) (optional, logical) Include forcing fluxes when using quadratic approximation (default: true)
+% - Parameter timeIndices: (optional) Time indices to average over (default: Inf -> all times)
+% - Parameter axes: (optional) Plot projection, one of {'jk','j','jWavenumber','k','k-pseudo-isotropic','omega'} (default: 'jk')
+% - Parameter filter: (optional) Function handle applied to plotted data (default: @(v) v)
+% - Parameter shouldOverlayWaveFrequencies: (optional) (optional, logical) Overlay wave-frequency contours on 'jk' axes (default: false)
+% - Parameter shouldOverlayGeostrophicKineticPotentialRatioContours: (optional) (optional, logical) Overlay geostrophic KE/PE fraction contours (default: true)
+% - Parameter colormap: (optional) Colormap to use for 'jk' axes (default: WVDiagnostics.crameri('-bam'))
+% - Parameter visible: (optional) Figure visibility (default: "on")
+% - Parameter overSaturationFactor: (optional) Scalar or two-element colormap limits (default: 10)
+% - Parameter fluxGroups: (optional) Cell array of index groups to combine for plotting (default: [])
+% - Parameter simpleName: (optional) Cell array of simple names for fluxGroups (default: [])
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

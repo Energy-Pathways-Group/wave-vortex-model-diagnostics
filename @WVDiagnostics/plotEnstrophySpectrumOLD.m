@@ -1,12 +1,14 @@
 function fig = plotEnstrophySpectrumOLD(self,options)
-% Plot the geostrophic enstrophy spectrum at a given time
+% Plot the geostrophic enstrophy spectrum at a given time.
 %
+% Plot the geostrophic enstrophy spectrum at a given time
 % Makes a geostrophic enstrophy spectrum at a given time
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Spectra — Potential energy
 % - Declaration: fig = plotEnergySpectrum(self,options)
-% - Parameter options.iTime: time index in model output file
-% - Parameter options.visible: figure visibility (default: "on")
+% - Parameter self: WVDiagnostics object
+% - Parameter iTime: time index in model output file
+% - Parameter visible: (optional) figure visibility (default: "on")
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

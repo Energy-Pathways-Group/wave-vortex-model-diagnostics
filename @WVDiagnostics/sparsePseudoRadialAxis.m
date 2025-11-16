@@ -1,4 +1,18 @@
 function [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
+% Sparse Pseudo Radial Axis.
+%
+% sparsePseudoRadialAxis is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
+% - Parameter self: WVDiagnostics object
+% - Returns kp: output value `kp`
+% - Returns bins_0: output value `bins_0`
+% - Returns bins_pm: output value `bins_pm`
+arguments
+    self
+end
+
 wvt = self.wvt;
 
 % Create kPseudoRadial *without* explicit de-aliasing

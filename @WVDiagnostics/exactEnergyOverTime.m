@@ -1,4 +1,14 @@
 function [energy, t] = exactEnergyOverTime(self, options)
+% Exact Energy Over Time.
+%
+% exactEnergyOverTime is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Diagnostics — Energy — Time series
+% - Declaration: [energy, t] = exactEnergyOverTime(self, options)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
+% - Returns energy: diagnosed energy as a function of time and/or scale
+% - Returns t: Summary table of energy flux diagnostics
 arguments
     self WVDiagnostics
     options.timeIndices = Inf;

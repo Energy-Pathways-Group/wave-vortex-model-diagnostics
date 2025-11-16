@@ -1,27 +1,31 @@
 function [xbar,f] = SineTransformForward( t, x, varargin )
+% SineTransformForward  Fast Discrete Sine Transform (DST-I).
+%
 % SineTransformForward  Fast Discrete Sine Transform (DST-I)
-% 
 % xbar is returned in the same units as x. This is the finite length
 % definition of a Fourier transform.
-%
 % f is returned in units of cycles, and only contains the potentially
 % nonzero frequency i.e., the zero and nyquist are not included, because
 % they must be zero.
-%
 % The following relationship is satisfied:
-%   [f, xbar] = SineTransformForward(t,x);
-%   S = T*(xbar .* conj(xbar));
-%   x_sum = (1/T)*sum(x.*x)*dt;
-%   S_sum = sum(S)*df;
-%   x_sum == S_sum
-%
+% [f, xbar] = SineTransformForward(t,x);
+% S = T*(xbar .* conj(xbar));
+% x_sum = (1/T)*sum(x.*x)*dt;
+% S_sum = sum(S)*df;
+% x_sum == S_sum
 % Using,
-%   N=33; % total points
-%   T=1.0; % total time length
-%   t=T*(0:(N-1))'/(N-1);
+% N=33; % total points
+% T=1.0; % total time length
+% t=T*(0:(N-1))'/(N-1);
 % This definition of t *includes* the end points which *must* be zero.
 %
-%
+% - Topic: Transforms — Spectral — General
+% - Declaration: [xbar,f] = SineTransformForward( t, x, varargin )
+% - Parameter t: input argument `t`
+% - Parameter x: input argument `x`
+% - Parameter varargin: input argument `varargin`
+% - Returns xbar: output value `xbar`
+% - Returns f: output value `f`
 
 if length(varargin) >= 1
     dim = varargin{1};

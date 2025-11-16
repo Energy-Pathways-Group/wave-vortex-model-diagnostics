@@ -1,3 +1,4 @@
+function fig = plotFluidStateMultipanel(self,options)
 % Plot multipanel summary of fluid state and spectra
 %
 % Create a compact multipanel figure showing horizontal (x-y) maps and
@@ -7,25 +8,24 @@
 % contours. Axes are annotated in kilometers and depth in kilometers; color
 % limits and annotation ticks are handled internally.
 %
-% - Topic: Figures / fluid diagnostics
+% - Topic: Figures — Diagnostics — General
 % - Declaration: fig = plotFluidStateMultipanel(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.visible: (optional) Figure visibility (default: "on")
-% - Parameter options.iTime: (optional) Time index to display; when provided sets self.iTime (default: self.iTime)
-% - Parameter options.title: (optional) Figure title; default uses the model time in days
-% - Parameter options.shouldShowEnergySpectra: (optional, logical) Include energy spectra panel (default: true)
-% - Parameter options.shouldShowTotalFields: (optional, logical) Also show total fields alongside decomposed fields (default: false)
-% - Parameter options.figureHandle: (optional) Existing figure handle to draw into (default: create new figure)
-% - Parameter options.wavelengths: (optional) Vector of pseudo-wavelength contour values (km) used in spectral panels
-% - Parameter options.wavelengthColor: (optional) RGB color for wavelength contour labels (default: [.5,.5,.5])
-% - Parameter options.frequencies: (optional) Vector of nondimensional frequency contours (in units of f) for spectral panels
-% - Parameter options.frequencyColor: (optional) RGB color for frequency contour labels (default: [.7,.7,.7])
-% - Parameter options.keFractions: (optional) Vector of KE/(KE+PE) fractional contour levels for spectral panels
-% - Parameter options.keFractionColor: (optional) RGB color for KE-fraction contour labels (default: [.7,.7,.7])
-% - Parameter options.labelSpacing: (optional) Label spacing passed to clabel for contour annotation (default: 1000)
-% - Parameter options.lineWidth: (optional) Line width for contour overlays (default: 1)
-% - Returns fig: Handle to the generated figure
-function fig = plotFluidStateMultipanel(self,options)
+% - Parameter visible: (optional) input argument `visible` (default: "on")
+% - Parameter iTime: time-related parameter `iTime`
+% - Parameter title: input argument `title`
+% - Parameter shouldShowEnergySpectra: (optional) input argument `shouldShowEnergySpectra` (default: true)
+% - Parameter shouldShowTotalFields: (optional) input argument `shouldShowTotalFields` (default: false)
+% - Parameter figureHandle: input argument `figureHandle`
+% - Parameter wavelengths: (optional) input argument `wavelengths` (default: [1,2,5,10,20,50,100,200,500])
+% - Parameter wavelengthColor: (optional) input argument `wavelengthColor` (default: [.5,.5,.5])
+% - Parameter frequencies: (optional) input argument `frequencies` (default: [1.01 1.05 1.2 2 4 8 16])
+% - Parameter frequencyColor: (optional) input argument `frequencyColor` (default: [.7,.7,.7])
+% - Parameter keFractions: (optional) input argument `keFractions` (default: [.01,.1,.25,.5,.75,.9,.99])
+% - Parameter keFractionColor: (optional) input argument `keFractionColor` (default: [.7,.7,.7])
+% - Parameter labelSpacing: (optional) input argument `labelSpacing` (default: 1000)
+% - Parameter lineWidth: (optional) input argument `lineWidth` (default: 1)
+% - Returns fig: Figure handle for the generated plot
 arguments
     self WVDiagnostics
     options.visible = "on"

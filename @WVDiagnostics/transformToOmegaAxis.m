@@ -1,10 +1,12 @@
 function [varargout] = transformToOmegaAxis(self,varargin)     
-% transforms in the from (j,kRadial) to omegaAxis
+% transforms in the from (j,kRadial) to omegaAxis.
 %
+% transforms in the from (j,kRadial) to omegaAxis
 % Sums all the variance/energy in radial bins `kPseudoRadial`.
 %
-% - Topic: Operations — Transformations
-% - Declaration: [varargout] = transformToRadialWavenumber(varargin) 
+% - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: [varargout] = transformToRadialWavenumber(varargin)
+% - Parameter self: WVDiagnostics object
 % - Parameter varargin: variables with dimensions $$(j,kl)$$
 % - Returns varargout: variables with dimensions $$(kRadial)$$ or $$(kRadial,j)$$
 

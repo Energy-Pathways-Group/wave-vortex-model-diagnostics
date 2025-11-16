@@ -1,4 +1,16 @@
 function k = sparseKRadialAxis(self)
+% Sparse KRadial Axis.
+%
+% sparseKRadialAxis is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: k = sparseKRadialAxis(self)
+% - Parameter self: WVDiagnostics object
+% - Returns k: output value `k`
+arguments
+    self
+end
+
 wvt = self.wvt;
 
 % Create kPseudoRadial *without* explicit de-aliasing

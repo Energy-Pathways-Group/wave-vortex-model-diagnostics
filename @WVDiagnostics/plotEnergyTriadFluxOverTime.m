@@ -1,13 +1,17 @@
 function fig = plotEnergyTriadFluxOverTime(self,options)
-% Plot inertial flux for each reservoir over time
+% Plot inertial flux for each reservoir over time.
 %
+% Plot inertial flux for each reservoir over time
 % Plots the energy flux between reservoirs due to inertial interactions as a function of time.
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Time series — Diagnostics
 % - Declaration: fig = plotInertialFluxOverTime(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-% - Parameter options.visible: figure visibility (default: "on")
-% - Parameter options.filter: function handle to filter fluxes (default: @(v) v)
+% - Parameter self: WVDiagnostics object
+% - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave, total]) (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave])
+% - Parameter triadComponents: (optional) input argument `triadComponents` (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
+% - Parameter visible: (optional) figure visibility (default: "on")
+% - Parameter filter: (optional) function handle to filter fluxes (default: @(v) v)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

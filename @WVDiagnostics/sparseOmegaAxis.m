@@ -1,4 +1,17 @@
 function [omegaAxis,bins_omega] = sparseOmegaAxis(self)
+% Sparse Omega Axis.
+%
+% sparseOmegaAxis is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: [omegaAxis,bins_omega] = sparseOmegaAxis(self)
+% - Parameter self: WVDiagnostics object
+% - Returns omegaAxis: output value `omegaAxis`
+% - Returns bins_omega: output value `bins_omega`
+arguments
+    self
+end
+
 wvt = self.wvt;
 
 omega = self.omegaAxis;

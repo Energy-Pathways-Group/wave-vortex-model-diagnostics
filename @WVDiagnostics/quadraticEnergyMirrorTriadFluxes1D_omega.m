@@ -1,4 +1,14 @@
 function [M_wwg, omegaAxis] = quadraticEnergyMirrorTriadFluxes1D_omega(self,options)
+% Quadratic Energy Mirror Triad Fluxes1 D omega.
+%
+% quadraticEnergyMirrorTriadFluxes1D_omega is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseKRadialAxis 1]
+% - Declaration: [M_wwg, omegaAxis] = quadraticEnergyMirrorTriadFluxes1D_omega(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
+% - Returns M_wwg: output value `M_wwg`
+% - Returns omegaAxis: output value `omegaAxis`
 arguments
     self WVDiagnostics
     options.timeIndices = Inf;

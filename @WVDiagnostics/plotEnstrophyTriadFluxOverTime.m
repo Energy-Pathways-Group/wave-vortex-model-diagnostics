@@ -1,18 +1,19 @@
 function fig = plotEnstrophyTriadFluxOverTime(self,options)
 % Plot enstrophy triad fluxes over time.
 %
+% Plot enstrophy triad fluxes over time.
 % Plots time series of enstrophy triad fluxes computed with the quadratic
 % approximation for the specified triad components. An optional filter may
 % be applied to each time series before plotting. Axis labels use the class
 % scaling properties (tscale, tscale_units, z_flux_scale, z_flux_scale_units).
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Time series — Diagnostics
 % - Declaration: fig = plotEnstrophyTriadFluxOverTime(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.triadComponents: (optional) vector of TriadFlowComponent objects to include (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
-% - Parameter options.timeIndices: (optional) Indices of model times to use (default: Inf -> all times)
-% - Parameter options.visible: (optional) Figure visibility (default: "on")
-% - Parameter options.filter: (optional) Function handle accepting (v,t) used to preprocess each flux series before plotting (default: @(v,t) v)
+% - Parameter triadComponents: (optional) vector of TriadFlowComponent objects to include (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
+% - Parameter timeIndices: (optional) Indices of model times to use (default: Inf -> all times)
+% - Parameter visible: (optional) Figure visibility (default: "on")
+% - Parameter filter: (optional) Function handle accepting (v,t) used to preprocess each flux series before plotting (default: @(v,t) v)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

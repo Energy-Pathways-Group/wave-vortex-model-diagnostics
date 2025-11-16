@@ -1,16 +1,17 @@
 function tableString = createEnstrophyFluxSummaryTable(self,options)
 % Create a LaTeX table summarizing enstrophy source/sink fluxes.
 %
+% Create a LaTeX table summarizing enstrophy source/sink fluxes.
 % Generates a LaTeX-formatted table listing enstrophy sources, sinks and totals
 % using spatial-temporally averaged enstrophy flux diagnostics. The table
 % reports both APV (exact) and quadratic (QGPV) flux measures and formats
 % columns so ampersands are aligned for human-readable LaTeX output.
 %
-% - Topic: Tables / diagnostics summary
+% - Topic: Diagnostics — Enstrophy fluxes — General
 % - Declaration: tableString = createEnstrophyFluxSummaryTable(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.customNames: dictionary mapping diagnostic names to custom labels (default: configureDictionary("string","string"))
-% - Parameter options.timeIndices: (optional) time indices to average over (default: Inf -> all times)
+% - Parameter customNames: (optional) dictionary mapping diagnostic names to custom labels (default: configureDictionary("string","string"))
+% - Parameter timeIndices: (optional) time indices to average over (default: Inf -> all times)
 % - Returns tableString: string containing the LaTeX table
 arguments
     self WVDiagnostics

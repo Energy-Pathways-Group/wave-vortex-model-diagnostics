@@ -1,6 +1,18 @@
 function [inertial_fluxes_g, inertial_fluxes_w, k, j] = quadraticEnergyPrimaryTriadFluxesTemporalAverage2D(self,options)
+% outputGrid determines whether or not the fluxes get downsampled to the.
+%
 % outputGrid determines whether or not the fluxes get downsampled to the
 % sparse grid, or up-sampled to the full grid.
+%
+% - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: [inertial_fluxes_g, inertial_fluxes_w, k, j] = quadraticEnergyPrimaryTriadFluxesTemporalAverage2D(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
+% - Parameter outputGrid: (optional) input argument `outputGrid` (default: "full")
+% - Returns inertial_fluxes_g: diagnosed flux values
+% - Returns inertial_fluxes_w: diagnosed flux values
+% - Returns k: output value `k`
+% - Returns j: output value `j`
 arguments
     self WVDiagnostics
     options.timeIndices = Inf

@@ -1,4 +1,19 @@
 function [S_0, S_pm, mask_0, mask_pm] = sparseJKAxisBinMatrices(self)
+% Sparse JKAxis Bin Matrices.
+%
+% sparseJKAxisBinMatrices is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: [S_0, S_pm, mask_0, mask_pm] = sparseJKAxisBinMatrices(self)
+% - Parameter self: WVDiagnostics object
+% - Returns S_0: output value `S_0`
+% - Returns S_pm: output value `S_pm`
+% - Returns mask_0: output value `mask_0`
+% - Returns mask_pm: output value `mask_pm`
+arguments
+    self
+end
+
 wvt = self.wvt;
 
 ks = self.sparseKRadialAxis;

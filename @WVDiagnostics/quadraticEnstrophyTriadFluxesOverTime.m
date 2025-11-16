@@ -1,12 +1,16 @@
 function [enstrophy_fluxes,t] = quadraticEnstrophyTriadFluxesOverTime(self,options)
-% Compute enstrophy inertial (aka, triad) fluxes over time
+% Compute enstrophy inertial (aka, triad) fluxes over time.
 %
+% Compute enstrophy inertial (aka, triad) fluxes over time
 % Returns the enstrophy fluxes from external forcing
 %
-% - Topic: Fluxes over time, [t 1]
+% - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes over time, [t 1]
 % - Declaration: enstrophy_fluxes = quadraticEnstrophyFluxesOverTime(self,options)
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
+% - Parameter self: WVDiagnostics object
+% - Parameter triadComponents: (optional) input argument `triadComponents` (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
+% - Parameter timeIndices: (optional) indices for time averaging (default: Inf)
 % - Returns enstrophy_fluxes: struct array with averaged fluxes
+% - Returns t: Summary table of enstrophy flux diagnostics
 arguments
     self WVDiagnostics
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]

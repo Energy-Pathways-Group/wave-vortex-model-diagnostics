@@ -1,25 +1,25 @@
 function fig = plotEnstrophyFluxOverTime(self,options)
 % Plot enstrophy fluxes for reservoirs as a function of time.
 %
+% Plot enstrophy fluxes for reservoirs as a function of time.
 % Draws time series of enstrophy fluxes (exact or quadratic approximation)
 % into specified enstrophy reservoirs. Supports selecting approximation,
 % time indices, simple filtering for visualisation, and toggles for showing
 % nonlinear advection, total flux, and dZ/dt.
-%
 % Some useful filters:
 % filter=@(v,t) movmean(v,21);
 % filter=@(v,t) cumtrapz(t,v)./(t+1)
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Time series — Diagnostics
 % - Declaration: fig = plotEnstrophyFluxOverTime(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.approximation: (optional) {'quadratic','exact'} which approximation to use (default: 'exact')
-% - Parameter options.timeIndices: (optional) Indices of model times to plot/average (default: Inf -> all times)
-% - Parameter options.visible: (optional) Figure visibility (default: "on")
-% - Parameter options.filter: (optional) Function handle to filter flux time series before plotting (default: @(v) v)
-% - Parameter options.shouldShowNonlinearAdvection: (optional, logical) Show nonlinear advection term (default: true)
-% - Parameter options.shouldShowTotal: (optional, logical) Show summed total flux (default: true)
-% - Parameter options.shouldShowDtEnstrophy: (optional, logical) Show dZ/dt series for comparison (default: true)
+% - Parameter approximation: (optional) {'quadratic','exact'} which approximation to use (default: 'exact')
+% - Parameter timeIndices: (optional) Indices of model times to plot/average (default: Inf -> all times)
+% - Parameter visible: (optional) Figure visibility (default: "on")
+% - Parameter filter: (optional) Function handle to filter flux time series before plotting (default: @(v) v)
+% - Parameter shouldShowNonlinearAdvection: (optional) (optional, logical) Show nonlinear advection term (default: true)
+% - Parameter shouldShowTotal: (optional) (optional, logical) Show summed total flux (default: true)
+% - Parameter shouldShowDtEnstrophy: (optional) (optional, logical) Show dZ/dt series for comparison (default: true)
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

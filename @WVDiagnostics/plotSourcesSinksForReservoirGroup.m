@@ -1,27 +1,28 @@
 function [fig, boxDiagram] = plotSourcesSinksForReservoirGroup(self,options)
 % Plot sources, sinks, and reservoirs diagram for a reservoir group.
 %
+% Plot sources, sinks, and reservoirs diagram for a reservoir group.
 % Generate a box-and-arrow diagram showing energy sources, sinks, reservoirs,
 % and fluxes between them for a named reservoir group stored in the diagnostics
 % NetCDF. Reads reservoir, forcing and inertial flux summaries for the requested
 % timeIndices, formats labels and units using class scaling properties, and
 % returns a drawn figure and the underlying BoxDiagram object.
 %
-% - Topic: Figures / diagnostics summary
+% - Topic: Figures — Diagnostics — General
 % - Declaration: [fig, boxDiagram] = plotSourcesSinksForReservoirGroup(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.name: (optional) Name of reservoir group to plot (default: "reservoir-damped-wave-geo")
-% - Parameter options.customNames: (optional) dictionary mapping internal names to display names (default: configureDictionary("string","cell"))
-% - Parameter options.customColors: (optional) dictionary mapping roles/names to RGB colors (default: dictionary with "source" and "sink" entries)
-% - Parameter options.customReservoirOrder: (optional) cell/array specifying reservoir ordering for layout (default: use group order)
-% - Parameter options.customForcing: (optional) list of forcing names to include (default: all)
-% - Parameter options.fluxTolerance: (optional) Minimum flux magnitude (in class flux units) to display arrows/labels (default: 1e-2)
-% - Parameter options.shouldShowUnits: (optional, logical) Include units in labels (default: true)
-% - Parameter options.timeIndices: (optional) Time indices to average over (default: Inf -> all times)
-% - Parameter options.shouldShowReservoirEnergy: (optional, logical) Show reservoir energy as sublabels (default: true)
-% - Parameter options.shouldShowExactValues: (optional, logical) Show exact total forcing values as sublabels (default: true)
-% - Parameter options.title: (optional) Diagram title (default: "Energy Pathways")
-% - Parameter options.visible: (optional) Figure visibility (default: "on")
+% - Parameter name: (optional) Name of reservoir group to plot (default: "reservoir-damped-wave-geo")
+% - Parameter customNames: (optional) dictionary mapping internal names to display names (default: configureDictionary("string","cell"))
+% - Parameter customColors: (optional) dictionary mapping roles/names to RGB colors (default: dictionary with "source" and "sink" entries) (default: dictionary(["source","sink"], {[191 191 250]/255,[245 194 193]/255}))
+% - Parameter customReservoirOrder: cell/array specifying reservoir ordering for layout (default: use group order)
+% - Parameter customForcing: list of forcing names to include (default: all)
+% - Parameter fluxTolerance: (optional) Minimum flux magnitude (in class flux units) to display arrows/labels (default: 1e-2)
+% - Parameter shouldShowUnits: (optional) (optional, logical) Include units in labels (default: true)
+% - Parameter timeIndices: (optional) Time indices to average over (default: Inf -> all times)
+% - Parameter shouldShowReservoirEnergy: (optional) (optional, logical) Show reservoir energy as sublabels (default: true)
+% - Parameter shouldShowExactValues: (optional) (optional, logical) Show exact total forcing values as sublabels (default: true)
+% - Parameter title: (optional) Diagram title (default: "Energy Pathways")
+% - Parameter visible: (optional) Figure visibility (default: "on")
 % - Returns fig: handle to the generated figure
 % - Returns boxDiagram: BoxDiagram object used to draw the diagram (can be re-used or modified)
 arguments

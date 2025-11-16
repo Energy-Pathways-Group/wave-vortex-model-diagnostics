@@ -1,4 +1,19 @@
 function [transferFlux, forcingFlux, ddt, energy] = fluxesForReservoirGroup(self,options)
+% Fluxes For Reservoir Group.
+%
+% fluxesForReservoirGroup is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Diagnostics — Flux diagnostics — General
+% - Declaration: [transferFlux, forcingFlux, ddt, energy] = fluxesForReservoirGroup(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter outputfile: file path or name
+% - Parameter name: (optional) input argument `name` (default: "reservoir-damped-wave-geo")
+% - Parameter timeIndices: indices specifying which time indices to use
+% - Parameter outputFormat: (optional) input argument `outputFormat` (default: 'matrix')
+% - Returns transferFlux: diagnosed flux values
+% - Returns forcingFlux: diagnosed flux values
+% - Returns ddt: output value `ddt`
+% - Returns energy: diagnosed energy as a function of time and/or scale
 arguments
     self WVDiagnostics
     options.outputfile NetCDFGroup

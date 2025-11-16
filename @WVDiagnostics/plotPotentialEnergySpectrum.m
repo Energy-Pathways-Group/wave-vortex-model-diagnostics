@@ -1,13 +1,14 @@
 function fig = plotPotentialEnergySpectrum(self,options)
-% Plot energy for each reservoir over time
+% Plot energy for each reservoir over time.
 %
+% Plot energy for each reservoir over time
 % Plots the energy in each specified reservoir as a function of time.
 %
-% - Topic: Figures (over time)
+% - Topic: Figures — Spectra — Potential energy
 % - Declaration: fig = plotEnergyOverTime(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-% - Parameter options.shouldIncludeExactTotalEnergy: include exact total energy (default: true)
-% - Parameter options.visible: figure visibility (default: "on")
+% - Parameter self: WVDiagnostics object
+% - Parameter iTime: time-related parameter `iTime`
+% - Parameter visible: (optional) figure visibility (default: "on")
 % - Returns fig: handle to the generated figure
 arguments
     self WVDiagnostics

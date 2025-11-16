@@ -1,11 +1,15 @@
 function [forcing_fluxes, t] = exactEnstrophyFluxesOverTime(self,options)
-% Compute exact enstrophy fluxes over time
+% Compute exact enstrophy fluxes over time.
 %
+% Compute exact enstrophy fluxes over time
 % Returns the exact enstrophy fluxes from external forcing for each time step.
 %
-% - Topic: Fluxes over time, [t 1]
+% - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes over time, [t 1]
 % - Declaration: forcing_fluxes = exactEnstrophyFluxesOverTime(self)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
 % - Returns forcing_fluxes: struct array with exact fluxes
+% - Returns t: Summary table of enstrophy flux diagnostics
 arguments
     self WVDiagnostics
     options.timeIndices = Inf;

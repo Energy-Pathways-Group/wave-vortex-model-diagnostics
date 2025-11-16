@@ -1,4 +1,13 @@
 function [varargout] = transformToKePeAxis(self,varargin)
+% Transform To Ke Pe Axis.
+%
+% transformToKePeAxis is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Declaration: [varargout] = transformToKePeAxis(self,varargin)
+% - Parameter self: WVDiagnostics object
+% - Parameter varargin: input argument `varargin`
+% - Returns varargout: output value `varargout`
     kePeAxis = reshape(self.kePeAxis,1,[]);
     kePeFraction = self.geo_hke_jk./(self.geo_hke_jk+self.geo_pe_jk);
 

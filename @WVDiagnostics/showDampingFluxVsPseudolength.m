@@ -1,4 +1,12 @@
 function showDampingFluxVsPseudolength(self,options)
+% Show Damping Flux Vs Pseudolength.
+%
+% showDampingFluxVsPseudolength is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Diagnostics — Flux diagnostics — General
+% - Declaration: showDampingFluxVsPseudolength(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
 arguments
     self WVDiagnostics
     options.timeIndices = Inf

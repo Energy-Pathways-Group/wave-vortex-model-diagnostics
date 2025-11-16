@@ -1,4 +1,17 @@
 function [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
+% Variables For Reservoir Group.
+%
+% variablesForReservoirGroup is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Configuration — Reservoirs — Grouping
+% - Declaration: [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter outputfile: file path or name
+% - Parameter name: (optional) input argument `name` (default: "reservoir-damped-wave-geo")
+% - Parameter flowComponents: input argument `flowComponents`
+% - Returns triadVar: output value `triadVar`
+% - Returns forcingVar: output value `forcingVar`
+% - Returns energyVar: output value `energyVar`
 arguments
     self WVDiagnostics
     options.outputfile NetCDFGroup

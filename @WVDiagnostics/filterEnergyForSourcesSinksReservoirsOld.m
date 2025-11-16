@@ -1,19 +1,32 @@
 function [sources, sinks, inertial, ddt, energy] = filterEnergyForSourcesSinksReservoirsOld(self,options)
+% This function returns values assuming three reservoirs: geo, wave, and.
+%
 % This function returns values assuming three reservoirs: geo, wave, and
 % damping. The damping resevoir is just scales below a threshold, wave or
-% geostrophic. It also returns the exact and exact-damp resevoirs. 
-%
+% geostrophic. It also returns the exact and exact-damp resevoirs.
 % The forcing struct has the the forcing on the three/two different
 % reservoirs
-%
 % The inertial struct has the flux from the two reservoirs (wave
 % geostrophic) to each other and to the damping region.
-%
 % The forcing struct also include the nonlinear advection, which has the
 % flux to the damping region.
-%
 % The ddt struct contains the change in total energy, closing the energy
 % budget.
+%
+% - Topic: Configuration — Reservoirs — Grouping
+% - Declaration: [sources, sinks, inertial, ddt, energy] = filterEnergyForSourcesSinksReservoirsOld(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter customNames: (optional) input argument `customNames` (default: configureDictionary("string","string"))
+% - Parameter fluxTolerance: (optional) input argument `fluxTolerance` (default: 1e-2)
+% - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)
+% - Parameter shouldShowReservoirEnergy: (optional) energy or enstrophy reservoir selection (default: true)
+% - Parameter shouldShowExactValues: (optional) input argument `shouldShowExactValues` (default: true)
+% - Parameter shouldSeparateClosureRegion: (optional) input argument `shouldSeparateClosureRegion` (default: true)
+% - Returns sources: output value `sources`
+% - Returns sinks: output value `sinks`
+% - Returns inertial: output value `inertial`
+% - Returns ddt: output value `ddt`
+% - Returns energy: diagnosed energy as a function of time and/or scale
 arguments
     self WVDiagnostics
     options.customNames = configureDictionary("string","string")

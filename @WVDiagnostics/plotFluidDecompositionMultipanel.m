@@ -1,6 +1,7 @@
 function fig = plotFluidDecompositionMultipanel(self,options)
 % Plot a multipanel decomposition of the fluid state (wave vs geostrophic).
 %
+% Plot a multipanel decomposition of the fluid state (wave vs geostrophic).
 % Creates a compact multipanel figure showing horizontal (x-y) maps and
 % vertical (x-z) sections of vertical vorticity for the total flow, the
 % wave component, and the geostrophic component at a specified model time.
@@ -8,13 +9,13 @@ function fig = plotFluidDecompositionMultipanel(self,options)
 % colormap, plotting scales, and annotations. The x/y axes are presented in
 % kilometers and the z (depth) axis in kilometers.
 %
-% - Topic: Figures / fluid diagnostics
+% - Topic: Figures — Diagnostics — General
 % - Declaration: fig = plotFluidDecompositionMultipanel(self,options)
 % - Parameter self: WVDiagnostics object
-% - Parameter options.visible: (optional) Figure visibility (default: "on")
-% - Parameter options.iTime: (optional) Time index to display; when provided sets self.iTime (default: self.iTime)
-% - Parameter options.title: (optional) Figure title; default uses the model time in days
-% - Parameter options.yForXZSlice: (optional) y coordinate (meters) at which to take the x-z slice; default uses center y
+% - Parameter visible: (optional) Figure visibility (default: "on")
+% - Parameter iTime: Time index to display; when provided sets self.iTime (default: self.iTime)
+% - Parameter title: Figure title; default uses the model time in days
+% - Parameter yForXZSlice: y coordinate (meters) at which to take the x-z slice; default uses center y
 % - Returns fig: Handle to the generated figure
 arguments
     self WVDiagnostics

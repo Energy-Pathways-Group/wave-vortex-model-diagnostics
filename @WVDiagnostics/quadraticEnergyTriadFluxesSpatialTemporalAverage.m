@@ -1,13 +1,15 @@
 function inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
-% Compute spatial-temporal average of inertial fluxes
+% Compute spatial-temporal average of inertial fluxes.
 %
+% Compute spatial-temporal average of inertial fluxes
 % Returns the spatial-temporal average of energy fluxes due to inertial interactions for each reservoir.
 %
-% - Topic: Flux averages, scalar
+% - Topic: Diagnostics — Energy fluxes — Triad interactions — Flux averages, scalar [1 1]
 % - Declaration: inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
-% - Parameter options.energyReservoirs: vector of EnergyReservoir objects (default: [geostrophic, wave, total])
-% - Parameter options.timeIndices: indices for time averaging (default: Inf)
-% - Parameter options.triadComponents: vector of TriadFlowComponent objects (default: [geostrophic_mda, wave])
+% - Parameter self: WVDiagnostics object
+% - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave, total]) (default: [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total])
+% - Parameter timeIndices: (optional) indices for time averaging (default: Inf)
+% - Parameter triadComponents: (optional) vector of TriadFlowComponent objects (default: [geostrophic_mda, wave]) (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
 % - Returns inertial_fluxes: struct array with averaged fluxes
 arguments
     self WVDiagnostics

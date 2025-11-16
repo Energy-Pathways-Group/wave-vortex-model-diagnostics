@@ -1,12 +1,14 @@
 function inertial_fluxes = quadraticEnstrophyTriadFluxes(self,options)
-% Return the enstrophy flux from the forcing terms
+% Return the enstrophy flux from the forcing terms.
 %
+% Return the enstrophy flux from the forcing terms
 % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial t].
 %
-% - Topic: Core function — spatial temporal
+% - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes, [j kRadial t]
 % - Declaration: forcing_fluxes = quadraticEnergyFluxes(options)
-% - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total].
-% - Returns forcing_fluxes: an array of structs
+% - Parameter self: WVDiagnostics object
+% - Parameter triadComponents: (optional) input argument `triadComponents` (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])
+% - Returns inertial_fluxes: diagnosed flux values
 arguments
     self WVDiagnostics
     options.triadComponents = [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave]

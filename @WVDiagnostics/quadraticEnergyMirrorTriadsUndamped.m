@@ -1,4 +1,14 @@
 function [E0_ggw,Epm_wwg] = quadraticEnergyMirrorTriadsUndamped(self,options)
+% Quadratic Energy Mirror Triads Undamped.
+%
+% quadraticEnergyMirrorTriadsUndamped is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+%
+% - Topic: Diagnostics — General — Misc — Fluxes over time, [t 1]
+% - Declaration: [E0_ggw,Epm_wwg] = quadraticEnergyMirrorTriadsUndamped(self,options)
+% - Parameter self: WVDiagnostics object
+% - Parameter timeIndices: indices specifying which time indices to use
+% - Returns E0_ggw: output value `E0_ggw`
+% - Returns Epm_wwg: output value `Epm_wwg`
 arguments
     self WVDiagnostics
     options.timeIndices
