@@ -1,0 +1,5 @@
+remote_theme: just-the-docs/just-the-docs
+title: WaveVortexModel Diagnostics
+description: Tools for the WaveVortexModel
+compress_html:
+  blanklines: true
