@@ -9,8 +9,14 @@ mathjax: true
 
 #  tscale_units
 
-
+time axis units (string value)
 
 
 ---
 
+## Discussion
+The default is `days'.
+ 
+  Set both tscale and tscale_units simultaneously to change the
+  axis in the figures.
+  

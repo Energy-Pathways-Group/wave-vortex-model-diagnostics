@@ -9,7 +9,7 @@ mathjax: true
 
 #  pseudoRadialBinning
 
-
+choose an algorithm for pseudoRadialBinning
 
 
 ---

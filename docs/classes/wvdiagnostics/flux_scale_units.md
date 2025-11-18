@@ -9,8 +9,14 @@ mathjax: true
 
 #  flux_scale_units
 
-
+energy flux units (string value)
 
 
 ---
 
+## Discussion
+The default is `GM/yr'.
+ 
+  Set both flux_scale and flux_scale_units simultaneously to change the
+  axis in the figures.
+  

@@ -42,24 +42,117 @@ classdef WVDiagnostics < handle
     %  - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
     %  - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
     properties
-        wvpath
-        diagpath
-        wvaapath
-        wvfile
-        diagfile
-        wvt
+        wvpath      % path to the WaveVortexModel output
+        diagpath    % path to the diagnostics file
 
-        % Default scaling and units for time, energy, and flux
+        % wvaapath - path to the a WVTransform with explicit anti-aliasing
+        % The WVTransformBoussinesq can take a very long time to
+        % initialize, so if explicity anti-aliasing is requested, we cache
+        % a copy of the transform.
+        wvaapath
+        wvfile      % NetCDFFile instance for the WaveVortexModel output
+        diagfile    % NetCDFFile instance for the diagnostics file
+        wvt         % WVTransform instance, set to the current iTime
+
+        % time axis scaling (numeric value)
+        % The default is 86400 seconds, corresponding to 1 day.
+        %
+        % Set both tscale and tscale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
+        % - Declaration: tscale
+        % - Returns
         tscale = 86400
+
+        % time axis units (string value)
+        % The default is `days'.
+        %
+        % Set both tscale and tscale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
         tscale_units = "days"
+
+        % energy scaling (numeric value)
+        % This is a depth-integrated area-averaged energy.
+        %
+        % The default is 3.74 $m^3 s^{-2}$, corresponding to 1 GM.
+        %
+        % Set both escale and escale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
         escale = 3.74
+
+        % energy units (string value)
+        % The default is `GM'.
+        %
+        % Set both escale and escale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
         escale_units = "GM"
+
+        % energy flux scaling (numeric value)
+        % This is a depth-integrated area-averaged energy per unit time.
+        %
+        % The default is 3.74/(86400*365), which corresponds to 1 GM per
+        % year.
+        %
+        % Set both flux_scale and flux_scale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
         flux_scale = 3.74/(86400*365)
+
+        % energy flux units (string value)
+        % The default is `GM/yr'.
+        %
+        % Set both flux_scale and flux_scale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
         flux_scale_units = "GM/yr"
-        z_flux_scale
-        z_flux_scale_units = "m f^2/yr"
+
+        % potential enstrophy scaling (numeric value)
+        % This is a depth-integrated area-averaged potential enstrophy.
+        %
+        % The default units are $m f^2$, where f gets set upon
+        % initialization of the WaveVortexModel.
+        %
+        % Set both zscale and zscale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
         zscale
+
+        % potential enstrophy units (string value)
+        %
+        % The default units are $m f^2$, where f gets set upon
+        % initialization of the WaveVortexModel.
+        %
+        % Set both zscale and zscale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
         zscale_units = "m f^2";
+
+        % potential enstrophy flux scaling (numeric value)
+        % This is a depth-integrated area-averaged potential enstrophy per unit time..
+        %
+        % The default units are $m f^2/yr$, where f gets set upon
+        % initialization of the WaveVortexModel.
+        %
+        % Set both z_flux_scale and z_flux_scale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
+        z_flux_scale
+
+        % potential enstrophy flux units (string value)
+        % This is a depth-integrated area-averaged potential enstrophy per unit time..
+        %
+        % The default units are $m f^2/yr$, where f gets set upon
+        % initialization of the WaveVortexModel.
+        %
+        % Set both z_flux_scale and z_flux_scale_units simultaneously to change the
+        % axis in the figures.
+        % - Topic: Units
+        z_flux_scale_units = "m f^2/yr"
+
+        % choose an algorithm for pseudoRadialBinning
         pseudoRadialBinning (1,1) string {mustBeMember(pseudoRadialBinning,["k2+j2","adaptive"])} = "k2+j2"
     end
 
@@ -68,6 +161,13 @@ classdef WVDiagnostics < handle
     end
 
     properties (Dependent)
+        % Get time vector from the diagnostics file
+        %
+        % Reads the 't' variable from the diagnostics file.
+        %
+        % - Topic: Dependent property getter
+        % - Declaration: t = get.t_diag(self)
+        % - Returns t: time vector from diagnostics file
         t_diag
         t_wv
         j
@@ -550,13 +650,6 @@ fig = plotPoissonFlowOverContours(wvd,options)
         end
 
         function t = get.t_diag(self)
-            % Get time vector from the diagnostics file
-            %
-            % Reads the 't' variable from the diagnostics file.
-            %
-            % - Topic: Dependent property getter
-            % - Declaration: t = get.t_diag(self)
-            % - Returns t: time vector from diagnostics file
             t = self.diagfile.readVariables('t');
         end
 

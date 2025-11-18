@@ -9,8 +9,14 @@ mathjax: true
 
 #  tscale
 
-Default scaling and units for time, energy, and flux
+time axis scaling (numeric value)
 
 
 ---
 
+## Discussion
+The default is 86400 seconds, corresponding to 1 day.
+ 
+  Set both tscale and tscale_units simultaneously to change the
+  axis in the figures.
+  

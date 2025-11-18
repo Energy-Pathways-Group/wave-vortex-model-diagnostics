@@ -9,7 +9,7 @@ mathjax: true
 
 #  wvt
 
-
+WVTransform instance, set to the current iTime
 
 
 ---

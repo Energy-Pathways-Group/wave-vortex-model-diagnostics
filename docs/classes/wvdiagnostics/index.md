@@ -212,6 +212,17 @@ Produces diagnostics and figures from WVModel output
       + [`sparsePseudoRadialAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsepseudoradialaxis.html) Sparse Pseudo Radial Axis.
 + Constructor
   + [`WVDiagnostics`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvdiagnostics.html) Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
++ Units
+  + [`escale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale.html) energy scaling (numeric value)
+  + [`escale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale_units.html) energy units (string value)
+  + [`flux_scale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/flux_scale.html) energy flux scaling (numeric value)
+  + [`flux_scale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/flux_scale_units.html) energy flux units (string value)
+  + [`tscale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/tscale.html) time axis scaling (numeric value)
+  + [`tscale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/tscale_units.html) time axis units (string value)
+  + [`z_flux_scale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/z_flux_scale.html) potential enstrophy flux scaling (numeric value)
+  + [`z_flux_scale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/z_flux_scale_units.html) potential enstrophy flux units (string value)
+  + [`zscale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/zscale.html) potential enstrophy scaling (numeric value)
+  + [`zscale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/zscale_units.html) potential enstrophy units (string value)
 + Other
   + [`Lr2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/lr2.html) 
   + [`Lr2_pm`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/lr2_pm.html) 
@@ -222,15 +233,11 @@ Produces diagnostics and figures from WVModel output
   + [`addForcingFluxesForReservoirGroupAtTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/addforcingfluxesforreservoirgroupattime.html) 
   + [`areEnergyReservoirsComplete`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/areenergyreservoirscomplete.html) 
   + [`areTriadComponentsComplete`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/aretriadcomponentscomplete.html) 
-  + [`diagfile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/diagfile.html) 
+  + [`diagfile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/diagfile.html) NetCDFFile instance for the diagnostics file
   + [`diagnosticsHasExplicitAntialiasing`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/diagnosticshasexplicitantialiasing.html) 
-  + [`diagpath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/diagpath.html) 
-  + [`escale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale.html) 
-  + [`escale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale_units.html) 
+  + [`diagpath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/diagpath.html) path to the diagnostics file
   + [`fancyNameForName`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/fancynameforname.html) 
   + [`filterFluxesForReservoir`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/filterfluxesforreservoir.html) 
-  + [`flux_scale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/flux_scale.html) 
-  + [`flux_scale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/flux_scale_units.html) 
   + [`forcingNames`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/forcingnames.html) 
   + [`geo_hke_jk`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/geo_hke_jk.html) 
   + [`geo_pe_jk`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/geo_pe_jk.html) 
@@ -248,24 +255,18 @@ Produces diagnostics and figures from WVModel output
   + [`overlayGeostrophicKineticPotentialFractionContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialfractioncontours.html) 
   + [`overlayGeostrophicKineticPotentialRatioContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialratiocontours.html) 
   + [`plotPoissonFlowOverPcolor`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotpoissonflowoverpcolor.html) 
-  + [`pseudoRadialBinning`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/pseudoradialbinning.html) 
+  + [`pseudoRadialBinning`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/pseudoradialbinning.html) choose an algorithm for pseudoRadialBinning
   + [`setLogWavelengthXAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/setlogwavelengthxaxis.html) 
   + [`showRossbyRadiusYAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/showrossbyradiusyaxis.html) 
   + [`symmetricTintMap`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/symmetrictintmap.html) Colormap going from color -> tinted white -> color
   + [`t_diag`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/t_diag.html) 
   + [`t_wv`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/t_wv.html) 
-  + [`tscale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/tscale.html) Default scaling and units for time, energy, and flux
-  + [`tscale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/tscale_units.html) 
   + [`version`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/version.html) Locate folder containing this class file
-  + [`wvaapath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvaapath.html) 
-  + [`wvfile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvfile.html) 
-  + [`wvpath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvpath.html) 
-  + [`wvt`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvt.html) 
+  + [`wvaapath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvaapath.html) path to the a WVTransform with explicit anti-aliasing
+  + [`wvfile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvfile.html) NetCDFFile instance for the WaveVortexModel output
+  + [`wvpath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvpath.html) path to the WaveVortexModel output
+  + [`wvt`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvt.html) WVTransform instance, set to the current iTime
   + [`wvt_aa`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvt_aa.html) 
-  + [`z_flux_scale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/z_flux_scale.html) 
-  + [`z_flux_scale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/z_flux_scale_units.html) 
-  + [`zscale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/zscale.html) 
-  + [`zscale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/zscale_units.html) 
 
 
 ---

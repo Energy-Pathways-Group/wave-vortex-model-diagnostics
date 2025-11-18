@@ -9,7 +9,7 @@ mathjax: true
 
 #  diagfile
 
-
+NetCDFFile instance for the diagnostics file
 
 
 ---

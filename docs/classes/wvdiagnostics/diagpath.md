@@ -9,7 +9,7 @@ mathjax: true
 
 #  diagpath
 
-
+path to the diagnostics file
 
 
 ---

@@ -9,7 +9,7 @@ mathjax: true
 
 #  wvpath
 
-
+path to the WaveVortexModel output
 
 
 ---

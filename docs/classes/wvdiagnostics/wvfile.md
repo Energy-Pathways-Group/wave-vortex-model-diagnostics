@@ -9,7 +9,7 @@ mathjax: true
 
 #  wvfile
 
-
+NetCDFFile instance for the WaveVortexModel output
 
 
 ---
