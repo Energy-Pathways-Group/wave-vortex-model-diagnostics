@@ -2,46 +2,45 @@ classdef WVDiagnostics < handle
     %WVDiagnostics Produces diagnostics and figures from WVModel output
     %   This is a collection of diagnostic tools for analyzing model output
     %
-    % Topics overview:
-    %   - Topic: Configuration — Reservoirs — Grouping
-    %   - Topic: Diagnostics — Energy fluxes — General — Fluxes over time, [t 1]
-    %   - Topic: Diagnostics — Energy fluxes — General — Fluxes, [j kRadial t]
-    %   - Topic: Diagnostics — Energy fluxes — Time/space averages — Flux averages, scalar [1 1]
-    %   - Topic: Diagnostics — Energy fluxes — Time/space averages — Fluxes in space, [j kRadial]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Flux averages, scalar [1 1]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [j kRadial]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes over time, [t 1]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes, [j kRadial t]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseKRadialAxis 1]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseKRadialAxis 1]
-    %   - Topic: Diagnostics — Energy — Time series
-    %   - Topic: Diagnostics — Enstrophy fluxes — General
-    %   - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes over time, [t 1]
-    %   - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes, [j kRadial t]
-    %   - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Flux averages, scalar [1 1]
-    %   - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Fluxes in space, [j kRadial]
-    %   - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes over time, [t 1]
-    %   - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes, [j kRadial t]
-    %   - Topic: Diagnostics — Enstrophy — Time series
-    %   - Topic: Diagnostics — Flux diagnostics — General
-    %   - Topic: Diagnostics — Flux diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Diagnostics — Flux diagnostics — Triad interactions
-    %   - Topic: Diagnostics — General — Misc
-    %   - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Diagnostics — General — Misc — Fluxes over time, [t 1]
-    %   - Topic: Diagnostics — Spectra — Cross-spectra — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Diagnostics — Spectra — Potential energy — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Figures — Diagnostics — General
-    %   - Topic: Figures — Diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Figures — Spectra — Potential energy
-    %   - Topic: Figures — Time series — Diagnostics
-    %   - Topic: Transforms — Spectral — General
-    %   - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %   - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Configuration — Reservoirs — Grouping
+    %  - Topic: Diagnostics — Energy fluxes — General — Fluxes over time, [t 1]
+    %  - Topic: Diagnostics — Energy fluxes — General — Fluxes, [j kRadial t]
+    %  - Topic: Diagnostics — Energy fluxes — Time/space averages — Flux averages, scalar [1 1]
+    %  - Topic: Diagnostics — Energy fluxes — Time/space averages — Fluxes in space, [j kRadial]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Flux averages, scalar [1 1]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [j kRadial]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes over time, [t 1]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes, [j kRadial t]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseKRadialAxis 1]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseKRadialAxis 1]
+    %  - Topic: Diagnostics — Energy — Time series
+    %  - Topic: Diagnostics — Enstrophy fluxes — General
+    %  - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes over time, [t 1]
+    %  - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes, [j kRadial t]
+    %  - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Flux averages, scalar [1 1]
+    %  - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Fluxes in space, [j kRadial]
+    %  - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes over time, [t 1]
+    %  - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes, [j kRadial t]
+    %  - Topic: Diagnostics — Enstrophy — Time series
+    %  - Topic: Diagnostics — Flux diagnostics — General
+    %  - Topic: Diagnostics — Flux diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Diagnostics — Flux diagnostics — Triad interactions
+    %  - Topic: Diagnostics — General — Misc
+    %  - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Diagnostics — General — Misc — Fluxes over time, [t 1]
+    %  - Topic: Diagnostics — Spectra — Cross-spectra — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Diagnostics — Spectra — Potential energy — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Figures — Diagnostics — General
+    %  - Topic: Figures — Diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Figures — Spectra — Potential energy
+    %  - Topic: Figures — Time series — Diagnostics
+    %  - Topic: Transforms — Spectral — General
+    %  - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    %  - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
     properties
         wvpath
         diagpath
