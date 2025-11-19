@@ -6,7 +6,7 @@ function createReservoirGroup(self,options)
 % The function will create variables and dimensions as needed, then loop over
 % the requested time indices to compute and write reservoir diagnostics.
 %
-% - Topic: Configuration — Reservoirs — Grouping
+% - Topic: Diagnostics Generation
 % - Declaration: createReservoirGroup(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter outputfile: NetCDFGroup to write into (default: self.diagfile).
@@ -95,7 +95,6 @@ for timeIndex = 1:length(timeIndices)
     self.iTime = timeIndices(timeIndex);
 
     self.addTriadFluxesForReservoirGroupAtTime(triadVar=triadVar,flowComponents=flowComponents,wvt=wvt,outputIndex=outputIndex);
-    % self.addForcingFluxesForReservoirGroupAtTime(forcingVar=forcingVar,flowComponents=flowComponents,wvt=wvt,outputIndex=outputIndex);
 
     F = wvt.fluxForForcing();
     for i=1:length(forcingNames)

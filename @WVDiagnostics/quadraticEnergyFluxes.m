@@ -4,7 +4,7 @@ function forcing_fluxes = quadraticEnergyFluxes(self,options)
 % Return the energy flux from the forcing terms
 % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial t].
 %
-% - Topic: Diagnostics — Energy fluxes — General — Fluxes, [j kRadial t]
+% - Topic: Diagnostics — Energy Fluxes — General, [j kRadial t]
 % - Declaration: forcing_fluxes = quadraticEnergyFluxes(options)
 % - Parameter self: WVDiagnostics object
 % - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total]. (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total])

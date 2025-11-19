@@ -3,7 +3,7 @@ layout: default
 title: showDampingFluxVsPseudolength
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 124
+nav_order: 120
 mathjax: true
 ---
 
@@ -24,6 +24,6 @@ Show Damping Flux Vs Pseudolength.
 
 ## Discussion
 
-  showDampingFluxVsPseudolength is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+  A plot focused on the damping flux as a function of pseudolength scale, for both exact and quadratic fluxes.
  
         

@@ -7,7 +7,7 @@ function fig = plotEnstrophyTriadFluxOverTime(self,options)
 % be applied to each time series before plotting. Axis labels use the class
 % scaling properties (tscale, tscale_units, z_flux_scale, z_flux_scale_units).
 %
-% - Topic: Figures — Time series — Diagnostics
+% - Topic: Figures — Potential Enstrophy
 % - Declaration: fig = plotEnstrophyTriadFluxOverTime(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter triadComponents: (optional) vector of TriadFlowComponent objects to include (default: [TriadFlowComponent.geostrophic_mda, TriadFlowComponent.wave])

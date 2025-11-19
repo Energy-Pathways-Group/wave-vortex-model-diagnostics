@@ -4,7 +4,7 @@ function inertial_fluxes = quadraticEnergyTriadFluxesTemporalAverage(self,option
 % Computes the temporally averaged quadratic triad fluxes.
 % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial].
 %
-% - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [j kRadial]
+% - Topic: Diagnostics — Energy Fluxes — Temporal averages, [j kRadial]
 % - Declaration: inertial_fluxes = quadraticEnergyTriadFluxesTemporalAverage(options)
 % - Parameter self: WVDiagnostics object
 % - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total]. (default: [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total])

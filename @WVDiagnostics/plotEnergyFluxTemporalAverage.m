@@ -1,13 +1,12 @@
 function fig = plotEnergyFluxTemporalAverage(self,options)
 % Plot temporally averaged energy flux diagnostics.
 %
-% Plot temporally averaged energy flux diagnostics.
 % Compute and plot temporally averaged energy flux diagnostics (exact or
 % quadratic approximation) on a chosen axes projection. Supports grouping
 % fluxes, overlaying frequency/ratio contours, and customizing colormap,
 % saturation, and figure visibility.
 %
-% - Topic: Figures — Diagnostics — General
+% - Topic: Figures — Energy
 % - Declaration: fig = plotEnergyFluxTemporalAverage(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter approximation: (optional) {'quadratic','exact'} approximation to use (default: 'quadratic')

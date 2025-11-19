@@ -3,7 +3,7 @@ layout: default
 title: quadraticEnergyMirrorTriadFluxes1D_omega
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 102
+nav_order: 98
 mathjax: true
 ---
 

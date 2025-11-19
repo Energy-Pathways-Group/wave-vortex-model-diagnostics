@@ -1,14 +1,13 @@
 function fig = plotEnstrophyFluxTemporalAverage(self,options)
 % Plot temporally averaged enstrophy flux diagnostics.
 %
-% Plot temporally averaged enstrophy flux diagnostics.
 % Compute and plot temporally averaged enstrophy flux diagnostics (exact or
 % quadratic approximation) on a chosen projection. Supports 'jk' (j vs
 % radial wavelength) pcolor plots, 1D summaries along j or k axes, and a
 % pseudo-isotropic radial projection. Allows applying a filter to the data,
 % customizing the colormap and saturation, and controlling figure visibility.
 %
-% - Topic: Figures — Diagnostics — General
+% - Topic: Figures — Potential Enstrophy
 % - Declaration: fig = plotEnstrophyFluxTemporalAverage(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) Time indices to average over (default: Inf -> all times)

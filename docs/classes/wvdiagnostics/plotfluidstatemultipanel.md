@@ -3,7 +3,7 @@ layout: default
 title: plotFluidStateMultipanel
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 87
+nav_order: 84
 mathjax: true
 ---
 

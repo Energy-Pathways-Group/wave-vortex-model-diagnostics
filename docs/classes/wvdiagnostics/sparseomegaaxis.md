@@ -3,7 +3,7 @@ layout: default
 title: sparseOmegaAxis
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 130
+nav_order: 126
 mathjax: true
 ---
 

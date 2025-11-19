@@ -1,12 +1,11 @@
 function fig = plotEnergyFluxOverTime(self,options)
-% Plot energy fluxes for reservoirs as a function of time.
+% Plot energy fluxes as a function of time.
 %
-% Plot energy fluxes for reservoirs as a function of time.
-% Draws time series of energy fluxes (exact or quadratic approximation) into
-% specified energy reservoirs. Supports selecting reservoirs, time indices,
-% applying a filter to series prior to plotting, and configuring figure visibility.
+% You can plot either the exact or quadratic approximations to the energy fluxes.
 %
-% - Topic: Figures — Time series — Diagnostics
+% If you plot the quadratic fluxes, you can specify which energy reservoirs to include, which will create a subplot for each reservoir.
+%
+% - Topic: Figures — Energy
 % - Declaration: fig = plotEnergyFluxOverTime(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter approximation: (optional) {'exact','quadratic'} which approximation to use (default: 'exact')

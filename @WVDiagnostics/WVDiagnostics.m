@@ -2,45 +2,31 @@ classdef WVDiagnostics < handle
     %WVDiagnostics Produces diagnostics and figures from WVModel output
     %   This is a collection of diagnostic tools for analyzing model output
     %
-    %  - Topic: Configuration — Reservoirs — Grouping
-    %  - Topic: Diagnostics — Energy fluxes — General — Fluxes over time, [t 1]
-    %  - Topic: Diagnostics — Energy fluxes — General — Fluxes, [j kRadial t]
-    %  - Topic: Diagnostics — Energy fluxes — Time/space averages — Flux averages, scalar [1 1]
-    %  - Topic: Diagnostics — Energy fluxes — Time/space averages — Fluxes in space, [j kRadial]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Flux averages, scalar [1 1]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [j kRadial]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes over time, [t 1]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes, [j kRadial t]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseKRadialAxis 1]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseKRadialAxis 1]
-    %  - Topic: Diagnostics — Energy — Time series
-    %  - Topic: Diagnostics — Enstrophy fluxes — General
-    %  - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes over time, [t 1]
-    %  - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes, [j kRadial t]
-    %  - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Flux averages, scalar [1 1]
-    %  - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Fluxes in space, [j kRadial]
-    %  - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes over time, [t 1]
-    %  - Topic: Diagnostics — Enstrophy fluxes — Triad interactions — Fluxes, [j kRadial t]
-    %  - Topic: Diagnostics — Enstrophy — Time series
-    %  - Topic: Diagnostics — Flux diagnostics — General
-    %  - Topic: Diagnostics — Flux diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Diagnostics — Flux diagnostics — Triad interactions
-    %  - Topic: Diagnostics — General — Misc
-    %  - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Diagnostics — General — Misc — Fluxes over time, [t 1]
-    %  - Topic: Diagnostics — Spectra — Cross-spectra — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Diagnostics — Spectra — Potential energy — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Figures — Diagnostics — General
-    %  - Topic: Figures — Diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Figures — Spectra — Potential energy
-    %  - Topic: Figures — Time series — Diagnostics
+    % - Topic: Diagnostics Generation
+    % - Topic: Figures — Model Snapshot
+    % - Topic: Figures — Energy
+    % - Topic: Figures — Potential Enstrophy
+    % - Topic: Figures — Ancillary
+    % - Topic: Summaries
+    %  - Topic: Diagnostics — Energy
+    %  - Topic: Diagnostics — Energy — Time series, [t 1]
+    %  - Topic: Diagnostics — Energy Fluxes
+    %  - Topic: Diagnostics — Energy Fluxes — General, [j kRadial t]
+    %  - Topic: Diagnostics — Energy Fluxes — Temporal averages, [j kRadial]
+    %  - Topic: Diagnostics — Energy Fluxes — Time series, [t 1]
+    %  - Topic: Diagnostics — Energy Fluxes — Spatial-temporal averages, [1 1]
+    %  - Topic: Diagnostics — Potential Enstrophy
+    %  - Topic: Diagnostics — Potential Enstrophy — Time series, [t 1]
+    %  - Topic: Diagnostics — Potential Enstrophy Fluxes
+    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — General, [j kRadial t]
+    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — Temporal averages, [j kRadial]
+    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — Time series, [t 1]
+    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — Spatial-temporal averages, [1 1]
     %  - Topic: Transforms — Spectral — General
     %  - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
     %  - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
     %  - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    % - Topic: Internal — Support functions for createReservoirGroup
     properties
         wvpath      % path to the WaveVortexModel output
         diagpath    % path to the diagnostics file
@@ -163,10 +149,10 @@ classdef WVDiagnostics < handle
     properties (Dependent)
         % Get time vector from the diagnostics file
         %
-        % Reads the 't' variable from the diagnostics file.
+        % Reads the 't' variable from the diagnostics file. This might not be the same as the time vector in the model output file.
         %
         % - Topic: Dependent property getter
-        % - Declaration: t = get.t_diag(self)
+        % - Declaration: t = self.t_diag
         % - Returns t: time vector from diagnostics file
         t_diag
         t_wv
@@ -191,66 +177,73 @@ classdef WVDiagnostics < handle
     end
 
     methods
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % - Topic: Diagnostics Generation
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         createDiagnosticsFile(self,options)
         create1DMirrorFluxes(self,options)
         create2DMirrorFluxes(self,options)
         createReservoirGroup(self,options) % groupName, flowComponents
 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % - Topic: Internal — Support functions for createReservoirGroup
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         % these are support functions for createReservoirGroup
         [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
         addTriadFluxesForReservoirGroupAtTime(self,options) %triadVar, flowComponents, wvt, outputIndex
-        addForcingFluxesForReservoirGroupAtTime(self,options) %forcingVar, flowComponents, wvt, outputIndex
         [transferFlux, forcingFlux, ddt, energy] = fluxesForReservoirGroup(self,options)
+        [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Figures (instantaneous snapshot, from model output)
+        % - Topic: Figures — Model Snapshot
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         fig = plotFluidStateMultipanel(self,options)
         fig = plotFluidDecompositionMultipanel(self,options)
-
+        fig = plotEnergySpectrum(self,options)
+        fig = plotEnstrophySpectrum(self,options)
         fig = plotPotentialEnergySpectrum(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Figures for Energy
+        % - Topic: Figures — Energy
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        fig = plotEnergySpectrum(self,options)
+        
         fig = plotEnergyOverTime(self,options)
         fig = plotEnergyFluxOverTime(self,options)
         fig = plotEnergyTriadFluxOverTime(self,options)
         fig = plotEnergyFluxTemporalAverage(self,options)
 
         fig = plotEnergyFluxes1D(self,options)
-
+        [fig, boxDiagram] = plotSourcesSinksForReservoirGroup(self,options)
         fig = plotSourcesSinksReservoirsDiagram(self,options)
-        fig = plotSourcesSinksReservoirsDiagramWithClosureRegion(self,options)
-        summarizeSourcesSinksReservoirs(self,options)
-        [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
-
         showDampingFluxVsPseudolength(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Figures for Potential Enstrophy
+        % - Topic: Figures — Potential Enstrophy
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        fig = plotEnstrophySpectrum(self,options)
+        
         fig = plotEnstrophyOverTime(self,options)
         fig = plotEnstrophyFluxOverTime(self,options)
         fig = plotEnstrophyTriadFluxOverTime(self,options)
         fig = plotEnstrophyFluxTemporalAverage(self,options)
 
-        tableString = createEnstrophyFluxSummaryTable(self,options)
-
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Figures (ancillary data, from model output)
+        % - Topic: Figures — Ancillary
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -258,60 +251,110 @@ classdef WVDiagnostics < handle
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Data (over time)
+        % - Topic: Summaries
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        [energy, t] = exactEnergyOverTime(self, options)
-        [enstrophy, t] = exactEnstrophyOverTime(self, options)
+        tableString = createEnstrophyFluxSummaryTable(self,options)
+        summarizeSourcesSinksReservoirs(self,options)
 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % - Topic: Diagnostics — Energy
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Energy — Time series, [t 1]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        [energy, t] = exactEnergyOverTime(self, options)
         [reservoirs, t] = quadraticEnergyOverTime(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % - Topic: Diagnostics — Energy Fluxes
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Energy Fluxes — General, [j kRadial t]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        energy_fluxes = exactEnergyFluxes(self)
+        forcing_fluxes = quadraticEnergyFluxes(self,options)
+        inertial_fluxes = quadraticEnergyTriadFluxes(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Energy Fluxes — Temporal averages, [j kRadial]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        energy_fluxes = quadraticEnergyFluxesTemporalAverage(self,options)
+        inertial_fluxes = quadraticEnergyTriadFluxesTemporalAverage(self,options)
+        energy_fluxes = exactEnergyFluxesTemporalAverage(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Energy Fluxes — Time series, [t 1]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        [energy_fluxes, t] = exactEnergyFluxesOverTime(self,options)
+        [energy_fluxes,t] = quadraticEnergyFluxesOverTime(self,options)
+        [energy_fluxes,t] = quadraticEnergyTriadFluxesOverTime(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Energy Fluxes — Spatial-temporal averages, [1 1]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        energy_fluxes = exactEnergyFluxesSpatialTemporalAverage(self,options)
+        forcing_fluxes = quadraticEnergyFluxesSpatialTemporalAverage(self,options)
+        inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % - Topic: Diagnostics — Potential Enstrophy
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Potential Enstrophy — Time series, [t 1]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        [enstrophy, t] = exactEnstrophyOverTime(self, options)
         [enstrophy, t] = quadraticEnstrophyOverTime(self, options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Flux averages, scalar [1 1]
+        % - Topic: Diagnostics — Potential Enstrophy Fluxes
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        energy_fluxes = exactEnergyFluxesSpatialTemporalAverage(self,options)
-        enstrophy_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
-
-        forcing_fluxes = quadraticEnergyFluxesSpatialTemporalAverage(self,options)
-        inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
-
-        enstrophy_fluxes = quadraticEnstrophyFluxesSpatialTemporalAverage(self,options)
-        
-
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Fluxes, [j kRadial t]
-        %
+        % - Topic: Diagnostics — Potential Enstrophy Fluxes — General, [j kRadial t]
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        energy_fluxes = exactEnergyFluxes(self)
         enstrophy_fluxes = exactEnstrophyFluxes(self)
-
-        forcing_fluxes = quadraticEnergyFluxes(self,options)
-        inertial_fluxes = quadraticEnergyTriadFluxes(self,options)
-
         enstrophy_fluxes = quadraticEnstrophyFluxes(self)
         inertial_fluxes = quadraticEnstrophyTriadFluxes(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Potential Enstrophy Fluxes — Temporal averages, [j kRadial]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        enstrophy_fluxes = quadraticEnstrophyFluxesTemporalAverage(self,options)
+        enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Potential Enstrophy Fluxes — Time series, [t 1]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        [enstrophy_fluxes, t] = exactEnstrophyFluxesOverTime(self,options)
+        [enstrophy_fluxes,t] = quadraticEnstrophyFluxesOverTime(self,options)
+        [enstrophy_fluxes,t] = quadraticEnstrophyTriadFluxesOverTime(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Potential Enstrophy Fluxes — Spatial-temporal averages, [1 1]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        enstrophy_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
+        enstrophy_fluxes = quadraticEnstrophyFluxesSpatialTemporalAverage(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Fluxes over time, [t 1]
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        [energy_fluxes, t] = exactEnergyFluxesOverTime(self,options)
-        [enstrophy_fluxes, t] = exactEnstrophyFluxesOverTime(self,options)
-
-        [energy_fluxes,t] = quadraticEnergyFluxesOverTime(self,options)
-        [energy_fluxes,t] = quadraticEnergyTriadFluxesOverTime(self,options)
-
-        [enstrophy_fluxes,t] = quadraticEnstrophyFluxesOverTime(self,options)
-        [enstrophy_fluxes,t] = quadraticEnstrophyTriadFluxesOverTime(self,options)
 
         [E0_ggw,Epm_wwg] = quadraticEnergyMirrorTriadsUndamped(self,options);
 
@@ -321,13 +364,9 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        energy_fluxes = quadraticEnergyFluxesTemporalAverage(self,options)
-        inertial_fluxes = quadraticEnergyTriadFluxesTemporalAverage(self,options)
 
-        energy_fluxes = exactEnergyFluxesTemporalAverage(self,options)
 
-        enstrophy_fluxes = quadraticEnstrophyFluxesTemporalAverage(self,options)
-        enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
+
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %

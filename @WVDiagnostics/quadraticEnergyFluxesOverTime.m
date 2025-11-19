@@ -4,7 +4,7 @@ function [forcing_fluxes,t] = quadraticEnergyFluxesOverTime(self,options)
 % Compute forcing fluxes over time
 % Returns the energy fluxes from external forcing for each reservoir as a function of time.
 %
-% - Topic: Diagnostics — Energy fluxes — General — Fluxes over time, [t 1]
+% - Topic: Diagnostics — Energy Fluxes — Time series, [t 1]
 % - Declaration: forcing_fluxes = quadraticEnergyFluxesOverTime(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave, total]) (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total])

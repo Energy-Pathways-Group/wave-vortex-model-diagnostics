@@ -3,7 +3,7 @@ layout: default
 title: filterEnergyForSourcesSinksReservoirs
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 46
+nav_order: 45
 mathjax: true
 ---
 
@@ -37,6 +37,8 @@ This function returns values assuming three reservoirs: geo, wave, and.
 
 ## Discussion
 
+  This function can probably be deprecated after we modernize to the  fluxesForReservoirGroup
+ 
   This function returns values assuming three reservoirs: geo, wave, and
   damping. The damping resevoir is just scales below a threshold, wave or
   geostrophic. It also returns the exact and exact-damp resevoirs.

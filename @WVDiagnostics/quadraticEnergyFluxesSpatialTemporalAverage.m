@@ -4,7 +4,7 @@ function forcing_fluxes = quadraticEnergyFluxesSpatialTemporalAverage(self,optio
 % Compute spatial-temporal average of forcing fluxes
 % Returns the spatial-temporal average of energy fluxes from external forcing for each reservoir.
 %
-% - Topic: Diagnostics — Energy fluxes — Time/space averages — Flux averages, scalar [1 1]
+% - Topic: Diagnostics — Energy Fluxes — Spatial-temporal averages, [1 1]
 % - Declaration: forcing_fluxes = quadraticEnergyFluxesSpatialTemporalAverage(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave, total]) (default: [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total])

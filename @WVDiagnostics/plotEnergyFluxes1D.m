@@ -8,7 +8,7 @@ function fig = plotEnergyFluxes1D(self,options)
 % prepares per-flux metadata (colors, styles, alpha), and draws a compact
 % 2x2 multipanel figure that highlights triad and forcing contributions.
 %
-% - Topic: Figures — Diagnostics — General
+% - Topic: Figures — Energy
 % - Declaration: fig = plotEnergyFluxes1D(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) Indices of model times to average/plot (default: Inf -> all times)

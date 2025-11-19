@@ -1,10 +1,9 @@
 function fig = plotEnstrophyOverTime(self,options)
-% Plot enstrophy over time.
-%
 % Plot enstrophy over time
+%
 % Plots the quadratic and APV enstrophy as a function of time.
 %
-% - Topic: Figures — Time series — Diagnostics
+% - Topic: Figures — Potential Enstrophy
 % - Declaration: fig = plotEnstrophyOverTime(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter visible: (optional) Figure visibility (default: "on")

@@ -9,7 +9,7 @@ function create1DMirrorFluxes(self,options)
 % required dimensions/variables if they do not already exist and then populate
 % the variables for each requested time index.
 %
-% - Topic: Diagnostics — Flux diagnostics — General
+% - Topic: Diagnostics Generation
 % - Declaration: create1DMirrorFluxes(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter stride: (optional) Stride for time sampling (default: 1).

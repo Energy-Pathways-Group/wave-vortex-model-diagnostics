@@ -3,7 +3,7 @@ layout: default
 title: plotSourcesSinksReservoirsDiagram
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 93
+nav_order: 90
 mathjax: true
 ---
 
@@ -35,7 +35,6 @@ Plot sources, sinks, and reservoirs diagram.
 
 ## Discussion
 
-  Plot sources, sinks, and reservoirs diagram
-  Generates a diagram showing energy sources, sinks, and reservoirs, including fluxes between them.
+  This function will be removed and replaced by plotSourcesSinksForReservoirGroup.
  
                           

@@ -4,7 +4,7 @@ function enstrophy_fluxes = quadraticEnstrophyFluxes(self)
 % Return the enstrophy flux from the forcing terms
 % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial t].
 %
-% - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes, [j kRadial t]
+% - Topic: Diagnostics — Potential Enstrophy Fluxes — General, [j kRadial t]
 % - Declaration: forcing_fluxes = quadraticEnergyFluxes(options)
 % - Parameter self: WVDiagnostics object
 % - Returns enstrophy_fluxes: diagnosed flux values

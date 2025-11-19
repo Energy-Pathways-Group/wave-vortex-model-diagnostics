@@ -1,10 +1,9 @@
 function fig = plotSourcesSinksReservoirsDiagram(self,options)
 % Plot sources, sinks, and reservoirs diagram.
 %
-% Plot sources, sinks, and reservoirs diagram
-% Generates a diagram showing energy sources, sinks, and reservoirs, including fluxes between them.
+% This function will be removed and replaced by plotSourcesSinksForReservoirGroup.
 %
-% - Topic: Figures — Diagnostics — General
+% - Topic: Figures — Energy
 % - Declaration: fig = plotSourcesSinksReservoirsDiagram(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave]) (default: [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave])

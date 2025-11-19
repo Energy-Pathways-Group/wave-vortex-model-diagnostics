@@ -1,6 +1,8 @@
 function [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
 % This function returns values assuming three reservoirs: geo, wave, and.
 %
+% This function can probably be deprecated after we modernize to the  fluxesForReservoirGroup
+%
 % This function returns values assuming three reservoirs: geo, wave, and
 % damping. The damping resevoir is just scales below a threshold, wave or
 % geostrophic. It also returns the exact and exact-damp resevoirs.
@@ -13,7 +15,7 @@ function [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEn
 % The ddt struct contains the change in total energy, closing the energy
 % budget.
 %
-% - Topic: Configuration — Reservoirs — Grouping
+% - Topic: Internal — Support functions for createReservoirGroup
 % - Declaration: [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter customNames: (optional) input argument `customNames` (default: configureDictionary("string","string"))

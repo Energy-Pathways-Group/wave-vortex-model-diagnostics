@@ -5,7 +5,7 @@ function fig = plotEnergySpectrum(self,options)
 % Makes a nice multiplanel plot of the wave and geostrophic spectra at a
 % given time.
 %
-% - Topic: Figures — Spectra — Potential energy
+% - Topic: Figures — Model Snapshot
 % - Declaration: fig = plotEnergySpectrum(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter iTime: time index in model output file

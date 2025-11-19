@@ -3,7 +3,7 @@ layout: default
 title: fluxesForReservoirGroup
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 51
+nav_order: 50
 mathjax: true
 ---
 

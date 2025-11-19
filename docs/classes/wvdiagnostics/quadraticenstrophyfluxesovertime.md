@@ -3,7 +3,7 @@ layout: default
 title: quadraticEnstrophyFluxesOverTime
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 116
+nav_order: 112
 mathjax: true
 ---
 

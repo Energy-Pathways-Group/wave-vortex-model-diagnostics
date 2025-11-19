@@ -4,7 +4,7 @@ function enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
 % Compute temporally averaged enstrophy fluxes
 % Returns the temporally averaged enstrophy fluxes from external forcing for each reservoir.
 %
-% - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Fluxes in space, [j kRadial]
+% - Topic: Diagnostics — Potential Enstrophy Fluxes — Temporal averages, [j kRadial]
 % - Declaration: enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices for time averaging (default: Inf)

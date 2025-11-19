@@ -9,7 +9,7 @@ function fig = plotFluidDecompositionMultipanel(self,options)
 % colormap, plotting scales, and annotations. The x/y axes are presented in
 % kilometers and the z (depth) axis in kilometers.
 %
-% - Topic: Figures — Diagnostics — General
+% - Topic: Figures — Model Snapshot
 % - Declaration: fig = plotFluidDecompositionMultipanel(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter visible: (optional) Figure visibility (default: "on")

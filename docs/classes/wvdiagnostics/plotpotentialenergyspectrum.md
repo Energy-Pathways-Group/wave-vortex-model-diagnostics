@@ -3,13 +3,13 @@ layout: default
 title: plotPotentialEnergySpectrum
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 91
+nav_order: 88
 mathjax: true
 ---
 
 #  plotPotentialEnergySpectrum
 
-Plot energy for each reservoir over time.
+Plot the potential energy spectrum
 
 
 ---
@@ -28,7 +28,6 @@ Plot energy for each reservoir over time.
 
 ## Discussion
 
-  Plot energy for each reservoir over time
-  Plots the energy in each specified reservoir as a function of time.
+  Attempts to plot the potential energy spectrum at a given time index, although this might not be fully implemented yet.
  
             

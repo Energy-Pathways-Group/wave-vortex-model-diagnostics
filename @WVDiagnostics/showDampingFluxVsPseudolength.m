@@ -1,9 +1,9 @@
 function showDampingFluxVsPseudolength(self,options)
 % Show Damping Flux Vs Pseudolength.
 %
-% showDampingFluxVsPseudolength is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+% A plot focused on the damping flux as a function of pseudolength scale, for both exact and quadratic fluxes.
 %
-% - Topic: Diagnostics — Flux diagnostics — General
+% - Topic: Figures — Energy
 % - Declaration: showDampingFluxVsPseudolength(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)

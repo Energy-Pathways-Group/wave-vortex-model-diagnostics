@@ -5,7 +5,7 @@ function energy_fluxes = exactEnergyFluxes(self)
 % Returns the exact energy fluxes from external forcing and nonlinear
 % advection.
 %
-% - Topic: Diagnostics — Energy fluxes — General — Fluxes, [j kRadial t]
+% - Topic: Diagnostics — Energy Fluxes — General, [j kRadial t]
 % - Declaration: forcing_fluxes = exactEnergyFluxes(self)
 % - Parameter self: WVDiagnostics object
 % - Returns energy_fluxes: diagnosed flux values

@@ -3,13 +3,13 @@ layout: default
 title: plotEnstrophyOverTime
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 82
+nav_order: 80
 mathjax: true
 ---
 
 #  plotEnstrophyOverTime
 
-Plot enstrophy over time.
+Plot enstrophy over time
 
 
 ---
@@ -28,7 +28,6 @@ Plot enstrophy over time.
 
 ## Discussion
 
-  Plot enstrophy over time
   Plots the quadratic and APV enstrophy as a function of time.
  
             

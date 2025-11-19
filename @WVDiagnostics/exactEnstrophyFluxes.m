@@ -6,7 +6,7 @@ function enstrophy_fluxes = exactEnstrophyFluxes(self)
 % fields name, fancyName, and a field for each energy reservoir with size
 % [j kRadial t]. This includes the nonlinear advection term.
 %
-% - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes, [j kRadial t]
+% - Topic: Diagnostics — Potential Enstrophy Fluxes — General, [j kRadial t]
 % - Declaration: forcing_fluxes = exactEnstrophyFluxes(options)
 % - Parameter self: WVDiagnostics object
 % - Returns enstrophy_fluxes: an array of structs

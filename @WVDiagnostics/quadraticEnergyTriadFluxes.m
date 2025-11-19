@@ -4,7 +4,7 @@ function inertial_fluxes = quadraticEnergyTriadFluxes(self,options)
 % Return the energy flux from the inertial terms, specified as triad components
 % Reads from the diagnostics file and returns an array of structs with fields name, fancyName, and a field for each energy reservoir with size [j kRadial t].
 %
-% - Topic: Diagnostics — Energy fluxes — Triad interactions — Fluxes, [j kRadial t]
+% - Topic: Diagnostics — Energy Fluxes — General, [j kRadial t]
 % - Declaration: inertial_fluxes = quadraticEnergyTriadFluxes(options)
 % - Parameter self: WVDiagnostics object
 % - Parameter energyReservoirs: (optional) a vector of EnergyReservoir objects that specify which energy reservoirs to include in the output. Defaults to [EnergyReservoir.geostrophic, EnergyReservoir.wave, EnergyReservoir.total]. (default: [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total])

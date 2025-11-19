@@ -3,7 +3,7 @@ layout: default
 title: plotEnstrophyFluxTemporalAverage
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 81
+nav_order: 79
 mathjax: true
 ---
 
@@ -34,7 +34,6 @@ Plot temporally averaged enstrophy flux diagnostics.
 
 ## Discussion
 
-  Plot temporally averaged enstrophy flux diagnostics.
   Compute and plot temporally averaged enstrophy flux diagnostics (exact or
   quadratic approximation) on a chosen projection. Supports 'jk' (j vs
   radial wavelength) pcolor plots, 1D summaries along j or k axes, and a

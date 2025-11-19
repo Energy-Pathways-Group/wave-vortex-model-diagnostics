@@ -8,7 +8,7 @@ function fig = plotFluidStateMultipanel(self,options)
 % contours. Axes are annotated in kilometers and depth in kilometers; color
 % limits and annotation ticks are handled internally.
 %
-% - Topic: Figures — Diagnostics — General
+% - Topic: Figures — Model Snapshot
 % - Declaration: fig = plotFluidStateMultipanel(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter visible: (optional) input argument `visible` (default: "on")

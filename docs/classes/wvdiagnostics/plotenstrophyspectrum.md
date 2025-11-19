@@ -3,7 +3,7 @@ layout: default
 title: plotEnstrophySpectrum
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 83
+nav_order: 81
 mathjax: true
 ---
 

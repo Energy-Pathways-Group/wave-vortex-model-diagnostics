@@ -4,7 +4,7 @@ function [enstrophy_fluxes,t] = quadraticEnstrophyFluxesOverTime(self,options)
 % Compute enstrophy fluxes over time
 % Returns the enstrophy fluxes from external forcing
 %
-% - Topic: Diagnostics — Enstrophy fluxes — General — Fluxes over time, [t 1]
+% - Topic: Diagnostics — Potential Enstrophy Fluxes — Time series, [t 1]
 % - Declaration: enstrophy_fluxes = quadraticEnstrophyFluxesOverTime(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices for time averaging (default: Inf)

@@ -3,7 +3,7 @@ layout: default
 title: plotEnergyOverTime
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 76
+nav_order: 75
 mathjax: true
 ---
 
@@ -30,7 +30,6 @@ Plot energy for each reservoir over time.
 
 ## Discussion
 
-  Plot energy for each reservoir over time
   Plots the energy in each specified reservoir as a function of time.
  
                 

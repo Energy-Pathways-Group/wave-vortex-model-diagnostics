@@ -3,7 +3,7 @@ layout: default
 title: transformToOmegaAxis
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 139
+nav_order: 135
 mathjax: true
 ---
 

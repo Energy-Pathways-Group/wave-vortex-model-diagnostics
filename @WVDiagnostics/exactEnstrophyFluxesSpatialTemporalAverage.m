@@ -4,7 +4,7 @@ function enstrophy_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,opti
 % Compute spatial-temporal average of the exact enstrophy fluxes
 % Returns the spatial-temporal average of the exact enstrophy fluxes from external forcing
 %
-% - Topic: Diagnostics — Enstrophy fluxes — Time/space averages — Flux averages, scalar [1 1]
+% - Topic: Diagnostics — Potential Enstrophy Fluxes — Spatial-temporal averages, [1 1]
 % - Declaration: forcing_fluxes = exactEnstrophyFluxesSpatialTemporalAverage(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices for time averaging (default: Inf)

@@ -12,7 +12,7 @@ function fig = plotMooringRotarySpectrum(self,options)
 % with inertial frequency (f), M2 tidal frequency, f+M2, and min/max buoyancy
 % frequency (N). Legend, panel titles, and overall title are optional.
 %
-% - Topic: Figures — Spectra — Potential energy
+% - Topic: Figures — Ancillary
 % - Declaration: fig = plotMooringRotarySpectrum(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter visible: (optional) Figure visibility (default: "on")

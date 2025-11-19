@@ -7,7 +7,7 @@ function create2DMirrorFluxes(self,options)
 % Creates a diagnostics group (mirror-flux-2d-<triad>) and variables if they
 % do not exist, then computes and appends the per-time-index 2D flux fields.
 %
-% - Topic: Diagnostics — Flux diagnostics — General
+% - Topic: Diagnostics Generation
 % - Declaration: create2DMirrorFluxes(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter stride: (optional) Stride between model time steps when creating new output (default: 1)

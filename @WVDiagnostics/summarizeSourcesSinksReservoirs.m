@@ -3,7 +3,7 @@ function summarizeSourcesSinksReservoirs(self,options)
 %
 % summarizeSourcesSinksReservoirs is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Configuration — Reservoirs — Grouping
+% - Topic: Summaries
 % - Declaration: summarizeSourcesSinksReservoirs(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)

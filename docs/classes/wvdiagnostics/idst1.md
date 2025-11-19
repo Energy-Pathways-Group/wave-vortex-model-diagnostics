@@ -3,7 +3,7 @@ layout: default
 title: iDST1
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 58
+nav_order: 57
 mathjax: true
 ---
 

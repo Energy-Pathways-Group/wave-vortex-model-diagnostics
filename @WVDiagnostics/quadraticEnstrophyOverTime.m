@@ -3,7 +3,7 @@ function [enstrophy, t] = quadraticEnstrophyOverTime(self, options)
 %
 % quadraticEnstrophyOverTime is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Diagnostics — Enstrophy — Time series
+% - Topic: Diagnostics — Potential Enstrophy — Time series, [t 1]
 % - Declaration: [enstrophy, t] = quadraticEnstrophyOverTime(self, options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)

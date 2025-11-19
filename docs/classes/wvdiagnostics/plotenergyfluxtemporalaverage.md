@@ -3,7 +3,7 @@ layout: default
 title: plotEnergyFluxTemporalAverage
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 74
+nav_order: 73
 mathjax: true
 ---
 
@@ -40,7 +40,6 @@ Plot temporally averaged energy flux diagnostics.
 
 ## Discussion
 
-  Plot temporally averaged energy flux diagnostics.
   Compute and plot temporally averaged energy flux diagnostics (exact or
   quadratic approximation) on a chosen axes projection. Supports grouping
   fluxes, overlaying frequency/ratio contours, and customizing colormap,

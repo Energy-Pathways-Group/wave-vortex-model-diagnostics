@@ -1,10 +1,9 @@
 function fig = plotEnergyOverTime(self,options)
 % Plot energy for each reservoir over time.
 %
-% Plot energy for each reservoir over time
 % Plots the energy in each specified reservoir as a function of time.
 %
-% - Topic: Figures — Time series — Diagnostics
+% - Topic: Figures — Energy
 % - Declaration: fig = plotEnergyOverTime(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter energyReservoirs: (optional) vector of EnergyReservoir objects (default: [geostrophic, wave, total]) (default: [EnergyReservoir.geostrophic_mda, EnergyReservoir.wave, EnergyReservoir.total])

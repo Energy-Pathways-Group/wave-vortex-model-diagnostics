@@ -3,7 +3,7 @@ layout: default
 title: quadraticEnergyTriadFluxesSpatialTemporalAverage
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 113
+nav_order: 109
 mathjax: true
 ---
 

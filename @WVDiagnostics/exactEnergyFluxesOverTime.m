@@ -4,7 +4,7 @@ function [energy_fluxes, t] = exactEnergyFluxesOverTime(self,options)
 % Exact energy fluxes over time
 % Returns the exact energy fluxes from external forcing for each time step.
 %
-% - Topic: Diagnostics — Energy fluxes — General — Fluxes over time, [t 1]
+% - Topic: Diagnostics — Energy Fluxes — Time series, [t 1]
 % - Declaration: forcing_fluxes = exactEnergyFluxesOverTime(self)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)

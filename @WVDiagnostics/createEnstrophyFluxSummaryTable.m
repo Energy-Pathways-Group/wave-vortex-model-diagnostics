@@ -7,7 +7,7 @@ function tableString = createEnstrophyFluxSummaryTable(self,options)
 % reports both APV (exact) and quadratic (QGPV) flux measures and formats
 % columns so ampersands are aligned for human-readable LaTeX output.
 %
-% - Topic: Diagnostics — Enstrophy fluxes — General
+% - Topic: Summaries
 % - Declaration: tableString = createEnstrophyFluxSummaryTable(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter customNames: (optional) dictionary mapping diagnostic names to custom labels (default: configureDictionary("string","string"))

@@ -4,7 +4,7 @@ function forcing_fluxes = exactEnergyFluxesTemporalAverage(self,options)
 % Temporally averaged exact energy fluxes
 % Returns the temporally averaged enstrophy fluxes from external forcing for each reservoir.
 %
-% - Topic: Diagnostics — Energy fluxes — Time/space averages — Fluxes in space, [j kRadial]
+% - Topic: Diagnostics — Energy Fluxes — Temporal averages, [j kRadial]
 % - Declaration: enstrophy_fluxes = exactEnergyFluxesTemporalAverage(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices for time averaging (default: Inf)

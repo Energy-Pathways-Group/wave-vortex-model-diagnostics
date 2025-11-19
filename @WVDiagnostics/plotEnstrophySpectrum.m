@@ -8,7 +8,7 @@ function fig = plotEnstrophySpectrum(self,options)
 % spectra. Supports a 2x2 "four-panel" layout or a single-panel
 % pseudo-radial projection ("kPseudoRadial").
 %
-% - Topic: Figures — Spectra — Potential energy
+% - Topic: Figures — Model Snapshot
 % - Declaration: fig = plotEnstrophySpectrum(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter iTime: time index in model output file (default: self.iTime)

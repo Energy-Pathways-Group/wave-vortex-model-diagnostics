@@ -3,7 +3,7 @@ function [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,opt
 %
 % variablesForReservoirGroup is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Configuration — Reservoirs — Grouping
+% - Topic: Internal — Support functions for createReservoirGroup
 % - Declaration: [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter outputfile: file path or name
