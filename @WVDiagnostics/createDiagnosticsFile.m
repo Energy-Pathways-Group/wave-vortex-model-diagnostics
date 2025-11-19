@@ -4,7 +4,7 @@ function createDiagnosticsFile(self,options)
 % Create a new diagnostics file and compute diagnostics from WVModel output.
 % Initializes a diagnostics NetCDF file, computes and stores energy, enstrophy, APE, APV, and flux diagnostics for each time step.
 %
-% - Topic: Diagnostics — General — Misc
+% - Topic: Diagnostics Generation
 % - Declaration: createDiagnosticsFile(self,options)
 % - Parameter self: WVDiagnostics object.
 % - Parameter stride: (optional) Stride for time sampling (default: 1).
