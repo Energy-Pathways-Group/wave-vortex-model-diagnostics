@@ -9,7 +9,7 @@ function matrix = DST2(N)
 % x = InverseSineTransformMatrix_DST2(N) * X.
 % See also: InverseSineTransformMatrix_DST2
 %
-% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: matrix = DST2(N)
 % - Parameter N: input argument `N`
 % - Returns matrix: output value `matrix`

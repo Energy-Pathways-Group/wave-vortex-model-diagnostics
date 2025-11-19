@@ -3,7 +3,7 @@ layout: default
 title: symmetricTintMap
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 131
+nav_order: 128
 mathjax: true
 ---
 
@@ -16,6 +16,8 @@ Colormap going from color -> tinted white -> color
 
 ## Discussion
 
+  This function is used by plotPoissonFlowOverContours
+ 
     c   : 1x3 RGB color in [0 1]
     N   : total number of levels (even recommended)
     tintStrength : fraction of c mixed into white at the center

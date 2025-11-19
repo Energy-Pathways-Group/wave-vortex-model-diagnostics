@@ -6,7 +6,7 @@ function matrix = iDST2(N)
 % 2/N scaling above (with no endpoint tweaks).
 % Implementation: DST-III with the LAST column halved (k = N).
 %
-% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: matrix = iDST2(N)
 % - Parameter N: input argument `N`
 % - Returns matrix: output value `matrix`

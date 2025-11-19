@@ -20,7 +20,7 @@ function [xbar,f] = SineTransformForward( t, x, varargin )
 % This definition of t *includes* the end points which *must* be zero.
 %
 % - Topic: Transforms — Spectral — General
-% - Declaration: [xbar,f] = SineTransformForward( t, x, varargin )
+% - Topic: Transformations — Cosine and Sine
 % - Parameter t: input argument `t`
 % - Parameter x: input argument `x`
 % - Parameter varargin: input argument `varargin`

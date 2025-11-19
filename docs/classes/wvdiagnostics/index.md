@@ -18,13 +18,14 @@ Produces diagnostics and figures from WVModel output
 ## Overview
     This is a collection of diagnostic tools for analyzing model output
  
-                                                                    
+                                                      
 
 
 ## Topics
 + Diagnostics Generation
   + [`create1DMirrorFluxes`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/create1dmirrorfluxes.html) Create 1D mirror flux diagnostics and write them to the diagnostics NetCDF.
   + [`create2DMirrorFluxes`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/create2dmirrorfluxes.html) Compute 2D mirror-flux diagnostics and write them to the diagnostics NetCDF.
+  + [`createDiagnosticsFile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/creatediagnosticsfile.html) Create a new diagnostics file and compute diagnostics from WVModel output.
   + [`createReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/createreservoirgroup.html) Create a reservoir group in the diagnostics NetCDF and populate it.
 + Figures
   + Model Snapshot
@@ -60,9 +61,8 @@ Produces diagnostics and figures from WVModel output
 + Diagnostics
   + Energy
     + Time series, [t 1]
-      + [`quadraticEnergyOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyovertime.html) Compute energy for each reservoir over time.
-    + Time series
       + [`exactEnergyOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/exactenergyovertime.html) Exact Energy Over Time.
+      + [`quadraticEnergyOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyovertime.html) Compute energy for each reservoir over time.
   + Energy Fluxes
     + General, [j kRadial t]
       + [`exactEnergyFluxes`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/exactenergyfluxes.html) Return the exact energy flux from the forcing terms, [j kRadial t].
@@ -79,6 +79,16 @@ Produces diagnostics and figures from WVModel output
       + [`exactEnergyFluxesSpatialTemporalAverage`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/exactenergyfluxesspatialtemporalaverage.html) Compute spatial-temporal average of the exact forcing fluxes.
       + [`quadraticEnergyFluxesSpatialTemporalAverage`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyfluxesspatialtemporalaverage.html) Compute spatial-temporal average of forcing fluxes.
       + [`quadraticEnergyTriadFluxesSpatialTemporalAverage`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergytriadfluxesspatialtemporalaverage.html) Compute spatial-temporal average of inertial fluxes.
+    + Temporal averages, 1D axes
+      + [`quadraticEnergyMirrorTriadFluxes1D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes1d.html) Quadratic Energy Mirror Triad Fluxes1 D.
+      + [`quadraticEnergyMirrorTriadFluxes1D_kepe`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes1d_kepe.html) Quadratic Energy Mirror Triad Fluxes1 D kepe.
+      + [`quadraticEnergyMirrorTriadFluxes1D_omega`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes1d_omega.html) Quadratic Energy Mirror Triad Fluxes1 D omega.
+      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage1D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage1d.html) Quadratic Energy Primary Triad Fluxes Temporal Average1 D.
+      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_kepe`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage1d_kepe.html) Quadratic Energy Primary Triad Fluxes Temporal Average1 D kepe.
+      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_omega`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage1d_omega.html) Quadratic Energy Primary Triad Fluxes Temporal Average1 D omega.
+    + Temporal averages, 2D axes [sparseJWavenumberAxis sparseKRadialAxis]
+      + [`quadraticEnergyMirrorTriadFluxes2D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes2d.html) Quadratic Energy Mirror Triad Fluxes2 D.
+      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage2D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage2d.html) outputGrid determines whether or not the fluxes get downsampled to the.
   + Potential Enstrophy
     + Time series, [t 1]
       + [`exactEnstrophyOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/exactenstrophyovertime.html) Exact Enstrophy Over Time.
@@ -98,49 +108,19 @@ Produces diagnostics and figures from WVModel output
     + Spatial-temporal averages, [1 1]
       + [`exactEnstrophyFluxesSpatialTemporalAverage`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/exactenstrophyfluxesspatialtemporalaverage.html) Compute spatial-temporal average of the exact enstrophy fluxes.
       + [`quadraticEnstrophyFluxesSpatialTemporalAverage`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenstrophyfluxesspatialtemporalaverage.html) Compute spatial-temporal average of the qgpv enstrophy fluxes.
-  + General — Misc
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`DCT1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dct1.html) CosineTransformForwardMatrix  Discrete Cosine Transform (DCT-I) matrix.
-      + [`DCT2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dct2.html) CosineTransformForwardMatrix_DCT2  Discrete Cosine Transform (DCT-II) matrix.
-      + [`DST1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dst1.html) CosineTransformForwardMatrix  Discrete Cosine Transform (DCT-I) matrix.
-      + [`DST2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dst2.html) SineTransformForwardMatrix_DST2  Discrete Sine Transform (DST-II) matrix.
-      + [`cmocean`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/cmocean.html) returns perceptually-uniform colormaps created by Kristen Thyng.
-      + [`geostrophicGeostrophicWaveEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/geostrophicgeostrophicwaveenergy.html) Note that.
-      + [`iDCT1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idct1.html) CosineTransformBackMatrix  Discrete Cosine Transform (DCT-I) matrix.
-      + [`iDCT2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idct2.html) InverseCosineTransformMatrix_DCT2  Inverse of forward DCT-II matrix.
-      + [`iDST1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idst1.html) CosineTransformBackMatrix  Discrete Cosine Transform (DCT-I) matrix.
-      + [`iDST2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idst2.html) InverseSineTransformMatrix_DST2  Inverse of forward DST-II matrix.
-      + [`waveWaveGeostrophicEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergy.html) Note that.
-      + [`waveWaveGeostrophicEnergyForMode`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergyformode.html) Note that.
-    + Fluxes over time, [t 1]
-      + [`quadraticEnergyMirrorTriadsUndamped`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadsundamped.html) Quadratic Energy Mirror Triads Undamped.
   + Flux diagnostics — General
     + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
       + [`RescalePoissonFlowFluxForLogSpace`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/rescalepoissonflowfluxforlogspace.html) Rescale Poisson Flow Flux For Log Space.
-  + General
-    + Misc
-      + [`createDiagnosticsFile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/creatediagnosticsfile.html) Create a new diagnostics file and compute diagnostics from WVModel output.
+  + General — Misc
+    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+      + [`cmocean`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/cmocean.html) returns perceptually-uniform colormaps created by Kristen Thyng.
+      + [`geostrophicGeostrophicWaveEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/geostrophicgeostrophicwaveenergy.html) Note that.
+      + [`waveWaveGeostrophicEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergy.html) Note that.
+      + [`waveWaveGeostrophicEnergyForMode`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergyformode.html) Note that.
   + Spectra — Cross-spectra
     + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
       + [`crossSpectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithfgtransform.html) Cross Spectrum With Fg Transform.
       + [`crossSpectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithggtransform.html) Cross Spectrum With Gg Transform.
-  + Energy fluxes — Triad interactions — Mirror pairs
-    + Fluxes in space, [sparseKRadialAxis 1]
-      + [`quadraticEnergyMirrorTriadFluxes1D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes1d.html) Quadratic Energy Mirror Triad Fluxes1 D.
-      + [`quadraticEnergyMirrorTriadFluxes1D_kepe`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes1d_kepe.html) Quadratic Energy Mirror Triad Fluxes1 D kepe.
-      + [`quadraticEnergyMirrorTriadFluxes1D_omega`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes1d_omega.html) Quadratic Energy Mirror Triad Fluxes1 D omega.
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`quadraticEnergyMirrorTriadFluxes2D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergymirrortriadfluxes2d.html) Quadratic Energy Mirror Triad Fluxes2 D.
-  + Energy fluxes — Triad interactions — Primary
-    + Fluxes in space, [sparseKRadialAxis 1]
-      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage1D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage1d.html) Quadratic Energy Primary Triad Fluxes Temporal Average1 D.
-      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_kepe`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage1d_kepe.html) Quadratic Energy Primary Triad Fluxes Temporal Average1 D kepe.
-      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_omega`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage1d_omega.html) Quadratic Energy Primary Triad Fluxes Temporal Average1 D omega.
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`quadraticEnergyPrimaryTriadFluxesTemporalAverage2D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergyprimarytriadfluxestemporalaverage2d.html) outputGrid determines whether or not the fluxes get downsampled to the.
-  + Energy fluxes — Triad interactions
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`quadraticEnergyTriadFluxWWGWave`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenergytriadfluxwwgwave.html) Quadratic Energy Triad Flux WWGWave.
   + Enstrophy fluxes — Triad interactions
     + Fluxes over time, [t 1]
       + [`quadraticEnstrophyTriadFluxesOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenstrophytriadfluxesovertime.html) Compute enstrophy inertial (aka, triad) fluxes over time.
@@ -151,17 +131,6 @@ Produces diagnostics and figures from WVModel output
 + Transforms
   + Spectral
     + General
-      + [`SineTransformForward`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sinetransformforward.html) Fast Discrete Sine Transform (DST-I).
-  + Spectral — General
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`CosineTransformBack`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/cosinetransformback.html) Fast Discrete Inverse Cosine Transform.
-      + [`CosineTransformForward`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/cosinetransformforward.html) Fast Discrete Cosine Transform (DCT-I).
-      + [`SineTransformBack`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sinetransformback.html) Fast Discrete Inverse Sine Transform.
-      + [`transformToKePeAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtokepeaxis.html) Transform To Ke Pe Axis.
-      + [`transformToOmegaAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtoomegaaxis.html) transforms in the from (j,kRadial) to omegaAxis.
-      + [`transformToPseudoRadialWavenumber`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumber.html) transforms in the from (j,kRadial) to kPseudoRadial.
-      + [`transformToPseudoRadialWavenumberA0`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumbera0.html) transforms in the from (j,kRadial) to kPseudoRadial.
-      + [`transformToPseudoRadialWavenumberApm`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumberapm.html) transforms Ap/Am modes in the from (j,kRadial) to kPseudoRadial.
 + Utilities
   + Colormaps
     + Crameri
@@ -184,6 +153,27 @@ Produces diagnostics and figures from WVModel output
     + [`filterEnergyForSourcesSinksReservoirs`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/filterenergyforsourcessinksreservoirs.html) This function returns values assuming three reservoirs: geo, wave, and.
     + [`fluxesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/fluxesforreservoirgroup.html) Fluxes For Reservoir Group.
     + [`variablesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/variablesforreservoirgroup.html) Variables For Reservoir Group.
++ Transformations
+  + Cosine and Sine
+    + [`CosineTransformBack`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/cosinetransformback.html) Fast Discrete Inverse Cosine Transform.
+    + [`CosineTransformForward`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/cosinetransformforward.html) Fast Discrete Cosine Transform (DCT-I).
+    + [`DCT1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dct1.html) CosineTransformForwardMatrix  Discrete Cosine Transform (DCT-I) matrix.
+    + [`DCT2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dct2.html) CosineTransformForwardMatrix_DCT2  Discrete Cosine Transform (DCT-II) matrix.
+    + [`DST1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dst1.html) CosineTransformForwardMatrix  Discrete Cosine Transform (DCT-I) matrix.
+    + [`DST2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/dst2.html) SineTransformForwardMatrix_DST2  Discrete Sine Transform (DST-II) matrix.
+    + [`SineTransformBack`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sinetransformback.html) Fast Discrete Inverse Sine Transform.
+    + [`iDCT1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idct1.html) CosineTransformBackMatrix  Discrete Cosine Transform (DCT-I) matrix.
+    + [`iDCT2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idct2.html) InverseCosineTransformMatrix_DCT2  Inverse of forward DCT-II matrix.
+    + [`iDST1`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idst1.html) CosineTransformBackMatrix  Discrete Cosine Transform (DCT-I) matrix.
+    + [`iDST2`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/idst2.html) InverseSineTransformMatrix_DST2  Inverse of forward DST-II matrix.
+    + General
+      + [`SineTransformForward`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sinetransformforward.html) Fast Discrete Sine Transform (DST-I).
+  + Axes
+    + [`transformToKePeAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtokepeaxis.html) Transform To Ke Pe Axis.
+    + [`transformToOmegaAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtoomegaaxis.html) transforms in the from (j,kRadial) to omegaAxis.
+    + [`transformToPseudoRadialWavenumber`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumber.html) transforms in the from (j,kRadial) to kPseudoRadial.
+    + [`transformToPseudoRadialWavenumberA0`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumbera0.html) transforms in the from (j,kRadial) to kPseudoRadial.
+    + [`transformToPseudoRadialWavenumberApm`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumberapm.html) transforms Ap/Am modes in the from (j,kRadial) to kPseudoRadial.
 + Constructor
   + [`WVDiagnostics`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvdiagnostics.html) Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
 + Units
@@ -199,9 +189,6 @@ Produces diagnostics and figures from WVModel output
   + [`zscale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/zscale_units.html) potential enstrophy units (string value)
 + Configuration
   + [`setEnergyUnits`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/setenergyunits.html) Set the time and energy scaling and units for plotting and output.
-  + Reservoirs
-    + Grouping
-      + [`filterEnergyForSourcesSinksReservoirsOld`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/filterenergyforsourcessinksreservoirsold.html) This function returns values assuming three reservoirs: geo, wave, and.
 + Dependent property getter
   + [`t_diag`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/t_diag.html) Get time vector from the diagnostics file
 + Other

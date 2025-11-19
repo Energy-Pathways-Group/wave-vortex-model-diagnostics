@@ -3,7 +3,7 @@ function [M_wwg, F_wwg, ks, js] = quadraticEnergyMirrorTriadFluxes2D(self,option
 %
 % quadraticEnergyMirrorTriadFluxes2D is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Diagnostics — Energy fluxes — Triad interactions — Mirror pairs — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Diagnostics — Energy Fluxes — Temporal averages, 2D axes [sparseJWavenumberAxis sparseKRadialAxis]
 % - Declaration: [M_wwg, F_wwg, ks, js] = quadraticEnergyMirrorTriadFluxes2D(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)

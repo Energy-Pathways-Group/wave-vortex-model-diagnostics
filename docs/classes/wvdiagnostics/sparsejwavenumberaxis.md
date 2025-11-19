@@ -3,7 +3,7 @@ layout: default
 title: sparseJWavenumberAxis
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 123
+nav_order: 120
 mathjax: true
 ---
 

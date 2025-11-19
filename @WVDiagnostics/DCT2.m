@@ -9,7 +9,7 @@ function matrix = DCT2(N)
 % x = InverseCosineTransformMatrix_DCT2(N) * X.
 % See also: InverseCosineTransformMatrix_DCT2
 %
-% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: matrix = DCT2(N)
 % - Parameter N: input argument `N`
 % - Returns matrix: output value `matrix`

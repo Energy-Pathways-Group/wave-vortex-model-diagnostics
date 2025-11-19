@@ -4,7 +4,7 @@ function [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)
 % transforms Ap/Am modes in the from (j,kRadial) to kPseudoRadial
 % Sums all the variance/energy in radial bins `kPseudoRadial`.
 %
-% - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Axes
 % - Declaration: [varargout] = transformToRadialWavenumber(varargin)
 % - Parameter self: WVDiagnostics object
 % - Parameter varargin: variables with dimensions $$(j,kl)$$

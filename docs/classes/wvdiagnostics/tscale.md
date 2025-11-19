@@ -3,7 +3,7 @@ layout: default
 title: tscale
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 139
+nav_order: 136
 mathjax: true
 ---
 

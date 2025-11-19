@@ -3,7 +3,7 @@ layout: default
 title: quadraticEnergyTriadFluxes
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 107
+nav_order: 104
 mathjax: true
 ---
 

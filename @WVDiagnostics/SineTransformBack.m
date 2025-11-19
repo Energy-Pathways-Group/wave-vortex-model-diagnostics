@@ -5,7 +5,7 @@ function [x, t] = SineTransformBack( f, xbar, varargin )
 % by default we're assuming that you're only doing resolved frequencies...
 % so no nyquist and no zero.
 %
-% - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: [x, t] = SineTransformBack( f, xbar, varargin )
 % - Parameter f: input argument `f`
 % - Parameter xbar: input argument `xbar`

@@ -14,7 +14,7 @@ function [xbar, f] = CosineTransformForward( t, x, varargin )
 % Where we've taken care to integrate only to the endpoints (and not
 % beyond) in the x_sum. The S_sum includes a correction for the Nyquist.
 %
-% - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: [xbar, f] = CosineTransformForward( t, x, varargin )
 % - Parameter t: input argument `t`
 % - Parameter x: input argument `x`

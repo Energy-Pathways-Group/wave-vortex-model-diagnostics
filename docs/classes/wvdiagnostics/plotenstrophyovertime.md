@@ -3,7 +3,7 @@ layout: default
 title: plotEnstrophyOverTime
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 80
+nav_order: 79
 mathjax: true
 ---
 

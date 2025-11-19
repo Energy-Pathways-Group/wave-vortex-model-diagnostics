@@ -3,7 +3,7 @@ function [inertial_fluxes_g, inertial_fluxes_w, kp] = quadraticEnergyPrimaryTria
 %
 % quadraticEnergyPrimaryTriadFluxesTemporalAverage1D is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Diagnostics — Energy fluxes — Triad interactions — Primary — Fluxes in space, [sparseKRadialAxis 1]
+% - Topic: Diagnostics — Energy Fluxes — Temporal averages, 1D axes
 % - Declaration: [inertial_fluxes_g, inertial_fluxes_w, kp] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter timeIndices: (optional) indices specifying which time indices to use (default: Inf)

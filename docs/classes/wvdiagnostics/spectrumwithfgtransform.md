@@ -3,7 +3,7 @@ layout: default
 title: spectrumWithFgTransform
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 128
+nav_order: 125
 mathjax: true
 ---
 

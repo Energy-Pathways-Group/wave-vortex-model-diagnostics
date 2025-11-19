@@ -3,7 +3,7 @@ layout: default
 title: plotMooringRotarySpectrum
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 85
+nav_order: 84
 mathjax: true
 ---
 

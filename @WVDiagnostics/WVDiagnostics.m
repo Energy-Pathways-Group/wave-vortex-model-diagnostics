@@ -8,24 +8,26 @@ classdef WVDiagnostics < handle
     % - Topic: Figures — Potential Enstrophy
     % - Topic: Figures — Ancillary
     % - Topic: Summaries
-    %  - Topic: Diagnostics — Energy
-    %  - Topic: Diagnostics — Energy — Time series, [t 1]
-    %  - Topic: Diagnostics — Energy Fluxes
-    %  - Topic: Diagnostics — Energy Fluxes — General, [j kRadial t]
-    %  - Topic: Diagnostics — Energy Fluxes — Temporal averages, [j kRadial]
-    %  - Topic: Diagnostics — Energy Fluxes — Time series, [t 1]
-    %  - Topic: Diagnostics — Energy Fluxes — Spatial-temporal averages, [1 1]
-    %  - Topic: Diagnostics — Potential Enstrophy
-    %  - Topic: Diagnostics — Potential Enstrophy — Time series, [t 1]
-    %  - Topic: Diagnostics — Potential Enstrophy Fluxes
-    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — General, [j kRadial t]
-    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — Temporal averages, [j kRadial]
-    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — Time series, [t 1]
-    %  - Topic: Diagnostics — Potential Enstrophy Fluxes — Spatial-temporal averages, [1 1]
-    %  - Topic: Transforms — Spectral — General
-    %  - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    %  - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    % - Topic: Diagnostics — Energy
+    % - Topic: Diagnostics — Energy — Time series, [t 1]
+    % - Topic: Diagnostics — Energy Fluxes
+    % - Topic: Diagnostics — Energy Fluxes — General, [j kRadial t]
+    % - Topic: Diagnostics — Energy Fluxes — Temporal averages, [j kRadial]
+    % - Topic: Diagnostics — Energy Fluxes — Time series, [t 1]
+    % - Topic: Diagnostics — Energy Fluxes — Spatial-temporal averages, [1 1]
+    % - Topic: Diagnostics — Energy Fluxes — Temporal averages, 1D axes
+    % - Topic: Diagnostics — Energy Fluxes — Temporal averages, 2D axes [sparseJWavenumberAxis sparseKRadialAxis]
+    % - Topic: Diagnostics — Potential Enstrophy
+    % - Topic: Diagnostics — Potential Enstrophy — Time series, [t 1]
+    % - Topic: Diagnostics — Potential Enstrophy Fluxes
+    % - Topic: Diagnostics — Potential Enstrophy Fluxes — General, [j kRadial t]
+    % - Topic: Diagnostics — Potential Enstrophy Fluxes — Temporal averages, [j kRadial]
+    % - Topic: Diagnostics — Potential Enstrophy Fluxes — Time series, [t 1]
+    % - Topic: Diagnostics — Potential Enstrophy Fluxes — Spatial-temporal averages, [1 1]
+    % - Topic: Transforms — Spectral — General
+    % - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    % - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    % - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
     % - Topic: Internal — Support functions for createReservoirGroup
     properties
         wvpath      % path to the WaveVortexModel output
@@ -186,7 +188,7 @@ classdef WVDiagnostics < handle
         createDiagnosticsFile(self,options)
         create1DMirrorFluxes(self,options)
         create2DMirrorFluxes(self,options)
-        createReservoirGroup(self,options) % groupName, flowComponents
+        createReservoirGroup(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -194,9 +196,8 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        % these are support functions for createReservoirGroup
         [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
-        addTriadFluxesForReservoirGroupAtTime(self,options) %triadVar, flowComponents, wvt, outputIndex
+        addTriadFluxesForReservoirGroupAtTime(self,options)
         [transferFlux, forcingFlux, ddt, energy] = fluxesForReservoirGroup(self,options)
         [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
 
@@ -218,7 +219,6 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        
         fig = plotEnergyOverTime(self,options)
         fig = plotEnergyFluxOverTime(self,options)
         fig = plotEnergyTriadFluxOverTime(self,options)
@@ -235,7 +235,6 @@ classdef WVDiagnostics < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        
         fig = plotEnstrophyOverTime(self,options)
         fig = plotEnstrophyFluxOverTime(self,options)
         fig = plotEnstrophyTriadFluxOverTime(self,options)
@@ -306,6 +305,24 @@ classdef WVDiagnostics < handle
         inertial_fluxes = quadraticEnergyTriadFluxesSpatialTemporalAverage(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Energy Fluxes — Temporal averages, 1D axes
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        [M_wwg, M_ggw, kp] = quadraticEnergyMirrorTriadFluxes1D(self,options)
+        [M_wwg, omegaAxis] = quadraticEnergyMirrorTriadFluxes1D_omega(self,options)
+        [M_ggw, kePeAxis] = quadraticEnergyMirrorTriadFluxes1D_kepe(self,options)
+
+        [inertial_fluxes_g, inertial_fluxes_w, kp] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(self,options)
+        [inertial_fluxes_w, omegaAxis] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_omega(self,options)
+        [inertial_fluxes_g, kePeAxis] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_kepe(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % - Topic: Diagnostics — Energy Fluxes — Temporal averages, 2D axes [sparseJWavenumberAxis sparseKRadialAxis]
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        [M_wwg, F_wwg, ks, js] = quadraticEnergyMirrorTriadFluxes2D(self,options)
+        [inertial_fluxes_g, inertial_fluxes_w, ks, js] = quadraticEnergyPrimaryTriadFluxesTemporalAverage2D(self,options)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % - Topic: Diagnostics — Potential Enstrophy
         %
@@ -335,7 +352,7 @@ classdef WVDiagnostics < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         enstrophy_fluxes = quadraticEnstrophyFluxesTemporalAverage(self,options)
         enstrophy_fluxes = exactEnstrophyFluxesTemporalAverage(self,options)
-        
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % - Topic: Diagnostics — Potential Enstrophy Fluxes — Time series, [t 1]
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -352,59 +369,15 @@ classdef WVDiagnostics < handle
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Fluxes over time, [t 1]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        [E0_ggw,Epm_wwg] = quadraticEnergyMirrorTriadsUndamped(self,options);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Fluxes in space, [j kRadial]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Fluxes in space, [sparseKRadialAxis 1]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        [M_wwg, M_ggw, kp] = quadraticEnergyMirrorTriadFluxes1D(self,options)
-        [M_wwg, omegaAxis] = quadraticEnergyMirrorTriadFluxes1D_omega(self,options)
-        [M_ggw, kePeAxis] = quadraticEnergyMirrorTriadFluxes1D_kepe(self,options)
-
-        [inertial_fluxes_g, inertial_fluxes_w, kp] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D(self,options)
-        [inertial_fluxes_w, omegaAxis] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_omega(self,options)
-        [inertial_fluxes_g, kePeAxis] = quadraticEnergyPrimaryTriadFluxesTemporalAverage1D_kepe(self,options)
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        [M_wwg, F_wwg, ks, js] = quadraticEnergyMirrorTriadFluxes2D(self,options)
-
-        [inertial_fluxes_g, inertial_fluxes_w, ks, js] = quadraticEnergyPrimaryTriadFluxesTemporalAverage2D(self,options)
-
-        wwg = quadraticEnergyTriadFluxWWGWave(self)
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Transforms to alternative axes
+        % - Topic: Transformations — Axes
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         [varargout] = transformToPseudoRadialWavenumber(self,energyReservoir,varargin);
         [varargout] = transformToPseudoRadialWavenumberA0(self,varargin);
-        [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)  
-        [varargout] = transformToOmegaAxis(self,varargin) 
-        [varargout] = transformToKePeAxis(self,varargin) 
+        [varargout] = transformToPseudoRadialWavenumberApm(self,varargin)
+        [varargout] = transformToOmegaAxis(self,varargin)
+        [varargout] = transformToKePeAxis(self,varargin)
 
         [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
         [omegaAxis,bins_omega] = sparseOmegaAxis(self)
@@ -424,134 +397,12 @@ classdef WVDiagnostics < handle
         S_f = crossSpectrumWithFgTransform(self,phi,gamma)
         S_f = crossSpectrumWithGgTransform(self,phi,gamma)
 
-        function fig = plotPoissonFlowOverPcolor(wvd,options)
-            arguments
-                wvd WVDiagnostics
-                options.visible = "on"
-                options.vectorFlux
-                options.flux
-                options.overSaturationFactor = 2;
-            end
 
-            color_axis_limits = max(abs(options.flux(:)))*[-1 1]/options.overSaturationFactor;
-
-            % We will pretend the "0" wavenumber is actually evenly spaced
-            % from the nearest two wavenumbers
-            kPseudoLocation = wvd.kRadial;
-            kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
-            jPseudoLocation = wvd.jWavenumber;
-            jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
-
-            % For interpolation to work correctly we need to repeat the
-            % first entry, but properly back at zero
-            kPadded = cat(1,0,kPseudoLocation);
-            jPadded= cat(1,0,jPseudoLocation);
-            [KPadded,JPadded] = ndgrid(kPadded,jPadded);
-            fluxPadded = cat(1,options.flux(1,:),options.flux);
-            fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
-
-            % We will use this axis to display. Widen the box so that it is
-            % the same size as its neighbors.
-            kMin = exp(-1.5*log(wvd.kRadial(3)) + 2.5*log(wvd.kRadial(2)));
-            jMin = exp(-1.5*log(wvd.jWavenumber(3)) + 2.5*log(wvd.jWavenumber(2)));
-
-            N = 500;
-            kLinLog = linspace(log10(kMin),max(log10(wvd.kRadial(:))),N);
-            jLinLog = linspace(log10(jMin),max(log10(wvd.jWavenumber(:))),N/2);
-            [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
-            fluxLinLog = interpn(KPadded,JPadded,(fluxPadded.'),10.^KLinLog,10.^JLinLog,"nearest");
-
-            fig = figure(Units='points',Visible = options.visible);
-            set(gcf,'PaperPositionMode','auto')
-
-            pcolor(KLinLog,JLinLog,fluxLinLog); shading flat;
-            colormap(WVDiagnostics.crameri('-bam'))
-            clim(color_axis_limits)
-            colorbar("eastoutside")
-
-            [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.vectorFlux.');
-            [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
-            % we need two adjustments. First, we need to move the first row and column
-            % half an increment
-            logX(1,:) = log10(kPseudoLocation(1));
-            logY(:,1) = log10(jPseudoLocation(1));
-            scale = 1.5;
-            hold on
-            % quiver(logX,logY,scale*Uprime,scale*Vprime,'off',Color=0*[1 1 1],AutoScale="off",LineWidth=2)
-            quiver(logX,logY,Uprime,Vprime,Color=0*[1 1 1],AutoScale="off",LineWidth=2)
-        end
-
-fig = plotPoissonFlowOverContours(wvd,options)
-
-[logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
-
-        function [X,Y,U,V] = PoissonFlowFromFlux(wvd, flux)
-            % We will treat the first dimension as `x' and the second
-            % dimension as `y'. This means that the flux in the usual form,
-            % which is j by kRadial, might need to be transposed to get
-            % what you want.
-            %
-            % [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvt.kRadial,jWavenumber,flux.');
-            % quiver(X,Y,10*U,10*V,'off',Color=0*[1 1 1])
-            % For the DCT2/DST2 we use a half-shift grid
-            x = wvd.kRadial + 0*(wvd.kRadial(2)-wvd.kRadial(1))/2;
-            y = wvd.jWavenumber + 0*(wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
-            [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFluxWithAxes(x,y,flux);
-
-            U = U/wvd.kRadial(2);
-            V = V/wvd.jWavenumber(2);
-        end
-
-        function [X,Y,U,V] = PoissonFlowFromFluxType1(wvd, flux)
-            % We will treat the first dimension as `x' and the second
-            % dimension as `y'. This means that the flux in the usual form,
-            % which is j by kRadial, might need to be transposed to get
-            % what you want.
-            %
-            % [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvt.kRadial,jWavenumber,flux.');
-            % quiver(X,Y,10*U,10*V,'off',Color=0*[1 1 1])
-            % For the DCT2/DST2 we use a half-shift grid
-            x = wvd.kRadial;
-            y = wvd.jWavenumber;
-
-            N = length(x);
-            M = length(y);
-            dk = 1/(2*(N-1)*(x(2)-x(1)));
-            dl = 1/(2*(M-1)*(y(2)-y(1)));
-
-            k=dk*(0:(N-1)).';
-            l=dl*(0:(M-1)).';
-
-            DCTx = WVDiagnostics.DCT1(N);
-            DCTy = WVDiagnostics.DCT1(M);
-
-            flux_ky = DCTx*flux;
-            flux_kl = shiftdim(DCTy*shiftdim(flux_ky,1),1);
-
-            [K,L] = ndgrid(k,l);
-
-            D = -((2*pi*K).^2 + (2*pi*L).^2);
-            D(1,1) = Inf;
-
-            UFactor = 2*pi*K./D;
-            VFactor = 2*pi*L./D;
-
-            iDCTx = WVDiagnostics.iDCT1(N);
-            iDSTy = WVDiagnostics.iDST1(M);
-            iDSTy = cat(2,zeros(M,1),iDSTy,zeros(M,1));
-
-            V_xl = iDCTx*(VFactor.*flux_kl);
-            V = shiftdim(iDSTy*shiftdim(V_xl,1),1);
-
-            iDCTy = WVDiagnostics.iDCT1(M);
-            iDSTx = WVDiagnostics.iDST1(N);
-            iDSTx = cat(2,zeros(N,1),iDSTx,zeros(N,1));
-
-            U_xl = iDSTx*(UFactor.*flux_kl);
-            U = shiftdim(iDCTy*shiftdim(U_xl,1),1);
-
-            [X,Y] = ndgrid(x,y);
-        end
+        fig = plotPoissonFlowOverPcolor(wvd,options)
+        fig = plotPoissonFlowOverContours(wvd,options)
+        [logX,logY,Uprime,Vprime] = RescalePoissonFlowFluxForLogSpace(wvd,X,Y,U,V,options)
+        [X,Y,U,V] = PoissonFlowFromFlux(wvd, flux)
+        [X,Y,U,V] = PoissonFlowFromFluxType1(wvd, flux)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -591,7 +442,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
 
         function overlayFrequencyContours(self,options)
             arguments
-                self 
+                self
                 options.frequencies = [1.01 1.05 1.2 1.5 2 4 8 16]
                 options.textColor = [.5,.5,.5]
                 options.labelSpacing = 600
@@ -600,7 +451,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
             omegaJK = self.omega_jk;
             set(gca,'layer','top'),
             hold on
-            % flipud() and fliplr() help trick clabel into nicer label placement. 
+            % flipud() and fliplr() help trick clabel into nicer label placement.
             % for y-axis, use j+1 so contours line up with pcolor cells.
             [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j',fliplr(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
             clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
@@ -608,7 +459,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
 
         function overlayGeostrophicKineticPotentialRatioContours(self,options)
             arguments
-                self 
+                self
                 options.ratios = [-2.5 -2.0 -1.5 -1.0 -0.5 0 0.5 1.0 1.5 2.0 2.5]
                 options.textColor = [.5,.5,.5]
                 options.labelSpacing = 400
@@ -628,7 +479,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
 
         function overlayGeostrophicKineticPotentialFractionContours(self,options)
             arguments
-                self 
+                self
                 options.fractions = [.01,.1,.25,.75,.9,.99]
                 options.textColor = [.5,.5,.5]
                 options.labelSpacing = 600
@@ -638,8 +489,8 @@ fig = plotPoissonFlowOverContours(wvd,options)
             pe = self.geo_pe_jk;
             fraction = hke./(hke+pe);
             set(gca,'layer','top'),
-            hold on          
-            % flipud() and fliplr() help trick clabel into nicer label placement. 
+            hold on
+            % flipud() and fliplr() help trick clabel into nicer label placement.
             % for y-axis, use j+1 so contours line up with pcolor cells.
             [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j(1:end)'+1,fliplr(fraction(1:end,2:end)),options.fractions,'LineWidth',options.lineWidth,'Color',options.textColor);
             clabel(C,h,options.fractions,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
@@ -649,8 +500,8 @@ fig = plotPoissonFlowOverContours(wvd,options)
 
         function showRossbyRadiusYAxis(self,options)
             arguments
-                self 
-                options.textColor = [.5,.5,.5] 
+                self
+                options.textColor = [.5,.5,.5]
             end
             set(gca,'Layer','top','TickLength',[0.015 0.015])
             % create some nice tick labels to show deformation radius
@@ -840,7 +691,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
             kPseudoRadial = reshape(kAxis_,[],1);
 
             % kPseudoRadial = reshape(kAxis_,[],1);
-            % 
+            %
             % n = find(kPseudoRadial < self.jWavenumber(2),1,"last");
             % kPseudoRadial = cat(1,kPseudoRadial(1:n),self.jWavenumber(2:end));
 
@@ -886,7 +737,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
             if self.diagfile.hasVariableWithName("Z0_antialias_filter")
                 forcingNames(end+1) = "antialias filter";
             end
-        end   
+        end
 
         function bool = get.diagnosticsHasExplicitAntialiasing(self)
             bool = false;
@@ -976,7 +827,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
             else
                 self.wvaapath= fullfile(pwd,strcat(fname,"-wvt-aa.nc"));
             end
-            
+
             self.zscale = self.wvt.f^2;
             self.z_flux_scale = self.zscale/(86400*365);
 
@@ -991,6 +842,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
         [x, t] = CosineTransformBack( f, xbar, varargin )
         [xbar, f] = CosineTransformForward( t, x, varargin )
         [x, t] = SineTransformBack( f, xbar, varargin )
+        [xbar, f] = SineTransformForward( t, x, varargin )
 
         matrix = DCT1(N)
         matrix = iDCT1(N)
@@ -1006,44 +858,7 @@ fig = plotPoissonFlowOverContours(wvd,options)
         E0 = waveWaveGeostrophicEnergy(wvt,mask)
         E0 = waveWaveGeostrophicEnergyForMode(wvt,maskKU,maskKUx,Nj)
 
-        function cmap = symmetricTintMap(c,options)
-            %SYMMETRICTINTMAP Colormap going from color -> tinted white -> color
-            %
-            %   c   : 1x3 RGB color in [0 1]
-            %   N   : total number of levels (even recommended)
-            %   tintStrength : fraction of c mixed into white at the center
-            %
-            % Example:
-            %   c = [0.2 0.6 0.8];
-            %   colormap(symmetricTintMap(c,256,0.05)); colorbar
-            arguments
-                c 
-                options.N = 256
-                options.tintStrength = 0.05;
-            end
-
-            N = options.N;
-            tintStrength = options.tintStrength;
-
-            % midpoint color: mostly white with a hint of c
-            c_mid = (1 - tintStrength)*[1 1 1] + tintStrength*c;
-
-            % split N into two halves
-            n1 = floor(N/2);
-            n2 = N - n1;
-
-            % first half: c -> c_mid
-            half1 = [linspace(c(1), c_mid(1), n1)' ...
-                linspace(c(2), c_mid(2), n1)' ...
-                linspace(c(3), c_mid(3), n1)'];
-
-            % second half: c_mid -> c
-            half2 = [linspace(c_mid(1), c(1), n2)' ...
-                linspace(c_mid(2), c(2), n2)' ...
-                linspace(c_mid(3), c(3), n2)'];
-
-            cmap = [half1; half2];
-        end
+        cmap = symmetricTintMap(c,options)
 
         function iTimeChanged(~,eventData)
             self = eventData.AffectedObject;

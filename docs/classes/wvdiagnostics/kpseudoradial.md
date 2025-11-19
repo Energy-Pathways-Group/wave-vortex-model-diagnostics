@@ -3,7 +3,7 @@ layout: default
 title: kPseudoRadial
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 63
+nav_order: 62
 mathjax: true
 ---
 

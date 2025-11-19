@@ -5,7 +5,7 @@ function matrix = iDCT1(n)
 % This matrix exactly matches CosineTransformBack. See its documentation
 % for details.
 %
-% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: matrix = iDCT1(n)
 % - Parameter n: input argument `n`
 % - Returns matrix: output value `matrix`

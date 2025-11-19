@@ -14,10 +14,6 @@ Fast Discrete Sine Transform (DST-I).
 
 ---
 
-## Declaration
-```matlab
- [xbar,f] = SineTransformForward( t, x, varargin )
-```
 ## Parameters
 + `t`  input argument `t`
 + `x`  input argument `x`

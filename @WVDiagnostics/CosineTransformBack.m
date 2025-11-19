@@ -3,7 +3,7 @@ function [x, t] = CosineTransformBack( f, xbar, varargin )
 %
 % CosineTransformBack  Fast Discrete Inverse Cosine Transform
 %
-% - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: [x, t] = CosineTransformBack( f, xbar, varargin )
 % - Parameter f: input argument `f`
 % - Parameter xbar: input argument `xbar`

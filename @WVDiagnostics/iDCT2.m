@@ -6,7 +6,7 @@ function matrix = iDCT2(N)
 % 2/N scaling above (with no extra row halving).
 % Implementation: DCT-III with DC (first) COLUMN halved.
 %
-% - Topic: Diagnostics — General — Misc — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Transformations — Cosine and Sine
 % - Declaration: matrix = iDCT2(N)
 % - Parameter N: input argument `N`
 % - Returns matrix: output value `matrix`
