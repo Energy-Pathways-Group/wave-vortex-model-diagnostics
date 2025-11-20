@@ -33,7 +33,7 @@ classdef WVDiagnostics < handle
         wvpath      % path to the WaveVortexModel output
         diagpath    % path to the diagnostics file
 
-        % wvaapath - path to the a WVTransform with explicit anti-aliasing
+        % wvaapath - path to a WVTransform with explicit anti-aliasing
         % The WVTransformBoussinesq can take a very long time to
         % initialize, so if explicity anti-aliasing is requested, we cache
         % a copy of the transform.
@@ -247,6 +247,12 @@ classdef WVDiagnostics < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         fig = plotMooringRotarySpectrum(self)
+        setLogWavelengthXAxis(self,options)
+        [labels, ticks] = logWavelengthAxis(self,options)
+        overlayFrequencyContours(self,options)
+        overlayGeostrophicKineticPotentialRatioContours(self,options)
+        overlayGeostrophicKineticPotentialFractionContours(self,options)
+        showRossbyRadiusYAxis(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -388,7 +394,7 @@ classdef WVDiagnostics < handle
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Spectra (also implemented in the WVT)
+        % - Topic: Computing Spectra
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -404,116 +410,6 @@ classdef WVDiagnostics < handle
         [X,Y,U,V] = PoissonFlowFromFlux(wvd, flux)
         [X,Y,U,V] = PoissonFlowFromFluxType1(wvd, flux)
 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Figure extras
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        function setLogWavelengthXAxis(self,options)
-            arguments
-                self WVDiagnostics
-                options.num_ticks = 6
-                options.roundToNearest = 5
-            end
-            [labels_x,ticks_x] = self.logWavelengthAxis(num_ticks=options.num_ticks,roundToNearest=options.roundToNearest);
-            xscale('log')
-            xticks(ticks_x)
-            xticklabels(labels_x)
-        end
-
-        function [labels, ticks] = logWavelengthAxis(self,options)
-            % To use this:
-            % xticks(ticks_x)
-            % xticklabels(labels_x)
-            arguments
-                self WVDiagnostics
-                options.num_ticks = 6
-                options.roundToNearest = 5
-            end
-            ticks = logspace(log10(self.kRadial(2)),log10(self.kRadial(end)),options.num_ticks);
-            ticks = round(2*pi./(1e3.*ticks)/options.roundToNearest)*options.roundToNearest;
-            labels = cell(length(ticks),1);
-            for i=1:length(ticks)
-                labels{i} = sprintf('%.0f',ticks(i));
-            end
-            ticks = 2*pi./(1e3*ticks);
-        end
-
-        function overlayFrequencyContours(self,options)
-            arguments
-                self
-                options.frequencies = [1.01 1.05 1.2 1.5 2 4 8 16]
-                options.textColor = [.5,.5,.5]
-                options.labelSpacing = 600
-                options.lineWidth = 1
-            end
-            omegaJK = self.omega_jk;
-            set(gca,'layer','top'),
-            hold on
-            % flipud() and fliplr() help trick clabel into nicer label placement.
-            % for y-axis, use j+1 so contours line up with pcolor cells.
-            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j',fliplr(omegaJK(:,2:end)),options.frequencies,'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.frequencies,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-        end
-
-        function overlayGeostrophicKineticPotentialRatioContours(self,options)
-            arguments
-                self
-                options.ratios = [-2.5 -2.0 -1.5 -1.0 -0.5 0 0.5 1.0 1.5 2.0 2.5]
-                options.textColor = [.5,.5,.5]
-                options.labelSpacing = 400
-                options.lineWidth = 1
-            end
-            hke = self.geo_hke_jk;
-            pe = self.geo_pe_jk;
-            ratio = log10(hke./pe);
-            set(gca,'layer','top'),
-            hold on
-            % [C,h] = contour(self.kRadial(2:end),self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
-            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(2:end)',(ratio(2:end,2:end)),options.ratios,'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-            [C,h] = contour(2*pi./self.kRadial(2:end)/1000,self.j(1:end)',(ratio(1:end,2:end)),[-3,3],'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.ratios,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-        end
-
-        function overlayGeostrophicKineticPotentialFractionContours(self,options)
-            arguments
-                self
-                options.fractions = [.01,.1,.25,.75,.9,.99]
-                options.textColor = [.5,.5,.5]
-                options.labelSpacing = 600
-                options.lineWidth = 1
-            end
-            hke = self.geo_hke_jk;
-            pe = self.geo_pe_jk;
-            fraction = hke./(hke+pe);
-            set(gca,'layer','top'),
-            hold on
-            % flipud() and fliplr() help trick clabel into nicer label placement.
-            % for y-axis, use j+1 so contours line up with pcolor cells.
-            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),self.j(1:end)'+1,fliplr(fraction(1:end,2:end)),options.fractions,'LineWidth',options.lineWidth,'Color',options.textColor);
-            clabel(C,h,options.fractions,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-            [C,h] = contour(flipud(2*pi./self.kRadial(2:end)/1000),(self.j(1:end)')+1,fliplr(fraction(1:end,2:end)),[.5,.5],'LineWidth',2,'Color',options.textColor);
-            clabel(C,h,.5,'Color',options.textColor,'LabelSpacing',options.labelSpacing)
-        end
-
-        function showRossbyRadiusYAxis(self,options)
-            arguments
-                self
-                options.textColor = [.5,.5,.5]
-            end
-            set(gca,'Layer','top','TickLength',[0.015 0.015])
-            % create some nice tick labels to show deformation radius
-            yticksTemp = yticks;
-            ticks_y = sqrt(self.wvt.Lr2)./1000;
-            labels_y = cell(length(yticksTemp),1);
-            for i=1:length(yticksTemp)
-                labels_y{i} = sprintf('%0.1f',ticks_y(yticksTemp(i)+1));
-            end
-            text(.7*min(xlim)*ones(size(yticksTemp)),yticksTemp,labels_y,'Color',options.textColor,'HorizontalAlignment','center')
-            text(.7*min(xlim),1.1*max(ylim),'L_r (km)','Color',options.textColor,'HorizontalAlignment','center')
-        end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
@@ -748,39 +644,13 @@ classdef WVDiagnostics < handle
             end
         end
 
-        function setEnergyUnits(self, units)
-            % Set the time and energy scaling and units for plotting and output.
-            %
-            % Sets tscale, tscale_units, escale, and escale_units based on the specified units.
-            %
-            % - Topic: Configuration
-            % - Declaration: setEnergyUnits(self, units)
-            % - Parameter units: must be one of "si", "gm", or "si-yr"
-            % - Returns: None
-            arguments
-                self
-                units {mustBeMember(units, ["si", "gm", "si-yr"])}
-            end
-            switch lower(units)
-                case "si"
-                    self.escale = 1;
-                    self.escale_units = "m^3 s^{-2}";
-                    self.flux_scale = 1;
-                    self.flux_scale_units = "m^3 s^{-3}";
-                case "gm"
-                    self.escale = 3.74;
-                    self.escale_units = "GM";
-                    self.flux_scale = 3.74/(86400*365);
-                    self.flux_scale_units = "GM/yr";
-                case "si-yr"
-                    self.escale = 1;
-                    self.escale_units = "m^3 s^{-2}";
-                    self.flux_scale = 1/(86400*365);
-                    self.flux_scale_units = "m^3 s^{-2} yr^{-1}";
-                otherwise
-                    error("Unknown units: %s. Must be 'si', 'gm', or 'si-yr'.", units);
-            end
-        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % - Topic: Units
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        setEnergyUnits(self, units)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %

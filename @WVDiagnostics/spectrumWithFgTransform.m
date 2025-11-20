@@ -3,7 +3,7 @@ function S_f = spectrumWithFgTransform(self,f,options)
 %
 % spectrumWithFgTransform is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Diagnostics — Spectra — Potential energy — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Computing Spectra
 % - Declaration: S_f = spectrumWithFgTransform(self,f,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter f: input argument `f`

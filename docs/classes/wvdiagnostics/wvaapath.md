@@ -9,7 +9,7 @@ mathjax: true
 
 #  wvaapath
 
-path to the a WVTransform with explicit anti-aliasing
+path to a WVTransform with explicit anti-aliasing
 
 
 ---

@@ -40,6 +40,7 @@ Produces diagnostics and figures from WVModel output
     + [`plotEnergyFluxes1D`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotenergyfluxes1d.html) Plot 1D energy fluxes as a function of pseudo-wavelength / KE-PE / frequency.
     + [`plotEnergyOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotenergyovertime.html) Plot energy for each reservoir over time.
     + [`plotEnergyTriadFluxOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotenergytriadfluxovertime.html) Plot inertial flux for each reservoir over time
+    + [`plotSourcesSinksForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotsourcessinksforreservoirgroup.html) Plot sources, sinks, and reservoirs diagram for a reservoir group.
     + [`plotSourcesSinksReservoirsDiagram`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotsourcessinksreservoirsdiagram.html) Plot sources, sinks, and reservoirs diagram.
     + [`showDampingFluxVsPseudolength`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/showdampingfluxvspseudolength.html) Show Damping Flux Vs Pseudolength.
   + Potential Enstrophy
@@ -49,12 +50,16 @@ Produces diagnostics and figures from WVModel output
     + [`plotEnstrophyTriadFluxOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotenstrophytriadfluxovertime.html) Plot enstrophy triad fluxes over time.
   + Ancillary
     + [`plotMooringRotarySpectrum`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotmooringrotaryspectrum.html) Plot rotary spectra from mooring velocity time series.
+  + Auxiliary functions
+    + [`logWavelengthAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/logwavelengthaxis.html) Produce tick labels and positions for a log-scaled wavelength x-axis.
+    + [`overlayFrequencyContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlayfrequencycontours.html) Overlay contours of nondimensional frequency on the current axes.
+    + [`overlayGeostrophicKineticPotentialFractionContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialfractioncontours.html) Overlay contour where geostrophic kinetic fraction equals a given value.
+    + [`overlayGeostrophicKineticPotentialRatioContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialratiocontours.html) Overlay contours of geostrophic kinetic-to-potential energy ratio.
+    + [`setLogWavelengthXAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/setlogwavelengthxaxis.html) Configure axis tick labels for a log-scaled wavelength x-axis.
+    + [`showRossbyRadiusYAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/showrossbyradiusyaxis.html) Annotate the axes with a Rossby radius y-axis label.
   + Diagnostics — General
     + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
       + [`plotPoissonFlowOverContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotpoissonflowovercontours.html) Plot Poisson Flow Over Contours.
-  + Diagnostics
-    + General
-      + [`plotSourcesSinksForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotsourcessinksforreservoirgroup.html) Plot sources, sinks, and reservoirs diagram for a reservoir group.
 + Summaries
   + [`createEnstrophyFluxSummaryTable`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/createenstrophyfluxsummarytable.html) Create a LaTeX table summarizing enstrophy source/sink fluxes.
   + [`summarizeSourcesSinksReservoirs`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/summarizesourcessinksreservoirs.html) Summarize Sources Sinks Reservoirs.
@@ -117,17 +122,9 @@ Produces diagnostics and figures from WVModel output
       + [`geostrophicGeostrophicWaveEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/geostrophicgeostrophicwaveenergy.html) Note that.
       + [`waveWaveGeostrophicEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergy.html) Note that.
       + [`waveWaveGeostrophicEnergyForMode`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergyformode.html) Note that.
-  + Spectra — Cross-spectra
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`crossSpectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithfgtransform.html) Cross Spectrum With Fg Transform.
-      + [`crossSpectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithggtransform.html) Cross Spectrum With Gg Transform.
   + Enstrophy fluxes — Triad interactions
     + Fluxes over time, [t 1]
       + [`quadraticEnstrophyTriadFluxesOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenstrophytriadfluxesovertime.html) Compute enstrophy inertial (aka, triad) fluxes over time.
-  + Spectra — Potential energy
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`spectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithfgtransform.html) Spectrum With Fg Transform.
-      + [`spectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithggtransform.html) Spectrum With Gg Transform.
 + Transforms
   + Spectral
     + General
@@ -176,19 +173,23 @@ Produces diagnostics and figures from WVModel output
     + [`transformToPseudoRadialWavenumberApm`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumberapm.html) transforms Ap/Am modes in the from (j,kRadial) to kPseudoRadial.
 + Constructor
   + [`WVDiagnostics`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvdiagnostics.html) Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
++ Computing Spectra
+  + [`crossSpectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithfgtransform.html) Cross Spectrum With Fg Transform.
+  + [`crossSpectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithggtransform.html) Cross Spectrum With Gg Transform.
+  + [`spectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithfgtransform.html) Spectrum With Fg Transform.
+  + [`spectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithggtransform.html) Spectrum With Gg Transform.
 + Units
   + [`escale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale.html) energy scaling (numeric value)
   + [`escale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale_units.html) energy units (string value)
   + [`flux_scale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/flux_scale.html) energy flux scaling (numeric value)
   + [`flux_scale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/flux_scale_units.html) energy flux units (string value)
+  + [`setEnergyUnits`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/setenergyunits.html) Set the time and energy scaling and units for plotting and output.
   + [`tscale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/tscale.html) time axis scaling (numeric value)
   + [`tscale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/tscale_units.html) time axis units (string value)
   + [`z_flux_scale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/z_flux_scale.html) potential enstrophy flux scaling (numeric value)
   + [`z_flux_scale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/z_flux_scale_units.html) potential enstrophy flux units (string value)
   + [`zscale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/zscale.html) potential enstrophy scaling (numeric value)
   + [`zscale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/zscale_units.html) potential enstrophy units (string value)
-+ Configuration
-  + [`setEnergyUnits`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/setenergyunits.html) Set the time and energy scaling and units for plotting and output.
 + Dependent property getter
   + [`t_diag`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/t_diag.html) Get time vector from the diagnostics file
 + Other
@@ -215,20 +216,14 @@ Produces diagnostics and figures from WVModel output
   + [`kPseudoRadial`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/kpseudoradial.html) 
   + [`kRadial`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/kradial.html) 
   + [`kePeAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/kepeaxis.html) 
-  + [`logWavelengthAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/logwavelengthaxis.html) To use this:
   + [`omegaAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/omegaaxis.html) 
   + [`omega_jk`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/omega_jk.html) 
-  + [`overlayFrequencyContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlayfrequencycontours.html) 
-  + [`overlayGeostrophicKineticPotentialFractionContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialfractioncontours.html) 
-  + [`overlayGeostrophicKineticPotentialRatioContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialratiocontours.html) 
   + [`plotPoissonFlowOverPcolor`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotpoissonflowoverpcolor.html) 
   + [`pseudoRadialBinning`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/pseudoradialbinning.html) choose an algorithm for pseudoRadialBinning
-  + [`setLogWavelengthXAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/setlogwavelengthxaxis.html) 
-  + [`showRossbyRadiusYAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/showrossbyradiusyaxis.html) 
   + [`symmetricTintMap`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/symmetrictintmap.html) Colormap going from color -> tinted white -> color
   + [`t_wv`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/t_wv.html) 
   + [`version`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/version.html) Locate folder containing this class file
-  + [`wvaapath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvaapath.html) path to the a WVTransform with explicit anti-aliasing
+  + [`wvaapath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvaapath.html) path to a WVTransform with explicit anti-aliasing
   + [`wvfile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvfile.html) NetCDFFile instance for the WaveVortexModel output
   + [`wvpath`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvpath.html) path to the WaveVortexModel output
   + [`wvt`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvt.html) WVTransform instance, set to the current iTime

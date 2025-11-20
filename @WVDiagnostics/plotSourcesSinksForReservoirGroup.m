@@ -8,7 +8,7 @@ function [fig, boxDiagram] = plotSourcesSinksForReservoirGroup(self,options)
 % timeIndices, formats labels and units using class scaling properties, and
 % returns a drawn figure and the underlying BoxDiagram object.
 %
-% - Topic: Figures — Diagnostics — General
+% - Topic: Figures — Energy
 % - Declaration: [fig, boxDiagram] = plotSourcesSinksForReservoirGroup(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter name: (optional) Name of reservoir group to plot (default: "reservoir-damped-wave-geo")

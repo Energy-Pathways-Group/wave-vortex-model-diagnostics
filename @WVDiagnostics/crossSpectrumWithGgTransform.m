@@ -3,7 +3,7 @@ function S_f = crossSpectrumWithGgTransform(self,phi,gamma)
 %
 % crossSpectrumWithGgTransform is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Diagnostics — Spectra — Cross-spectra — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Computing Spectra
 % - Declaration: S_f = crossSpectrumWithGgTransform(self,phi,gamma)
 % - Parameter self: WVDiagnostics object
 % - Parameter phi: input argument `phi`
