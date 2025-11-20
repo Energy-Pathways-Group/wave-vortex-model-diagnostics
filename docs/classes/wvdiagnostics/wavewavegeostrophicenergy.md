@@ -3,7 +3,7 @@ layout: default
 title: waveWaveGeostrophicEnergy
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 140
+nav_order: 141
 mathjax: true
 ---
 

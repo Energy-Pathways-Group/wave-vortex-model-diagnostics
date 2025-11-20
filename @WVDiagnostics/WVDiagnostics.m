@@ -1,4 +1,4 @@
-classdef WVDiagnostics < handle
+classdef WVDiagnostics < handle & CAAnnotatedClass
     %WVDiagnostics Produces diagnostics and figures from WVModel output
     %   This is a collection of diagnostic tools for analyzing model output
     %
@@ -442,14 +442,13 @@ classdef WVDiagnostics < handle
         end
 
         function t = get.j(self)
-            % Get j indices
+            % j axis
             %
-            % Reads the 'j' variable from the diagnostics file.
+            % Reads the 'j' variable from the diagnostics file, if available, otherwise the model file.
             %
-            % - Topic: Dependent property getter
-            % - Declaration: t = get.j(self)
-            % - Returns t: j indices from diagnostics file
-            % t = self.diagfile.readVariables('j');
+            % - Topic: Axes
+            % - Declaration: j
+            % - Returns j: array of values
             if ~isempty(self.diagfile)
                 t = self.diagfile.readVariables('j');
             else
@@ -460,12 +459,11 @@ classdef WVDiagnostics < handle
         function t = get.kRadial(self)
             % Get kRadial indices
             %
-            % Reads the 'kRadial' variable from the diagnostics file.
+            % Reads the 'kRadial' variable from the diagnostics file, if available, otherwise the model file.
             %
-            % - Topic: Dependent property getter
-            % - Declaration: t = get.kRadial(self)
-            % - Returns t: kRadial indices from diagnostics file
-            % t = self.diagfile.readVariables('kRadial');
+            % - Topic: Axes
+            % - Declaration: kRadial
+            % - Returns kRadial: array of values
             if ~isempty(self.diagfile)
                 t = self.diagfile.readVariables('kRadial');
             else
@@ -479,10 +477,9 @@ classdef WVDiagnostics < handle
             % Reads the 'Lr2' variable from the diagnostics file if it
             % exists, or from the wvt if not
             %
-            % - Topic: Dependent property getter
-            % - Declaration: t = get.Lr2(self)
-            % - Returns t: kRadial indices from diagnostics file
-            % t = self.diagfile.readVariables('kRadial');
+            % - Topic: Axes
+            % - Declaration: Lr2
+            % - Returns Lr2: array of values
             if ~isempty(self.diagfile)
                 t = self.diagfile.readVariables('Lr2');
             else
@@ -496,9 +493,9 @@ classdef WVDiagnostics < handle
             % Reads the 'Lr2_pm' variable from the diagnostics file if it
             % exists, or from the wvt if not
             %
-            % - Topic: Dependent property getter
-            % - Declaration: t = get.Lr2_pm(self)
-            % - Returns t: Lr2_pm
+             % - Topic: Axes
+            % - Declaration: Lr2_pm
+            % - Returns Lr2_pm: array of values
             if ~isempty(self.diagfile)
                 t = self.diagfile.readVariables('Lr2_pm');
             else
@@ -708,6 +705,31 @@ classdef WVDiagnostics < handle
     end
 
     methods (Static)
+        function propertyAnnotations = classDefinedPropertyAnnotations()
+            arguments (Output)
+                propertyAnnotations CAPropertyAnnotation
+            end
+            propertyAnnotations = CAPropertyAnnotation.empty(0,0);
+
+            propertyAnnotations(end+1) = CANumericProperty('t_diag',{}, 's', 'time of observations');
+            propertyAnnotations(end).attributes('standard_name') = 'time';
+            propertyAnnotations(end).attributes('axis') = 'T';
+
+            propertyAnnotations(end+1) = CANumericProperty('t_wv',{}, 's', 'time of observations');
+            propertyAnnotations(end).attributes('standard_name') = 'time';
+            propertyAnnotations(end).attributes('axis') = 'T';
+
+            propertyAnnotations(end+1) = CADimensionProperty('j', 'mode number', 'vertical mode number');
+            propertyAnnotations(end+1) = CADimensionProperty('kRadial', 'rad/m', 'isotropic wavenumber dimension');
+
+            propertyAnnotations(end+1) = CANumericProperty('Lr2',{'j'},'m^2/rad^2', 'squared Rossby radius');
+            propertyAnnotations(end+1) = CANumericProperty('Lr2_pm',{'j','kRadial'},'m^2/rad^2', 'squared deformation radius of each wave mode', detailedDescription='- topic: Domain Attributes — Stratification');
+            propertyAnnotations(end+1) = CANumericProperty('omega_jk',{'j','kRadial'},'rad s^{-1}', 'intrinsic frequency wave mode', detailedDescription='- topic: Domain Attributes — Stratification');
+            propertyAnnotations(end+1) = CANumericProperty('geo_hke_jk',{'j','kRadial'},'m^{-1}', 'multiplicative factor that multiplies $$A_0^2$$ to compute kinetic energy.');
+            propertyAnnotations(end+1) = CANumericProperty('geo_pe_jk',{'j','kRadial'},'m^{-1}', 'multiplicative factor that multiplies $$A_0^2$$ to compute potential energy.');
+
+        end
+        
         cmap = cmocean(ColormapName,varargin)
         cmap = crameri(ColormapName,varargin)
 

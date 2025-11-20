@@ -41,8 +41,8 @@ function cmap = crameri(ColormapName,varargin)
 % Oceanography 29(3):9-13, http://dx.doi.org/10.5670/oceanog.2016.66.
 % See also colormap and caxis.
 %
-% - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-% - Declaration: cmap = crameri(ColormapName,varargin)
+% - Topic: Utilities
+% - Declaration: cmap = WVDiagnostics.crameri(ColormapName,varargin)
 % - Parameter ColormapName: input argument `ColormapName`
 % - Parameter varargin: input argument `varargin`
 % - Returns cmap: output value `cmap`

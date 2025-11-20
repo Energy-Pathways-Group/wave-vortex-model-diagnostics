@@ -158,15 +158,15 @@ Produces diagnostics and figures from WVModel output
     + [`transformToPseudoRadialWavenumberA0`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumbera0.html) transforms in the from (j,kRadial) to kPseudoRadial.
     + [`transformToPseudoRadialWavenumberApm`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumberapm.html) transforms Ap/Am modes in the from (j,kRadial) to kPseudoRadial.
 + Utilities
-  + Colormaps — Crameri
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`crameri`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crameri.html) returns perceptually-uniform scientific colormaps created.
+  + [`crameri`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crameri.html) returns perceptually-uniform scientific colormaps created.
 + Internal
   + Support functions for createReservoirGroup
     + [`addTriadFluxesForReservoirGroupAtTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/addtriadfluxesforreservoirgroupattime.html) Add Triad Fluxes For Reservoir Group At Time.
     + [`filterEnergyForSourcesSinksReservoirs`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/filterenergyforsourcessinksreservoirs.html) This function returns values assuming three reservoirs: geo, wave, and.
     + [`fluxesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/fluxesforreservoirgroup.html) Fluxes For Reservoir Group.
     + [`variablesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/variablesforreservoirgroup.html) Variables For Reservoir Group.
++ Developer
+  + [`classDefinedPropertyAnnotations`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/classdefinedpropertyannotations.html) return array of WVPropertyAnnotation initialized by default
 + Units
   + [`escale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale.html) energy scaling (numeric value)
   + [`escale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale_units.html) energy units (string value)

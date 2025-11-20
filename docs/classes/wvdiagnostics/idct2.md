@@ -3,7 +3,7 @@ layout: default
 title: iDCT2
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 55
+nav_order: 56
 mathjax: true
 ---
 

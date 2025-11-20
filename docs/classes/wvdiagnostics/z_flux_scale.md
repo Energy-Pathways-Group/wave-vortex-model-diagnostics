@@ -3,7 +3,7 @@ layout: default
 title: z_flux_scale
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 147
+nav_order: 148
 mathjax: true
 ---
 

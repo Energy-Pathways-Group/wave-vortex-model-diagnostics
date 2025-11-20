@@ -3,7 +3,7 @@ layout: default
 title: create2DMirrorFluxes
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 23
+nav_order: 24
 mathjax: true
 ---
 

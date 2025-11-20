@@ -3,7 +3,7 @@ layout: default
 title: showRossbyRadiusYAxis
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 118
+nav_order: 119
 mathjax: true
 ---
 

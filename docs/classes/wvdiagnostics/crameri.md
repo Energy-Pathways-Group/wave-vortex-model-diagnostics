@@ -3,7 +3,7 @@ layout: default
 title: crameri
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 21
+nav_order: 22
 mathjax: true
 ---
 
@@ -16,7 +16,7 @@ returns perceptually-uniform scientific colormaps created.
 
 ## Declaration
 ```matlab
- cmap = crameri(ColormapName,varargin)
+ cmap = WVDiagnostics.crameri(ColormapName,varargin)
 ```
 ## Parameters
 + `ColormapName`  input argument `ColormapName`
