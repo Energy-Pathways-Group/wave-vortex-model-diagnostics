@@ -3,7 +3,7 @@ function fig = plotPoissonFlowOverContours(wvd,options)
 %
 % plotPoissonFlowOverContours is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
-% - Topic: Figures — Diagnostics — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% - Topic: Figures — Auxiliary functions
 % - Declaration: fig = plotPoissonFlowOverContours(wvd,options)
 % - Parameter wvd: WVDiagnostics object
 % - Parameter visible: (optional) input argument `visible` (default: "on")

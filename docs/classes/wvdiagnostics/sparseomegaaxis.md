@@ -27,6 +27,14 @@ Sparse Omega Axis.
 
 ## Discussion
 
-  sparseOmegaAxis is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+  This function is used by create1DMirrorFluxes to create an efficient omega axis.
+ 
+  The bin assignments, `bins_omega`, can be used to create sparse matrices for efficient binning operations.
+ 
+  ```matlab
+  valid = ~isnan(bins_0);
+  S_0 = sparse(find(valid), bins_0(valid), 1, numel(wvt.Ap), numel(kp), nnz(valid));
+  F_wwg_kp_val = reshape(E0(:).' * S_0,[],1);
+  ```
  
           

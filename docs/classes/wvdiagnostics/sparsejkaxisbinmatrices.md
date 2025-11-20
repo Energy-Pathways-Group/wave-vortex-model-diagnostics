@@ -9,7 +9,7 @@ mathjax: true
 
 #  sparseJKAxisBinMatrices
 
-Sparse JKAxis Bin Matrices.
+Bin matrices for sparseKRadialAxis and sparseJWavenumberAxis
 
 
 ---
@@ -29,6 +29,6 @@ Sparse JKAxis Bin Matrices.
 
 ## Discussion
 
-  sparseJKAxisBinMatrices is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+  Used by create2DMirrorFluxes to create sparse binning matrices for the (j,k) axes.
  
               

@@ -2,6 +2,7 @@ classdef WVDiagnostics < handle
     %WVDiagnostics Produces diagnostics and figures from WVModel output
     %   This is a collection of diagnostic tools for analyzing model output
     %
+    % - Topic: Initialization
     % - Topic: Diagnostics Generation
     % - Topic: Figures — Model Snapshot
     % - Topic: Figures — Energy
@@ -24,10 +25,11 @@ classdef WVDiagnostics < handle
     % - Topic: Diagnostics — Potential Enstrophy Fluxes — Temporal averages, [j kRadial]
     % - Topic: Diagnostics — Potential Enstrophy Fluxes — Time series, [t 1]
     % - Topic: Diagnostics — Potential Enstrophy Fluxes — Spatial-temporal averages, [1 1]
-    % - Topic: Transforms — Spectral — General
-    % - Topic: Transforms — Spectral — General — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    % - Topic: Utilities — Colormaps — Crameri — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-    % - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+    % - Topic: Computing Spectra
+    % - Topic: Transformations — Cosine and Sine
+    % - Topic: Transformations — Axes
+    % - Topic: Utilities
+    % - Topic: Utilities — Sparse matrices
     % - Topic: Internal — Support functions for createReservoirGroup
     properties
         wvpath      % path to the WaveVortexModel output
@@ -661,7 +663,7 @@ classdef WVDiagnostics < handle
         function self = WVDiagnostics(filename,options)
             % Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
             %
-            % - Topic: Constructor
+            % - Topic: Initialization
             % - Declaration: self = WVDiagnostics(filename,options)
             % - Parameter filename: path to the WVModel output file
             % - Parameter options.diagnosticsFilePath: (optional) path to the diagnostics file

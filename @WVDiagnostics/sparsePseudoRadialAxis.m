@@ -1,9 +1,17 @@
 function [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
-% Sparse Pseudo Radial Axis.
+% Create Sparse Pseudo-Radial Wavenumber Axis and Bin Assignments.
 %
-% sparsePseudoRadialAxis is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+% This function is used by create1DMirrorFluxes to create an efficient pseudo-radial wavenumber axis.
 %
-% - Topic: Utilities — Sparse matrices — Axis binning — Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+% The bin assignments, e.g. `bins_0` and `bins_pm`, can be used to create sparse matrices for efficient binning operations.
+%
+% ```matlab
+% valid = ~isnan(bins_0);
+% S_0 = sparse(find(valid), bins_0(valid), 1, numel(wvt.Ap), numel(kp), nnz(valid));
+% F_wwg_kp_val = reshape(E0(:).' * S_0,[],1);
+% ```
+%
+% - Topic: Transformations — Axes
 % - Declaration: [kp,bins_0,bins_pm] = sparsePseudoRadialAxis(self)
 % - Parameter self: WVDiagnostics object
 % - Returns kp: output value `kp`

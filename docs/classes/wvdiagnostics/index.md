@@ -18,10 +18,12 @@ Produces diagnostics and figures from WVModel output
 ## Overview
     This is a collection of diagnostic tools for analyzing model output
  
-                                                      
+                                                          
 
 
 ## Topics
++ Initialization
+  + [`WVDiagnostics`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvdiagnostics.html) Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
 + Diagnostics Generation
   + [`create1DMirrorFluxes`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/create1dmirrorfluxes.html) Create 1D mirror flux diagnostics and write them to the diagnostics NetCDF.
   + [`create2DMirrorFluxes`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/create2dmirrorfluxes.html) Compute 2D mirror-flux diagnostics and write them to the diagnostics NetCDF.
@@ -55,11 +57,9 @@ Produces diagnostics and figures from WVModel output
     + [`overlayFrequencyContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlayfrequencycontours.html) Overlay contours of nondimensional frequency on the current axes.
     + [`overlayGeostrophicKineticPotentialFractionContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialfractioncontours.html) Overlay contour where geostrophic kinetic fraction equals a given value.
     + [`overlayGeostrophicKineticPotentialRatioContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/overlaygeostrophickineticpotentialratiocontours.html) Overlay contours of geostrophic kinetic-to-potential energy ratio.
+    + [`plotPoissonFlowOverContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotpoissonflowovercontours.html) Plot Poisson Flow Over Contours.
     + [`setLogWavelengthXAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/setlogwavelengthxaxis.html) Configure axis tick labels for a log-scaled wavelength x-axis.
     + [`showRossbyRadiusYAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/showrossbyradiusyaxis.html) Annotate the axes with a Rossby radius y-axis label.
-  + Diagnostics — General
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`plotPoissonFlowOverContours`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/plotpoissonflowovercontours.html) Plot Poisson Flow Over Contours.
 + Summaries
   + [`createEnstrophyFluxSummaryTable`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/createenstrophyfluxsummarytable.html) Create a LaTeX table summarizing enstrophy source/sink fluxes.
   + [`summarizeSourcesSinksReservoirs`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/summarizesourcessinksreservoirs.html) Summarize Sources Sinks Reservoirs.
@@ -125,31 +125,11 @@ Produces diagnostics and figures from WVModel output
   + Enstrophy fluxes — Triad interactions
     + Fluxes over time, [t 1]
       + [`quadraticEnstrophyTriadFluxesOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenstrophytriadfluxesovertime.html) Compute enstrophy inertial (aka, triad) fluxes over time.
-+ Transforms
-  + Spectral
-    + General
-+ Utilities
-  + Colormaps
-    + Crameri
-  + Sparse matrices
-    + Axis binning
-  + Colormaps — Crameri
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`crameri`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crameri.html) returns perceptually-uniform scientific colormaps created.
-  + Sparse matrices — Axis binning
-    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
-      + [`sparseJKAxisBinMatrices`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsejkaxisbinmatrices.html) Sparse JKAxis Bin Matrices.
-      + [`sparseJWavenumberAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsejwavenumberaxis.html) Sparse JWavenumber Axis.
-      + [`sparseKRadialAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsekradialaxis.html) Sparse KRadial Axis.
-      + [`sparseKePeAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsekepeaxis.html) Sparse Ke Pe Axis.
-      + [`sparseOmegaAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparseomegaaxis.html) Sparse Omega Axis.
-      + [`sparsePseudoRadialAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsepseudoradialaxis.html) Sparse Pseudo Radial Axis.
-+ Internal
-  + Support functions for createReservoirGroup
-    + [`addTriadFluxesForReservoirGroupAtTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/addtriadfluxesforreservoirgroupattime.html) Add Triad Fluxes For Reservoir Group At Time.
-    + [`filterEnergyForSourcesSinksReservoirs`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/filterenergyforsourcessinksreservoirs.html) This function returns values assuming three reservoirs: geo, wave, and.
-    + [`fluxesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/fluxesforreservoirgroup.html) Fluxes For Reservoir Group.
-    + [`variablesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/variablesforreservoirgroup.html) Variables For Reservoir Group.
++ Computing Spectra
+  + [`crossSpectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithfgtransform.html) Cross Spectrum With Fg Transform.
+  + [`crossSpectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithggtransform.html) Cross Spectrum With Gg Transform.
+  + [`spectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithfgtransform.html) Spectrum With Fg Transform.
+  + [`spectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithggtransform.html) Spectrum With Gg Transform.
 + Transformations
   + Cosine and Sine
     + [`CosineTransformBack`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/cosinetransformback.html) Fast Discrete Inverse Cosine Transform.
@@ -166,18 +146,27 @@ Produces diagnostics and figures from WVModel output
     + General
       + [`SineTransformForward`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sinetransformforward.html) Fast Discrete Sine Transform (DST-I).
   + Axes
+    + [`sparseJKAxisBinMatrices`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsejkaxisbinmatrices.html) Bin matrices for sparseKRadialAxis and sparseJWavenumberAxis
+    + [`sparseJWavenumberAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsejwavenumberaxis.html) Sparse JWavenumber Axis.
+    + [`sparseKRadialAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsekradialaxis.html) Sparse KRadial Axis.
+    + [`sparseKePeAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsekepeaxis.html) Sparse kenetic-potential energy ratio Axis.
+    + [`sparseOmegaAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparseomegaaxis.html) Sparse Omega Axis.
+    + [`sparsePseudoRadialAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/sparsepseudoradialaxis.html) Create Sparse Pseudo-Radial Wavenumber Axis and Bin Assignments.
     + [`transformToKePeAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtokepeaxis.html) Transform To Ke Pe Axis.
     + [`transformToOmegaAxis`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtoomegaaxis.html) transforms in the from (j,kRadial) to omegaAxis.
     + [`transformToPseudoRadialWavenumber`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumber.html) transforms in the from (j,kRadial) to kPseudoRadial.
     + [`transformToPseudoRadialWavenumberA0`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumbera0.html) transforms in the from (j,kRadial) to kPseudoRadial.
     + [`transformToPseudoRadialWavenumberApm`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/transformtopseudoradialwavenumberapm.html) transforms Ap/Am modes in the from (j,kRadial) to kPseudoRadial.
-+ Constructor
-  + [`WVDiagnostics`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wvdiagnostics.html) Initializes the WVDiagnostics object, loads the wave-vortex transform and diagnostics files.
-+ Computing Spectra
-  + [`crossSpectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithfgtransform.html) Cross Spectrum With Fg Transform.
-  + [`crossSpectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crossspectrumwithggtransform.html) Cross Spectrum With Gg Transform.
-  + [`spectrumWithFgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithfgtransform.html) Spectrum With Fg Transform.
-  + [`spectrumWithGgTransform`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/spectrumwithggtransform.html) Spectrum With Gg Transform.
++ Utilities
+  + Colormaps — Crameri
+    + Fluxes in space, [sparseJWavenumberAxis sparseKRadialAxis]
+      + [`crameri`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/crameri.html) returns perceptually-uniform scientific colormaps created.
++ Internal
+  + Support functions for createReservoirGroup
+    + [`addTriadFluxesForReservoirGroupAtTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/addtriadfluxesforreservoirgroupattime.html) Add Triad Fluxes For Reservoir Group At Time.
+    + [`filterEnergyForSourcesSinksReservoirs`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/filterenergyforsourcessinksreservoirs.html) This function returns values assuming three reservoirs: geo, wave, and.
+    + [`fluxesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/fluxesforreservoirgroup.html) Fluxes For Reservoir Group.
+    + [`variablesForReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/variablesforreservoirgroup.html) Variables For Reservoir Group.
 + Units
   + [`escale`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale.html) energy scaling (numeric value)
   + [`escale_units`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/escale_units.html) energy units (string value)
