@@ -27,6 +27,8 @@ Add Triad Fluxes For Reservoir Group At Time.
 
 ## Discussion
 
-  addTriadFluxesForReservoirGroupAtTime is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
+  Compute triad energy-flux contributions for a reservoir group at the
+  specified time index and write the integrated per-triad energy
+  transfers into the corresponding `triadVar("T_i_j_k")` variables.
  
               

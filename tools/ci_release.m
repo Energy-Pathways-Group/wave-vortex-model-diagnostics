@@ -1,8 +1,9 @@
 function ci_release(options)
 arguments
+    options.rootDir = ".."
     options.bumpType
-    options.doc_build_script
-    options.rootDir
+    options.shouldBuildWebsiteDocumentation = false
+    options.shouldPackageForDistribution = false
     options.dist_folder = "dist"
     options.excluded_dist_folders = [".git", "docs", "tools"]
 end
@@ -78,18 +79,18 @@ else
 end
 
 %% 2) Run your custom documentation build
-if isfield(options,"doc_build_script")
+if options.shouldBuildWebsiteDocumentation
     % Replace this with your actual doc build entry point
     % e.g. waveVortexDiagnostics_build_docs, or build_docs
-    if exist(options.doc_build_script, "file")
+    if exist("BuildWebsiteDocumentation","file")
         fprintf('Running documentation builder\n');
-        run(options.doc_build_script);
+        BuildWebsiteDocumentation(rootDir=options.rootDir);
     end
 end
 
 %% 3) Export package root to dist/<name>-<version> for MPM repo
 
-if isfield(options,"dist_folder")
+if options.shouldPackageForDistribution == true
     pkgName = string(cfg.name);
     distDir = fullfile(options.rootDir, options.dist_folder);
     if ~isfolder(distDir)
