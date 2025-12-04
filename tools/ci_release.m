@@ -2,6 +2,7 @@ function ci_release(options)
 arguments
     options.rootDir = ".."
     options.bumpType
+    options.notes string = ""
     options.shouldBuildWebsiteDocumentation = false
     options.shouldPackageForDistribution = false
     options.dist_folder = "dist"
@@ -74,6 +75,11 @@ if isfield(options,"bumpType")
     assert(fid ~= -1, "Could not open mpackage.json for writing");
     fwrite(fid, jsonStr);
     fclose(fid);
+
+    %% If we bumped the version, and were handed notes, record that
+    %% 2) Update CHANGELOG.md (optional notes)
+    changelogPath = fullfile(options.rootDir, "CHANGELOG.md");
+    update_changelog(changelogPath,options.notes,newVer);
 else
     newVer = sprintf('%d.%d.%d', major, minor, patch);
 end
