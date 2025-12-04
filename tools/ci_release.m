@@ -77,7 +77,6 @@ if isfield(options,"bumpType")
     fclose(fid);
 
     %% If we bumped the version, and were handed notes, record that
-    %% 2) Update CHANGELOG.md (optional notes)
     changelogPath = fullfile(options.rootDir, "CHANGELOG.md");
     update_changelog(changelogPath,options.notes,newVer);
 else
@@ -88,9 +87,9 @@ end
 if options.shouldBuildWebsiteDocumentation
     % Replace this with your actual doc build entry point
     % e.g. waveVortexDiagnostics_build_docs, or build_docs
-    if exist("BuildWebsiteDocumentation","file")
+    if exist("build_website_documentation","file")
         fprintf('Running documentation builder\n');
-        BuildWebsiteDocumentation(rootDir=options.rootDir);
+        build_website_documentation(rootDir=options.rootDir);
     end
 end
 
