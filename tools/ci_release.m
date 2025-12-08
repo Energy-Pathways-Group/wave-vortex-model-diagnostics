@@ -6,7 +6,7 @@ arguments
     options.shouldBuildWebsiteDocumentation = false
     options.shouldPackageForDistribution = false
     options.dist_folder = "dist"
-    options.excluded_dist_folders = [".git", "docs", "tools"]
+    options.excluded_dist_folders = [".git", "docs", "tools", "Documentation"]
 end
 %CI_RELEASE CI entry point for MPM release.
 %   CI_RELEASE(options) where
