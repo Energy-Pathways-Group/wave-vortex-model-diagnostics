@@ -64,8 +64,6 @@ jobs:
           
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
-        with:
-          release: R2024b
 
       - name: Bump version, update changelog, build docs, export MPM package
         uses: matlab-actions/run-command@v2
@@ -106,7 +104,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Stage changes from ci_release: mpackage.json, CHANGELOG, docs, etc.
-          git add .
+          git add resources/mpackage.json CHANGELOG.md docs
 
           # If nothing changed, skip commit
           if git diff --cached --quiet; then
