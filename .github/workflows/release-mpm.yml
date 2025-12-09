@@ -6,9 +6,10 @@ on:
       bump:
         description: "Version bump type"
         required: true
-        default: "patch"
+        default: "none"
         type: choice
         options:
+          - none
           - patch
           - minor
           - major
