@@ -78,9 +78,10 @@ jobs:
             opts.rootDir = pwd;
             opts.bumpType = "${{ github.event.inputs.bump }}";
             opts.notes = "${{ github.event.inputs.notes }}";
-            opts.shouldBuildWebsiteDocumentation = "${{ github.event.inputs.shouldBuildWebsiteDocumentation }}";
-            opts.shouldPackageForDistribution = "${{ github.event.inputs.shouldPackageForDistribution }}";
-            ci_release(opts);
+            opts.shouldBuildWebsiteDocumentation = ${{ github.event.inputs.shouldBuildWebsiteDocumentation }};
+            opts.shouldPackageForDistribution = ${{ github.event.inputs.shouldPackageForDistribution }};
+            options = namedargs2cell(opts);
+            ci_release(options{:});
 
       - name: Read release metadata from MATLAB
         id: meta
