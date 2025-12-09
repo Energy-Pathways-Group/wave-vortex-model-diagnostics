@@ -140,21 +140,21 @@ jobs:
               --notes "$NOTES"
           fi
 
-      - name: Check out OceanKit-mpm-repo
+      - name: Check out OceanKit
         uses: actions/checkout@v4
         with:
-          repository: JeffreyEarly/OceanKit-mpm-repo
-          path: OceanKit-mpm-repo
+          repository: JeffreyEarly/OceanKit
+          path: OceanKit
           token: ${{ secrets.MPM_REPO_PAT }}
           fetch-depth: 0
 
-      - name: Copy package into OceanKit-mpm-repo
+      - name: Copy package into OceanKit
         run: |
-          echo "Copying dist/${{ steps.meta.outputs.folder }} -> OceanKit-mpm-repo/"
-          rsync -av "dist/${{ steps.meta.outputs.folder }}/" "OceanKit-mpm-repo/${{ steps.meta.outputs.folder }}/"
+          echo "Copying dist/${{ steps.meta.outputs.folder }} -> OceanKit/"
+          rsync -av "dist/${{ steps.meta.outputs.folder }}/" "OceanKit/${{ steps.meta.outputs.folder }}/"
 
-      - name: Commit and push to OceanKit-mpm-repo
-        working-directory: OceanKit-mpm-repo
+      - name: Commit and push to OceanKit
+        working-directory: OceanKit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -162,7 +162,7 @@ jobs:
           git add .
 
           if git diff --cached --quiet; then
-            echo "No changes to commit in OceanKit-mpm-repo."
+            echo "No changes to commit in OceanKit."
             exit 0
           fi
 
