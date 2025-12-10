@@ -35,6 +35,9 @@ on:
           - true
           - false
 
+permissions:
+  contents: write
+  
 jobs:
   call-reusable-release:
     uses: JeffreyEarly/OceanKit/.github/workflows/reusable-mpm-release.yml@main
