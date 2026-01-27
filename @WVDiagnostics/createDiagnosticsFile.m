@@ -33,13 +33,16 @@ if exist(self.diagpath,"file") && ~isfield(options,"filename")
     didx = diff(idx);
     stride = didx(1);
     timeIndices = (idx(end)+stride):stride:length(self.t_wv);
-    wvt = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
+    wvt = self.wvt; %WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
     diagfile = self.diagfile;
     ncfile = self.wvfile;
 
     outputIndexOffset = length(self.t_diag);
 
-    wvt.addOperation(SpatialForcingOperation(wvt));
+    try
+        wvt.addOperation(SpatialForcingOperation(wvt));
+    catch
+    end
     int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
     
     % 1. Measures of energy, APV and enstrophy
@@ -109,11 +112,12 @@ else
     else
         [wvt, ncfile] = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf,shouldReadOnly=true);
     end
-    if ncfile.hasVariableWithName('wave-vortex/t')
-        tDim = ncfile.readVariables('wave-vortex/t');
-    else
-        tDim = ncfile.readVariables('t');
-    end
+    % if ncfile.hasVariableWithName('wave-vortex/t')
+    %     tDim = ncfile.readVariables('wave-vortex/t');
+    % else
+    %     tDim = ncfile.readVariables('t');
+    % end
+    tDim = ncfile.readVariables('wave-vortex/t');
 
     if ~isfield(options,"timeIndices")
         timeIndices = 1:options.stride:length(tDim);
@@ -317,7 +321,7 @@ for timeIndex = 1:length(timeIndices)
                 Fv = Fv - wvt.f*wvt.u;
             end
             DF_x = wvt.diffY(Fw) - wvt.diffZF(Fv); % w_y - v_z
-            DF_y = wvt.diffZF(Fu) - wvt.diffX(Fw);  % u_z - w_x
+            DF_y = wvt.diffZF(Fu) - wvt.diffX(Fw); % u_z - w_x
             DF_z = wvt.diffX(Fv) - wvt.diffY(Fu);  % v_x - u_y
         end
 
