@@ -243,7 +243,8 @@ if options.shouldShowEnergySpectra
     % title('geostrophic energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
     axis square
     clim(ax,energy_limits);
-    ylabel("radius of deformation (km)")
+    % ylabel("deformation wavelength (km)")
+    ylabel("vertical mode scale, 2\pi\cdotL_d (km)")
     set(gca, 'YAxisLocation', 'right','Layer','top','TickLength',[0.015 0.015]);
     colormap(ax, cmLinMono);
     set(gca,'layer','top'),
@@ -281,7 +282,8 @@ if options.shouldShowEnergySpectra
     % title('wave energy spectrum','Units', 'normalized', 'Position', [0.5, 0.93, 0])
     xlabel('horizontal wavelength (km)')
     % clim(ax,energy_limits);
-    ylabel("radius of deformation (km)")
+    % ylabel("deformation wavelength (km)")
+    ylabel("vertical mode scale, 2\pi\cdotL_d (km)")
     set(gca, 'YAxisLocation', 'right','Layer','top','TickLength',[0.015 0.015]);
     colormap(ax, cmLinMono);
     cb.Label.String = "log10(m^3 s^{-2})";
