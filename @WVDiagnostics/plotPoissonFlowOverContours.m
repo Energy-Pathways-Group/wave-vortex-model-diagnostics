@@ -101,14 +101,16 @@ kLinLog = linspace(log10(kMin),logKmax,N);
 jLinLog = linspace(log10(jMin),logJmax,N);
 [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
 
-if ~isfield(options,"figureHandle")
-    fig = figure(Units='points',Visible = options.visible);
-    set(gcf,'PaperPositionMode','auto')
-else
-    fig = options.figureHandle;
-    clf(options.figureHandle)
-    set(0, 'currentfigure', options.figureHandle);
-end
+[hostAx, fig] = resolveHostAxes(options.figureHandle, visible=options.visible);
+
+% if ~isfield(options,"figureHandle")
+%     fig = figure(Units='points',Visible = options.visible);
+%     set(gcf,'PaperPositionMode','auto')
+% elseif isa(options.figureHandle, "matlab.ui.Figure")
+%     fig = options.figureHandle;
+%     clf(options.figureHandle)
+%     set(0, 'currentfigure', options.figureHandle);
+% end
 % fig = figure(Units='points',Visible = options.visible);
 % set(gcf,'PaperPositionMode','auto')
 
@@ -121,7 +123,11 @@ if isfield(options,"forcingFlux")
 
     % loop over forcing fluxes to plot
     for k=1:nData
-        ax(k) = axes;
+        if k == 1
+            ax(k) = hostAx;
+        else
+            ax(k) = axes(Parent=fig);%, Units=hostAx.Units, Position=hostAx.Position, Color = "none", Box="off");
+        end
 
         % add contour for IO and MDA modes
         if k==1
@@ -178,7 +184,8 @@ if isfield(options,"forcingFlux")
         set(ax(k),'XTick',[]);
         set(ax(k),'YTick',[]);
         if k>1
-            ax(k).Position = ax(1).Position;      % match positions
+            ax(k).Units = hostAx.Units;
+            ax(k).Position = hostAx.Position;      % match positions
             linkaxes([ax(1) ax(k)])               % link panning/zooming
         end
     end
@@ -186,12 +193,15 @@ if isfield(options,"forcingFlux")
     % add coutour for damping scale
     ax(k+1) = axes;
     ax(k+1).Color = 'none';                 % transparent background
-    ax(k+1).Position = ax(1).Position;      % match positions
+    ax(k+1).Units = hostAx.Units;
+    ax(k+1).Position = hostAx.Position;      % match positions
     linkaxes([ax(1) ax(k+1)])               % link panning/zooming
 else
     k=0;
-    ax = axes;
+    ax(k+1) = hostAx;
     ax(k+1).Color = 'none';                 % transparent background
+    ax(k+1).Units = hostAx.Units;
+    ax(k+1).Position = hostAx.Position;      % match positions
     H = gobjects(0);
 end
 
@@ -298,7 +308,8 @@ end
 
 
 % make log style ticks
-h = gca;
+h = hostAx;
+hostAx.Layer = "top";
 % vector for tick labels (wavelength)
 X = 2*pi./(10.^kLinLog)/1;
 Y = 2*pi./(10.^jLinLog)/1;
@@ -336,4 +347,31 @@ ylabel("deformation wavelength (km)")
 % legend
 % Either give legend name with DisplayName='text' or hide with HandleVisibility='off'
 legend(gca,H,'location','northwest');
+end
+
+function [hostAx, f] = resolveHostAxes(target, options)
+arguments
+    target 
+    options.visible  = "on"
+end
+if isempty(target)
+    f = figure(Units='points',Visible = options.visible);
+    set(gcf,'PaperPositionMode','auto')
+    hostAx = axes("Parent", f);
+    cla(hostAx)
+
+elseif isa(target, "matlab.ui.Figure")
+    f = target;
+    clf(f)
+    hostAx = axes("Parent", f);
+
+elseif isa(target, "matlab.graphics.axis.Axes")
+    hostAx = target;
+    f = ancestor(hostAx, "figure");
+    cla(hostAx)
+
+else
+    error("drawOverlayThing:BadTarget", ...
+        "opts.target must be [], a figure handle, or an axes handle.");
+end
 end

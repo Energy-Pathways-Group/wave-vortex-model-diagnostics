@@ -38,8 +38,8 @@ if options.outputGrid == "sparse"
 else
     repeat_last_row_col = @(v) v([1:end end], [1:end end]);
     zero_pad = @(v) [[0, zeros(1,size(v,2))]; [zeros(size(v,1),1), v]];
-    js_pad = cat(1,js,self.jWavenumber(end));
-    ks_pad = cat(1,ks,self.kRadial(end));
+    js_pad = cat(1,js,js(end)+eps);
+    ks_pad = cat(1,ks,ks(end)+eps);
     [Js_pad,Ks_pad] = ndgrid(js_pad,ks_pad);
     flux_interp_full = @(v) v;
     flux_interp_sparse = @(v) diff(diff( zero_pad(interpn(Js_pad,Ks_pad,repeat_last_row_col(cumsum(cumsum(v,1),2)),J,K)), 1,1 ),1,2);
