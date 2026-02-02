@@ -244,7 +244,8 @@ if options.shouldShowEnergySpectra
     axis square
     clim(ax,energy_limits);
     % ylabel("deformation wavelength (km)")
-    ylabel("vertical mode scale, 2\pi\cdotL_d (km)")
+    % ylabel("vertical mode scale, 2\pi\cdotL_d (km)")
+    ylabel("vertical mode deformation length (km)")
     set(gca, 'YAxisLocation', 'right','Layer','top','TickLength',[0.015 0.015]);
     colormap(ax, cmLinMono);
     set(gca,'layer','top'),
@@ -283,7 +284,8 @@ if options.shouldShowEnergySpectra
     xlabel('horizontal wavelength (km)')
     % clim(ax,energy_limits);
     % ylabel("deformation wavelength (km)")
-    ylabel("vertical mode scale, 2\pi\cdotL_d (km)")
+    % ylabel("vertical mode scale, 2\pi\cdotL_d (km)")
+    ylabel("vertical mode deformation length (km)")
     set(gca, 'YAxisLocation', 'right','Layer','top','TickLength',[0.015 0.015]);
     colormap(ax, cmLinMono);
     cb.Label.String = "log10(m^3 s^{-2})";
