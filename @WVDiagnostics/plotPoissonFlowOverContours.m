@@ -47,7 +47,7 @@ arguments
     options.kmax = Inf;
     options.jmax = Inf;
     options.quiverScale
-    options.figureHandle
+    options.figureHandle = []
     options.nLevels = 10
 end
 % if isnumeric(options.forcingFlux)
@@ -224,10 +224,10 @@ hold on
 [C,h] = contour(ax(k+1),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
 clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
 ax(k+1).Color = 'none';
-% set(ax(k+1),'XTickLabel',[]);
-% set(ax(k+1),'YTickLabel',[]);
-% set(ax(k+1),'XTick',[]);
-% set(ax(k+1),'YTick',[]);
+set(ax(k+1),'XTickLabel',[]);
+set(ax(k+1),'YTickLabel',[]);
+set(ax(k+1),'XTick',[]);
+set(ax(k+1),'YTick',[]);
 
 % add frequency contours
 if options.addFrequencyContours
@@ -310,6 +310,7 @@ end
 % make log style ticks
 h = hostAx;
 hostAx.Layer = "top";
+axes(hostAx);
 % vector for tick labels (wavelength)
 X = 2*pi./(10.^kLinLog)/1;
 Y = 2*pi./(10.^jLinLog)/1;
