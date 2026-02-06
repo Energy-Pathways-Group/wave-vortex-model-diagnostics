@@ -16,9 +16,9 @@ Produces diagnostics and figures from WVModel output
 ---
 
 ## Overview
-    This is a collection of diagnostic tools for analyzing model output
+This is a collection of diagnostic tools for analyzing model output
  
-                                                          
+                                                      
 
 
 ## Topics
