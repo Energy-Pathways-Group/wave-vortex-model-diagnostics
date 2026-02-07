@@ -116,6 +116,13 @@ jLinLog = linspace(log10(jMin),logJmax,N);
 
 filled = true;
 
+% Shade IO and MDA in hostAx
+IOMDA = zeros(size(KLinLog));
+IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
+IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
+contourf(hostAx,KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
+hold on
+
 if isfield(options,"forcingFlux")
     nData = length(options.forcingFlux);
     ax = gobjects(nData,1);
@@ -123,21 +130,11 @@ if isfield(options,"forcingFlux")
 
     % loop over forcing fluxes to plot
     for k=1:nData
-        if k == 1
-            ax(k) = hostAx;
-        else
-            ax(k) = axes(Parent=fig);%, Units=hostAx.Units, Position=hostAx.Position, Color = "none", Box="off");
-        end
 
-        % add contour for IO and MDA modes
-        if k==1
-            IOMDA = zeros(size(KLinLog));
-            IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
-            IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
-            contourf(ax(k),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
-            hold on
-        end
-
+        % axes for forcing contours
+        ax(k) = axes(Parent=fig);%, Units=hostAx.Units, Position=hostAx.Position, Color = "none", Box="off");
+        
+        % interpolate forcingFlux for log-log plot
         forcingFlux = options.forcingFlux(k).flux;
         fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
         fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
@@ -308,6 +305,7 @@ end
 
 
 % make log style ticks
+hostAx.Color = 'none';
 h = hostAx;
 hostAx.Layer = "top";
 axes(hostAx);
