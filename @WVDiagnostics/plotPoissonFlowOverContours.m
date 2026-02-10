@@ -180,11 +180,9 @@ if isfield(options,"forcingFlux")
         set(ax(k),'YTickLabel',[]);
         set(ax(k),'XTick',[]);
         set(ax(k),'YTick',[]);
-        if k>1
-            ax(k).Units = hostAx.Units;
-            ax(k).Position = hostAx.Position;      % match positions
-            linkaxes([ax(1) ax(k)])               % link panning/zooming
-        end
+        ax(k).Units = hostAx.Units;
+        ax(k).Position = hostAx.Position;      % match positions
+        linkaxes([ax(1) ax(k)])               % link panning/zooming
     end
 
     % add coutour for damping scale
@@ -303,9 +301,8 @@ for k=1:length(options.inertialFlux)
 
 end
 
-
 % make log style ticks
-hostAx.Color = 'none';
+hostAx.Color = 'w';%'none';
 h = hostAx;
 hostAx.Layer = "top";
 axes(hostAx);
@@ -341,7 +338,7 @@ h.YAxis.MinorTickValues = (minor_y_wn);
 
 % add labels
 xlabel("horizontal wavelength (km)")
-ylabel("deformation wavelength (km)")
+ylabel("vertical mode deformation length (km)")
 
 % legend
 % Either give legend name with DisplayName='text' or hide with HandleVisibility='off'
