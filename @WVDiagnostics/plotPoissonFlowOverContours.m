@@ -182,25 +182,25 @@ if isfield(options,"forcingFlux")
         set(ax(k),'YTick',[]);
         ax(k).Units = hostAx.Units;
         ax(k).Position = hostAx.Position;      % match positions
-        linkaxes([ax(1) ax(k)])               % link panning/zooming
+        linkaxes([hostAx ax(k)])               % link panning/zooming
     end
 
-    % add coutour for damping scale
-    ax(k+1) = axes;
-    ax(k+1).Color = 'none';                 % transparent background
-    ax(k+1).Units = hostAx.Units;
-    ax(k+1).Position = hostAx.Position;      % match positions
-    linkaxes([ax(1) ax(k+1)])               % link panning/zooming
 else
     k=0;
     ax(k+1) = hostAx;
     ax(k+1).Color = 'none';                 % transparent background
     ax(k+1).Units = hostAx.Units;
     ax(k+1).Position = hostAx.Position;      % match positions
+    linkaxes([hostAx ax(k+1)])               % link panning/zooming
     H = gobjects(0);
 end
 
-
+% add coutour for damping scale
+ax(k+1) = axes;
+ax(k+1).Color = 'none';                 % transparent background
+ax(k+1).Units = hostAx.Units;
+ax(k+1).Position = hostAx.Position;      % match positions
+linkaxes([hostAx ax(k+1)])               % link panning/zooming
 kj = 10.^KLinLog; kr = 10.^ JLinLog;
 Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
@@ -301,8 +301,15 @@ for k=1:length(options.inertialFlux)
 
 end
 
+% create legend in own axes so it always has solid background.
+legAx = axes;
+legend(legAx,H,'location','northwest');
+legAx.Visible = 'off';
+legAx.Color = 'none';
+legAx.Position = hostAx.Position;   
+
 % make log style ticks
-hostAx.Color = 'w';%'none';
+hostAx.Color = 'none';
 h = hostAx;
 hostAx.Layer = "top";
 axes(hostAx);
@@ -340,9 +347,6 @@ h.YAxis.MinorTickValues = (minor_y_wn);
 xlabel("horizontal wavelength (km)")
 ylabel("vertical mode deformation length (km)")
 
-% legend
-% Either give legend name with DisplayName='text' or hide with HandleVisibility='off'
-legend(gca,H,'location','northwest');
 end
 
 function [hostAx, f] = resolveHostAxes(target, options)
