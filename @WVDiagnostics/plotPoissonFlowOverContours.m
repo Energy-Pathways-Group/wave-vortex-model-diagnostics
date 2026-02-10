@@ -25,6 +25,7 @@ function fig = plotPoissonFlowOverContours(wvd,options)
 % - Parameter quiverScale: input argument `quiverScale`
 % - Parameter figureHandle: input argument `figureHandle`
 % - Parameter nLevels: (optional) input argument `nLevels` (default: 10)
+% - Parameter yAxisLabel: (optionsl) label for y-axis, either 'deformation length' (default) or 'vertical mode'.
 % - Returns fig: Figure handle for the generated plot
 arguments
     wvd WVDiagnostics
@@ -49,6 +50,7 @@ arguments
     options.quiverScale
     options.figureHandle = []
     options.nLevels = 10
+    options.yAxisLabel = "deformation length"
 end
 % if isnumeric(options.forcingFlux)
 %     options.forcingFlux = {options.forcingFlux};
@@ -308,44 +310,73 @@ legAx.Visible = 'off';
 legAx.Color = 'none';
 legAx.Position = hostAx.Position;   
 
-% make log style ticks
+% make log style ticks for x axis
 hostAx.Color = 'none';
 h = hostAx;
 hostAx.Layer = "top";
 axes(hostAx);
 % vector for tick labels (wavelength)
 X = 2*pi./(10.^kLinLog)/1;
-Y = 2*pi./(10.^jLinLog)/1;
 % Major ticks (decades)
 major_x = floor(min(log10(X))):ceil(max(log10(X)));
-major_y = floor(min(log10(Y))):ceil(max(log10(Y)));
 % Minor ticks (log-spaced between major ticks)
 minor_x = [];
 for k = 1:length(major_x)-1
     minor_x = [minor_x, log10((2:9) * 10^major_x(k))];
 end
-minor_y = [];
-for k = 1:length(major_y)-1
-    minor_y = [minor_y, log10((2:9) * 10^major_y(k))];
-end
 % convert back to wavenumber and flip
 major_x_wn = log10(2*pi)-flip(major_x);
-major_y_wn = log10(2*pi)-flip(major_y);
 minor_x_wn = log10(2*pi)-flip(minor_x);
-minor_y_wn = log10(2*pi)-flip(minor_y);
 % add major ticks
-set(h, 'XTick', (major_x_wn), 'YTick', (major_y_wn));
+set(h, 'XTick', (major_x_wn));
 % Set tick labels to 10^x format, remembering to flip
 set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x-3), flip(major_x), 'UniformOutput', false));
-set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y-3), flip(major_y), 'UniformOutput', false));
 % add minor ticks
-set(h, 'XMinorTick','on', 'YMinorTick','on')
+set(h, 'XMinorTick','on')
 h.XAxis.MinorTickValues = (minor_x_wn);
-h.YAxis.MinorTickValues = (minor_y_wn);
-
 % add labels
 xlabel("horizontal wavelength (km)")
-ylabel("vertical mode deformation length (km)")
+
+% y axis ticks
+if strcmp(options.yAxisLabel,"deformation length")
+    % vector for tick labels (wavelength)
+    Y = 2*pi./(10.^jLinLog)/1;
+    % Major ticks (decades)
+    major_y = floor(min(log10(Y))):ceil(max(log10(Y)));
+    % Minor ticks (log-spaced between major ticks)
+    minor_y = [];
+    for k = 1:length(major_y)-1
+        minor_y = [minor_y, log10((2:9) * 10^major_y(k))];
+    end
+    % convert back to wavenumber and flip
+    major_y_wn = log10(2*pi)-flip(major_y);
+    minor_y_wn = log10(2*pi)-flip(minor_y);
+    % add major ticks
+    set(h, 'YTick', (major_y_wn));
+    % Set tick labels to 10^x format, remembering to flip
+    set(h, 'YTickLabel', arrayfun(@(y) sprintf('10^{%d}', y-3), flip(major_y), 'UniformOutput', false));
+    % add minor ticks
+    set(h, 'YMinorTick','on')
+    h.YAxis.MinorTickValues = (minor_y_wn);
+    % add labels
+    ylabel("vertical mode deformation length (km)")
+elseif strcmp(options.yAxisLabel,"vertical mode")
+    % select reasonable jMode spacing for ticks
+    jInd = [1,2,3,4,5,6,11:10:length(wvd.j)];
+    jMode = wvd.j(jInd);
+    % for each jMode, get corresponding jWavenumber
+    jWavenumberTemp1 = jPseudoLocation(jInd);
+    jWavenumberTemp2 = [jMin;jPseudoLocation(jInd(1:end-1))];
+    jWavenumberTemp = mean([jWavenumberTemp1 jWavenumberTemp2],2);
+    % set tick locations
+    set(h, 'YTick', log10(jWavenumberTemp));
+    % set tick labels
+    set(h, 'YTickLabel', jMode);
+    % add labels
+    ylabel("vertical mode")
+else
+    error("yAxisLabel must be 'deformation length' or 'vertical mode'.")
+end
 
 end
 
