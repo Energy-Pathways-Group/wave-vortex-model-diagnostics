@@ -118,17 +118,19 @@ jLinLog = linspace(log10(jMin),logJmax,N);
 
 filled = true;
 
+hold on
+
 % Shade IO and MDA in hostAx
+ax(1) = hostAx;
 IOMDA = zeros(size(KLinLog));
 IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
 IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
-contourf(hostAx,KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
-hold on
+contourf(ax(end),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
 
+H = gobjects(0);
 if isfield(options,"forcingFlux")
     nData = length(options.forcingFlux);
     ax = gobjects(nData,1);
-    H = gobjects(0); % empty container for plot element handles
 
     % loop over forcing fluxes to plot
     for k=1:nData
@@ -155,9 +157,9 @@ if isfield(options,"forcingFlux")
             fluxLinLogTmp = fluxLinLog;
             fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
             if options.forcingFlux(k).alpha < 1
-                [~,H(length(H)+1)] = contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha, DisplayName=options.forcingFlux(k).fancyName); hold on
+                [~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha, DisplayName=options.forcingFlux(k).fancyName); hold on
             else
-                [~,H(length(H)+1)] = contourf(ax(k),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none', DisplayName=options.forcingFlux(k).fancyName); hold on
+                [~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none', DisplayName=options.forcingFlux(k).fancyName); hold on
             end
             if nLevels>11 % cap on number of contour lines to draw.
                 skip = floor(nLevels/10);
@@ -165,44 +167,35 @@ if isfield(options,"forcingFlux")
                 skip = 1;
             end
             % contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
-            contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
+            contour(ax(end),KLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
             % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
-            contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.5, DisplayName=options.forcingFlux(k).fancyName);
+            contour(ax(end),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.5, DisplayName=options.forcingFlux(k).fancyName);
 
         else
             contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
             contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-',LineWidth=1.0)
         end
-        colormap(ax(k),cmap)
+        colormap(ax(end),cmap)
         clim(color_axis_limits)
 
         % this seems to have to be placed at the bottom
-        ax(k).Color = 'none';
-        set(ax(k),'XTickLabel',[]);
-        set(ax(k),'YTickLabel',[]);
-        set(ax(k),'XTick',[]);
-        set(ax(k),'YTick',[]);
-        ax(k).Units = hostAx.Units;
-        ax(k).Position = hostAx.Position;      % match positions
-        linkaxes([hostAx ax(k)])               % link panning/zooming
-    end
-
-else
-    k=0;
-    ax(k+1) = hostAx;
-    ax(k+1).Color = 'none';                 % transparent background
-    ax(k+1).Units = hostAx.Units;
-    ax(k+1).Position = hostAx.Position;      % match positions
-    linkaxes([hostAx ax(k+1)])               % link panning/zooming
-    H = gobjects(0);
+        ax(end).Color = 'none';
+        set(ax(end),'XTickLabel',[]);
+        set(ax(end),'YTickLabel',[]);
+        set(ax(end),'XTick',[]);
+        set(ax(end),'YTick',[]);
+        ax(end).Units = hostAx.Units;
+        ax(end).Position = hostAx.Position;      % match positions
+        linkaxes([hostAx ax(end)])               % link panning/zooming
+    end    
 end
 
 % add coutour for damping scale
-ax(k+1) = axes;
-ax(k+1).Color = 'none';                 % transparent background
-ax(k+1).Units = hostAx.Units;
-ax(k+1).Position = hostAx.Position;      % match positions
-linkaxes([hostAx ax(k+1)])               % link panning/zooming
+ax(end+1) = axes(Parent=fig);
+ax(end).Color = 'none';                 % transparent background
+ax(end).Units = hostAx.Units;
+ax(end).Position = hostAx.Position;      % match positions
+linkaxes([hostAx ax(end)])               % link panning/zooming
 kj = 10.^KLinLog; kr = 10.^ JLinLog;
 Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
@@ -213,18 +206,18 @@ pseudoRadialWavelengthDamp = 2*pi/sqrt(k_damp.^2 + jWavelength_damp.^2)/1000;
 Damp = zeros(size(KLinLog));
 Damp(pseudoRadialWavelength<1.2*pseudoRadialWavelengthDamp) = 1;
 col = orderedcolors("gem");
-[~,H(length(H)+1)] = contourf(ax(k+1),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.3, DisplayName="adaptive damping");
+[~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.3, DisplayName="adaptive damping");
 
 % add pseudoRadialWavelength contours
 hold on
 % pseudoRadialWavelength(pseudoRadialWavelength==Inf) = max(radialWavelength);
-[C,h] = contour(ax(k+1),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+[C,h] = contour(ax(end),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
 clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
-ax(k+1).Color = 'none';
-set(ax(k+1),'XTickLabel',[]);
-set(ax(k+1),'YTickLabel',[]);
-set(ax(k+1),'XTick',[]);
-set(ax(k+1),'YTick',[]);
+ax(end).Color = 'none';
+set(ax(end),'XTickLabel',[]);
+set(ax(end),'YTickLabel',[]);
+set(ax(end),'XTick',[]);
+set(ax(end),'YTick',[]);
 
 % add frequency contours
 if options.addFrequencyContours
@@ -232,7 +225,7 @@ if options.addFrequencyContours
     omegaPadded = cat(1,wvd.omega_jk(1,:),wvd.omega_jk);
     omegaPadded = cat(2,omegaPadded(:,1),omegaPadded);
     omegaJK = interpn(KPadded,JPadded,omegaPadded.',10.^KLinLog,10.^JLinLog,"linear");
-    [C,h] = contour(ax(k+1),KLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
+    [C,h] = contour(ax(end),KLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
     clabel(C,h,options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
 end
 
@@ -243,7 +236,7 @@ if options.addKEPEContours
     fractionPadded = cat(1,fraction(1,:),fraction);
     fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
     fractionJK = interpn(KPadded,JPadded,fractionPadded.',10.^KLinLog,10.^JLinLog,"linear");
-    [C,h] = contour(ax(k+1),KLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
+    [C,h] = contour(ax(end),KLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
     clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
 end
 
@@ -304,11 +297,12 @@ for k=1:length(options.inertialFlux)
 end
 
 % create legend in own axes so it always has solid background.
-legAx = axes;
-legend(legAx,H,'location','northwest');
-legAx.Visible = 'off';
-legAx.Color = 'none';
-legAx.Position = hostAx.Position;   
+% legAx = axes;
+% legend(legAx,H,'location','northwest');
+% legAx.Visible = 'off';
+% legAx.Color = 'none';
+% legAx.Position = hostAx.Position;
+% linkaxes([hostAx legAx])
 
 % make log style ticks for x axis
 hostAx.Color = 'none';
