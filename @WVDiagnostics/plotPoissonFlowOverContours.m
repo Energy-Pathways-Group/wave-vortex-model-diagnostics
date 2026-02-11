@@ -136,7 +136,7 @@ if isfield(options,"forcingFlux")
     for k=1:nData
 
         % axes for forcing contours
-        ax(k) = axes(Parent=fig);%, Units=hostAx.Units, Position=hostAx.Position, Color = "none", Box="off");
+        ax(end+1) = axes(Parent=fig);%, Units=hostAx.Units, Position=hostAx.Position, Color = "none", Box="off");
         
         % interpolate forcingFlux for log-log plot
         forcingFlux = options.forcingFlux(k).flux;
@@ -191,11 +191,11 @@ if isfield(options,"forcingFlux")
 end
 
 % add coutour for damping scale
-ax(end+1) = axes(Parent=fig);
-ax(end).Color = 'none';                 % transparent background
-ax(end).Units = hostAx.Units;
-ax(end).Position = hostAx.Position;      % match positions
-linkaxes([hostAx ax(end)])               % link panning/zooming
+% ax(end+1) = axes(Parent=fig);
+% ax(end).Color = 'none';                 % transparent background
+% ax(end).Units = hostAx.Units;
+% ax(end).Position = hostAx.Position;      % match positions
+% linkaxes([hostAx ax(end)])               % link panning/zooming
 kj = 10.^KLinLog; kr = 10.^ JLinLog;
 Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
@@ -356,7 +356,11 @@ if strcmp(options.yAxisLabel,"deformation length")
     ylabel("vertical mode deformation length (km)")
 elseif strcmp(options.yAxisLabel,"vertical mode")
     % select reasonable jMode spacing for ticks
+    if length(wvd.j) > 100
+        jInd = [1,2,3,4,5,6,11:10:51,101:100:length(wvd.j)];
+    else
     jInd = [1,2,3,4,5,6,11:10:length(wvd.j)];
+    end
     jMode = wvd.j(jInd);
     % for each jMode, get corresponding jWavenumber
     jWavenumberTemp1 = jPseudoLocation(jInd);
