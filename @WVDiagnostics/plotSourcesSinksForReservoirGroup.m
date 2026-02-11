@@ -115,10 +115,18 @@ sink_arrows = Arrow.empty(0,0);
 
 for i=1:2
     if i==1
-        forcing_fluxes = forcing_sources;
+        if exist("forcing_sources","var")
+            forcing_fluxes = forcing_sources;
+        else
+            forcing_fluxes = [];
+        end
         forcingColor = options.customColors{"source"};
     else
-        forcing_fluxes = forcing_sinks;
+        if exist("forcing_sinks","var")
+            forcing_fluxes = forcing_sinks;
+        else
+            forcing_fluxes = [];
+        end
         forcingColor = options.customColors{"sink"};
     end
     for iFlux=1:length(forcing_fluxes)
@@ -225,8 +233,13 @@ sources = sources_sorted;
 
 RowSublabels = strings(1,3);
 if options.shouldShowExactValues
-    source_total = sum([forcing_sources.te_exact]);
-    sink_total = sum([forcing_sinks.te_exact]);
+    source_total = 0; sink_total = 0;
+    if exist("forcing_sources","var")
+        source_total = sum([forcing_sources.te_exact]);
+    end
+    if exist("forcing_sinks","var")
+        source_total = sum([forcing_sinks.te_exact]);
+    end
 
     if options.shouldShowUnits
         RowSublabels(1) = sprintf("[%.2f %s]",source_total/self.flux_scale,self.flux_scale_units);

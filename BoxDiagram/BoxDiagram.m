@@ -74,6 +74,9 @@ classdef BoxDiagram < handle
 
             lblOffset = 2.0;
             for r = 1:3
+                if isempty(self.rows{r})
+                    continue;
+                end
                 if r==1
                     yMid  = self.rows{r}(1).Position(2) + self.rows{r}(1).Size(2)/2;
                 elseif r==2
@@ -147,7 +150,10 @@ classdef BoxDiagram < handle
             mags   = [self.arrows.Magnitude];
             maxMag = max(mags);
             % minMag = max(min(mags),0.01);
-            boxes = [self.rows{:}];
+            rows_ = self.rows(~cellfun(@isempty, self.rows));
+            rows_ = cellfun(@(x) reshape(x, [], 1), rows_, 'UniformOutput', false);  % force column
+            boxes  = vertcat(rows_{:});
+            % boxes = [self.rows{:}];
             for i = 1:length(self.arrows)
                 a = self.arrows(i);
                 a.LineWidth = options.BaseLineWidth + (options.MaxLineWidth-options.BaseLineWidth)*(a.Magnitude/maxMag);
