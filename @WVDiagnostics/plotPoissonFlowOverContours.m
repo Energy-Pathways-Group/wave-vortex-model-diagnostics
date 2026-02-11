@@ -136,7 +136,7 @@ if isfield(options,"forcingFlux")
     for k=1:nData
 
         % axes for forcing contours
-        ax(k) = axes(Parent=fig);%, Units=hostAx.Units, Position=hostAx.Position, Color = "none", Box="off");
+        ax(end+1) = axes(Parent=fig);%, Units=hostAx.Units, Position=hostAx.Position, Color = "none", Box="off");
         
         % interpolate forcingFlux for log-log plot
         forcingFlux = options.forcingFlux(k).flux;
@@ -191,11 +191,11 @@ if isfield(options,"forcingFlux")
 end
 
 % add coutour for damping scale
-ax(end+1) = axes(Parent=fig);
-ax(end).Color = 'none';                 % transparent background
-ax(end).Units = hostAx.Units;
-ax(end).Position = hostAx.Position;      % match positions
-linkaxes([hostAx ax(end)])               % link panning/zooming
+% ax(end+1) = axes(Parent=fig);
+% ax(end).Color = 'none';                 % transparent background
+% ax(end).Units = hostAx.Units;
+% ax(end).Position = hostAx.Position;      % match positions
+% linkaxes([hostAx ax(end)])               % link panning/zooming
 kj = 10.^KLinLog; kr = 10.^ JLinLog;
 Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
@@ -297,12 +297,11 @@ for k=1:length(options.inertialFlux)
 end
 
 % create legend in own axes so it always has solid background.
-% legAx = axes;
-% legend(legAx,H,'location','northwest');
-% legAx.Visible = 'off';
-% legAx.Color = 'none';
-% legAx.Position = hostAx.Position;
-% linkaxes([hostAx legAx])
+legAx = axes;
+legend(legAx,H,'location','northwest');
+legAx.Visible = 'off';
+legAx.Color = 'none';
+legAx.Position = hostAx.Position;
 
 % make log style ticks for x axis
 hostAx.Color = 'none';
