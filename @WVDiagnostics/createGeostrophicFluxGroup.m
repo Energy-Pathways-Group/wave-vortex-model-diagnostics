@@ -34,13 +34,20 @@ else
     timeIndices = options.timeIndices;
 end
 
-group = options.outputfile.addGroup("geostrophic-flux");
-dimensionNames = ["j", "kRadial", "t"];
+if ~options.outputfile.hasVariableWithName("geostrophic-flux/ggg")
+    group = options.outputfile.addGroup("geostrophic-flux");
+    dimensionNames = ["j", "kRadial", "t"];
 
-ggg = group.addVariable("ggg",dimensionNames,type="double",isComplex=false);
-ggw = group.addVariable("ggw",dimensionNames,type="double",isComplex=false);
-ggw_tx = group.addVariable("ggw_tx",dimensionNames,type="double",isComplex=false);
-wwg_tx = group.addVariable("wwg_tx",dimensionNames,type="double",isComplex=false);
+    ggg = group.addVariable("ggg",dimensionNames,type="double",isComplex=false);
+    ggw = group.addVariable("ggw",dimensionNames,type="double",isComplex=false);
+    ggw_tx = group.addVariable("ggw_tx",dimensionNames,type="double",isComplex=false);
+    wwg_tx = group.addVariable("wwg_tx",dimensionNames,type="double",isComplex=false);
+else
+    ggg = options.outputfile.variableWithName("geostrophic-flux/ggg");
+    ggw = options.outputfile.variableWithName("geostrophic-flux/ggw");
+    ggw_tx = options.outputfile.variableWithName("geostrophic-flux/ggw_tx");
+    wwg_tx = options.outputfile.variableWithName("geostrophic-flux/wwg_tx");
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
