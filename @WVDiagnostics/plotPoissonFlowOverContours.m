@@ -328,7 +328,7 @@ set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x-3), flip(major_x), 'Unif
 set(h, 'XMinorTick','on')
 h.XAxis.MinorTickValues = (minor_x_wn);
 % add labels
-xlabel("horizontal wavelength (km)")
+xlabel("Horizontal wavelength (km)")
 
 % y axis ticks
 if strcmp(options.yAxisLabel,"deformation length")
@@ -366,7 +366,7 @@ elseif strcmp(options.yAxisLabel,"vertical mode")
     % set tick labels
     set(h, 'YTickLabel', jMode);
     % add labels
-    ylabel("vertical mode")
+    ylabel("Vertical mode number")
 else
     error("yAxisLabel must be 'deformation length' or 'vertical mode'.")
 end
