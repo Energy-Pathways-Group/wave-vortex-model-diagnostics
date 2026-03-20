@@ -1,15 +1,15 @@
 ---
 layout: default
-title: createReservoirGroup
+title: createGeostrophicFluxGroup
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 28
+nav_order: 27
 mathjax: true
 ---
 
-#  createReservoirGroup
+#  createGeostrophicFluxGroup
 
-Create a reservoir group in the diagnostics NetCDF and populate it.
+Create a geostrophic flux group in the diagnostics NetCDF and populate it.
 
 
 ---
@@ -27,9 +27,7 @@ Create a reservoir group in the diagnostics NetCDF and populate it.
 
 ## Discussion
 
-  Create a reservoir group in the diagnostics NetCDF and populate it.
-  Create (or open) a diagnostics group containing reservoir definitions as defined by specified flow components.
-  The function will create variables and dimensions as needed, then loop over
-  the requested time indices to compute and write reservoir diagnostics.
+  Computes the geostrophic fluxes from geostrophicFlux, valid only for
+  constant stratification..
  
               

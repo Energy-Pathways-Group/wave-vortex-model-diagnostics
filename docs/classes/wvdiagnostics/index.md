@@ -28,6 +28,7 @@ This is a collection of diagnostic tools for analyzing model output
   + [`create1DMirrorFluxes`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/create1dmirrorfluxes.html) Create 1D mirror flux diagnostics and write them to the diagnostics NetCDF.
   + [`create2DMirrorFluxes`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/create2dmirrorfluxes.html) Compute 2D mirror-flux diagnostics and write them to the diagnostics NetCDF.
   + [`createDiagnosticsFile`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/creatediagnosticsfile.html) Create a new diagnostics file and compute diagnostics from WVModel output.
+  + [`createGeostrophicFluxGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/creategeostrophicfluxgroup.html) Create a geostrophic flux group in the diagnostics NetCDF and populate it.
   + [`createReservoirGroup`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/createreservoirgroup.html) Create a reservoir group in the diagnostics NetCDF and populate it.
 + Figures
   + Model Snapshot
@@ -122,6 +123,8 @@ This is a collection of diagnostic tools for analyzing model output
       + [`geostrophicGeostrophicWaveEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/geostrophicgeostrophicwaveenergy.html) Note that.
       + [`waveWaveGeostrophicEnergy`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergy.html) Note that.
       + [`waveWaveGeostrophicEnergyForMode`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/wavewavegeostrophicenergyformode.html) Note that.
+    + Fluxes
+      + [`geostrophicFlux`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/geostrophicflux.html) Compute the spatial and spectral fluxes for constant stratification
   + Enstrophy fluxes — Triad interactions
     + Fluxes over time, [t 1]
       + [`quadraticEnstrophyTriadFluxesOverTime`](/wave-vortex-model-diagnostics/classes/wvdiagnostics/quadraticenstrophytriadfluxesovertime.html) Compute enstrophy inertial (aka, triad) fluxes over time.

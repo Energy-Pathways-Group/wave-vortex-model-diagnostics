@@ -3,7 +3,7 @@ layout: default
 title: plotPoissonFlowOverContours
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 86
+nav_order: 88
 mathjax: true
 ---
 
@@ -39,6 +39,7 @@ Plot Poisson Flow Over Contours.
 + `quiverScale`  input argument `quiverScale`
 + `figureHandle`  input argument `figureHandle`
 + `nLevels`  (optional) input argument `nLevels` (default: 10)
++ `yAxisLabel`  (optionsl) label for y-axis, either 'deformation length' (default) or 'vertical mode'.
 
 ## Returns
 + `fig`  Figure handle for the generated plot
@@ -47,4 +48,4 @@ Plot Poisson Flow Over Contours.
 
   plotPoissonFlowOverContours is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
  
-                                              
+                                                

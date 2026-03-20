@@ -3,7 +3,7 @@ layout: default
 title: symmetricTintMap
 parent: WVDiagnostics
 grand_parent: Classes
-nav_order: 129
+nav_order: 131
 mathjax: true
 ---
 

@@ -1,5 +1,8 @@
 # Version History
 
+## [1.0.4] - 2026-03-20
+- - figure tweaks
+
 ## [1.0.3] - 2026-01-23
 - Fixing package dependency
 
