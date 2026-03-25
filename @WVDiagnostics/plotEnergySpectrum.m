@@ -153,5 +153,39 @@ cb = colorbar(axIGW);
 cb.Layout.Tile = 'south';
 cb.Label.String = "log10(m^3 s^{-2})";
 
+% % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % %
+% % % %% wave spectrum power law fits
+% % % %
+% % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % spectralSlopes = struct;
+% % % 
+% % % % select wavenumber range
+% % % k_no_damp = wvt.forcingWithName('adaptive damping').k_no_damp;
+% % % kInd = all([wvt.kRadial>(2*pi/wvt.Lx) , wvt.kRadial<k_no_damp],2);
+% % % % select vertical mode range
+% % % j_no_damp = wvt.forcingWithName('adaptive damping').j_no_damp;
+% % % jInd = all([wvt.j>2 , wvt.j<j_no_damp],2);
+% % % 
+% % % % radial wavenumber slope
+% % % p = polyfit( log(wvt.kRadial(kInd)), log(TE_inertial_kR(kInd)+TE_wave_kR(kInd)), 1 );
+% % % spectralSlopes.IOIGW_kR_slope = p(1);
+% % % 
+% % % p = polyfit( log(wvt.kRadial(kInd)), log(TE_A0_kR(kInd)), 1 );
+% % % spectralSlopes.A0_kR_slope = p(1);
+% % % 
+% % % % j mode slope
+% % % p = polyfit( log(wvt.j(jInd)), log(TE_inertial_j(jInd)+TE_wave_j(jInd)), 1 );
+% % % spectralSlopes.IOIGW_j_slope = p(1);
+% % % 
+% % % p = polyfit( log(wvt.j(jInd)), log(TE_A0_j(jInd)), 1 );
+% % % spectralSlopes.A0_j_slope = p(1);
+% % % 
+% % % % j wavenumber slope
+% % % p = polyfit( log(self.jWavenumber(jInd)), log(TE_inertial_j(jInd)+TE_wave_j(jInd)), 1 );
+% % % spectralSlopes.IOIGW_jWavenumber_slope = p(1);
+% % % 
+% % % p = polyfit( log(self.jWavenumber(jInd)), log(TE_A0_j(jInd)), 1 );
+% % % spectralSlopes.A0_jWavenumber_slope = p(1);
 
 end
