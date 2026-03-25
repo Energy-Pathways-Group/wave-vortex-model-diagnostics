@@ -201,12 +201,13 @@ Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
 k_damp = wvd.wvt.forcingWithName('adaptive damping').k_damp; % can also use .k_no_damp
 j_damp = wvd.wvt.forcingWithName('adaptive damping').j_damp; % can also use .j_no_damp
-jWavelength_damp = wvd.jWavenumber(round(j_damp));
-pseudoRadialWavelengthDamp = 2*pi/sqrt(k_damp.^2 + jWavelength_damp.^2)/1000;
+jWavenumber_damp = wvd.jWavenumber(round(j_damp));
+pseudoRadialWavelengthDamp = 2*pi/sqrt(k_damp.^2 + jWavenumber_damp.^2)/1000;
 Damp = zeros(size(KLinLog));
 Damp(pseudoRadialWavelength<1.2*pseudoRadialWavelengthDamp) = 1;
+% Damp(pseudoRadialWavelength<4*pseudoRadialWavelengthDamp) = 1;
 col = orderedcolors("gem");
-[~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.3, DisplayName="adaptive damping");
+[~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.2, DisplayName="adaptive damping");
 
 % add pseudoRadialWavelength contours
 hold on
