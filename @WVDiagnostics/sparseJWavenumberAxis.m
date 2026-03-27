@@ -1,12 +1,14 @@
-function j = sparseJWavenumberAxis(self)
+function [sparseJWavenumber,varargout] = sparseJWavenumberAxis(self)
 % Sparse JWavenumber Axis.
 %
 % sparseJWavenumberAxis is part of the WVDiagnostics toolbox. Update this description to explain its purpose, inputs, outputs, and how it is used in the overall diagnostics workflow.
 %
 % - Topic: Transformations — Axes
-% - Declaration: j = sparseJWavenumberAxis(self)
+% - Declaration: [sparseJWavenumber,varargout] = sparseJWavenumberAxis(self)
 % - Parameter self: WVDiagnostics object
-% - Returns j: output value `j`
+% - Returns sparseJWavenumber: output value `sparseJWavenumber`, a
+% logarithmically spaced jWavenumber axis
+% - Returns j: Vertical mode indices for the logarithmically spaced jWavenumber axis
 arguments
     self
 end
@@ -14,14 +16,14 @@ end
 wvt = self.wvt;
 
 % Create kPseudoRadial *without* explicit de-aliasing
-kRadial = reshape(wvt.j,1,[]);    % 1×nK
+j = reshape(wvt.j,1,[]);    % 1×nK
 
 % this is an expensive calculation so we need to be thoughtful about which
 % bins we compute. The idea we use here is that we want to resolve three
 % points, log-spaced, in between the damping bin and the maximum bin. So we
 % compute that interval, then work backwards.
-max_bin = length(kRadial);
-mid    = 0.5*(kRadial(1:end-1) + kRadial(2:end));
+max_bin = length(j);
+mid    = 0.5*(j(1:end-1) + j(2:end));
 edges  = [-Inf, mid, +Inf];
 if wvt.hasForcingWithName("adaptive damping")
     svv = wvt.forcingWithName("adaptive damping");
@@ -47,6 +49,12 @@ search_bins = cat(2,1:(search_bins(1)-1),search_bins);
 
 jWavenumber = 1./sqrt(wvt.Lr2);
 jWavenumber(1) = 0;
-j = reshape(jWavenumber(search_bins),[],1);
+sparseJWavenumber = reshape(jWavenumber(search_bins),[],1);
+
+if nargout==2
+    varargout{1} = search_bins;
+elseif nargout>2
+    error("error: too many output arguments.")
+end
 
 end

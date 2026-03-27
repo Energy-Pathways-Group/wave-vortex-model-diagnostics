@@ -391,7 +391,7 @@ classdef WVDiagnostics < handle & CAAnnotatedClass
         [omegaAxis,bins_omega] = sparseOmegaAxis(self)
         [kePeAxis,bins_kepe] = sparseKePeAxis(self)
         k = sparseKRadialAxis(self)
-        j = sparseJWavenumberAxis(self)
+        [jWavenumber,varargtou] = sparseJWavenumberAxis(self)
         [S_0, S_pm, mask_0, mask_pm] = sparseJKAxisBinMatrices(self)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
