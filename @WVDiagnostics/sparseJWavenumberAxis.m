@@ -52,7 +52,7 @@ jWavenumber(1) = 0;
 sparseJWavenumber = reshape(jWavenumber(search_bins),[],1);
 
 if nargout==2
-    varargout{1} = search_bins;
+    varargout{1} = wvt.j(search_bins);
 elseif nargout>2
     error("error: too many output arguments.")
 end
