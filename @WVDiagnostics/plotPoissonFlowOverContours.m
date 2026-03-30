@@ -61,9 +61,10 @@ end
 
 if size(options.inertialFlux(1).flux,1) == length(wvd.jWavenumber)
     jWavenumber = wvd.jWavenumber;
+    j = wvd.j;
     kRadial = wvd.kRadial;
 elseif size(options.inertialFlux(1).flux,1) == length(wvd.sparseJWavenumberAxis)
-    jWavenumber = wvd.sparseJWavenumberAxis;
+    [jWavenumber,j] = wvd.sparseJWavenumberAxis;
     kRadial = wvd.sparseKRadialAxis;
 else
     error("The inertial flux has unknown dimensions")
@@ -73,7 +74,9 @@ end
 % from the nearest two wavenumbers
 kPseudoLocation = kRadial;
 kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
-jPseudoLocation = jWavenumber;
+jwnPseudoLocation = jWavenumber;
+jwnPseudoLocation(1) = exp(-log(jwnPseudoLocation(3)) + 2*log(jwnPseudoLocation(2)));
+jPseudoLocation = j;
 jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
 
 % For interpolation to work correctly we need to repeat the
@@ -85,7 +88,9 @@ jPadded= cat(1,0,jPseudoLocation);
 % We will use this axis to display. Widen the box so that it is
 % the same size as its neighbors.
 kMin = exp(-1.5*log(kRadial(3)) + 2.5*log(kRadial(2)));
-jMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
+% % % jMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
+jwnMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
+jMin = exp(-1.5*log(j(3)) + 2.5*log(j(2)));
 
 % make K and J grid for log of variables in linear space
 N = 500;
@@ -95,13 +100,16 @@ else
     logKmax = log10(options.kmax);
 end
 if isinf(options.jmax)
-    logJmax =  max(log10(jWavenumber(:)));
+    logJmax =  max(log10(j(:)));
 else
     logJmax = log10(options.jmax);
 end
+logJWNmax = max(log10(jWavenumber));
 kLinLog = linspace(log10(kMin),logKmax,N);
 jLinLog = linspace(log10(jMin),logJmax,N);
+jwnLinLog = linspace(log10(jwnMin),logJWNmax,N);
 [KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
+[~,JWNLinLog] = ndgrid(kLinLog,jwnLinLog);
 
 [hostAx, fig] = resolveHostAxes(options.figureHandle, visible=options.visible);
 
@@ -196,7 +204,7 @@ end
 % ax(end).Units = hostAx.Units;
 % ax(end).Position = hostAx.Position;      % match positions
 % linkaxes([hostAx ax(end)])               % link panning/zooming
-kj = 10.^KLinLog; kr = 10.^ JLinLog;
+kj = 10.^JWNLinLog; kr = 10.^ KLinLog;
 Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
 k_damp = wvd.wvt.forcingWithName('adaptive damping').k_damp; % can also use .k_no_damp
@@ -243,23 +251,57 @@ end
 
 for k=1:length(options.inertialFlux)
 
+    %%% need to re-work the two funcitons below to compute flux in
+    %%% (jMode,kMode) space. the x and y directions need to have the same
+    %%% units for the flux calculation to make sense. And mode is better
+    %%% than wavenumber because Ld depends on both jMode and k for
+    %%% non-hydrostatic case. *Think* that doing all the calculations in
+    %%% jMode,kMode space will be best. 
+    %%% kmode = wvd.kRadial/wvd.wvt.dk;
+    %%% might even want to make this whole plotting routine work in
+    %%% (jMode,kMode) space. Then overlay the contours. And re-label x-axis
+    %%% with wavelength. That's the most true to the model.
+
     % compute quiver arrows for inertial flux
     [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux(k).flux.');
     [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
-    % we need two adjustments. First, we need to move the first row and column
-    % half an increment
+    % we need two adjustments. 
+    % First, we need to move the first row and column half an increment.
     logX(1,:) = log10(kPseudoLocation(1));
     logY(:,1) = log10(jPseudoLocation(1));
+    % Second, switch from log-spacing to linear-spacing at some wavenumber.
     if ~isinf(options.vectorDensityLinearTransitionWavenumber)
-        cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
-        index = find(logY(1,:) > cutoff,1,'first');
-        delta = logY(1,index+1) - logY(1,index);
-        y = (logY(1,1:index+1)).';
+        % % % cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
+        % % % index = find(logY(1,:) > cutoff,1,'first');
+        % % % delta = logY(1,index+1) - logY(1,index);
+        % % % y = (logY(1,1:index+1)).';
+        % % % 
+        % % % xIndex = find(diff(logX(:,1)) < delta,1,'first');
+        % % % x = logX(1:xIndex,1);
+        % % % x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
+        % % % y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
+        % % % 
+        % % % [X,Y] = ndgrid(x,y);
+        % % % Uprime= interpn(logX,logY,Uprime,X,Y);
+        % % % Vprime = interpn(logX,logY,Vprime,X,Y);
+        % % % 
+        % % % logX = X;
+        % % % logY = Y;
 
-        xIndex = find(diff(logX(:,1)) < delta,1,'first');
-        x = logX(1:xIndex,1);
-        x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
-        y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
+        cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
+        
+        % x axis
+        xindex = find(logX(:,1) > cutoff,1,'first');
+        deltax = logX(xindex+1,1) - logX(xindex,1);
+        x = (logX(1:xindex+1,1)); % keep log-space x below cutoff
+        x = cat(1,x,((x(end)+deltax):deltax:max(logX(:,1))).'); % create linear-space x above cutoff
+
+        % y axis
+        yindex = find(log10(jWavenumber) > cutoff,1,'first');
+        deltay = logY(1,yindex+1) - logY(1,yindex);
+        y = (logY(1,1:yindex+1)).'; % keep log-space x below cutoff
+        y = cat(1,y,((y(end)+deltay):deltay:max(logY(1,:))).'); % create linear-space x above cutoff
+        y(2:end) = log10(round(10.^y(2:end))); % force 10.^y to be intteger mode number
 
         [X,Y] = ndgrid(x,y);
         Uprime= interpn(logX,logY,Uprime,X,Y);
