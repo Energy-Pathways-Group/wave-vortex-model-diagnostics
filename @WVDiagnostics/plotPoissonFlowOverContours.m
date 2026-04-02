@@ -63,9 +63,11 @@ if size(options.inertialFlux(1).flux,1) == length(wvd.jWavenumber)
     jWavenumber = wvd.jWavenumber;
     j = wvd.j;
     kRadial = wvd.kRadial;
+    kMode = kRadial/wvd.wvt.dk;
 elseif size(options.inertialFlux(1).flux,1) == length(wvd.sparseJWavenumberAxis)
     [jWavenumber,j] = wvd.sparseJWavenumberAxis;
     kRadial = wvd.sparseKRadialAxis;
+    kMode = kRadial/wvd.wvt.dk;
 else
     error("The inertial flux has unknown dimensions")
 end
@@ -74,6 +76,8 @@ end
 % from the nearest two wavenumbers
 kPseudoLocation = kRadial;
 kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
+kModePseudoLocation = kMode;
+kModePseudoLocation(1) = exp(-log(kModePseudoLocation(3)) + 2*log(kModePseudoLocation(2)));
 jwnPseudoLocation = jWavenumber;
 jwnPseudoLocation(1) = exp(-log(jwnPseudoLocation(3)) + 2*log(jwnPseudoLocation(2)));
 jPseudoLocation = j;
@@ -82,12 +86,16 @@ jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
 % For interpolation to work correctly we need to repeat the
 % first entry, but properly back at zero
 kPadded = cat(1,0,kPseudoLocation);
+kModePadded = cat(1,0,kModePseudoLocation);
+jwnPadded= cat(1,0,jwnPseudoLocation);
 jPadded= cat(1,0,jPseudoLocation);
-[KPadded,JPadded] = ndgrid(kPadded,jPadded);
+[KModePadded,JPadded] = ndgrid(kModePadded,jPadded); % mode number grids
+[KPadded,JWNPadded] = ndgrid(kPadded,jwnPadded); % wavenumber grids
 
 % We will use this axis to display. Widen the box so that it is
 % the same size as its neighbors.
 kMin = exp(-1.5*log(kRadial(3)) + 2.5*log(kRadial(2)));
+kModeMin = exp(-1.5*log(kMode(3)) + 2.5*log(kMode(2)));
 % % % jMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
 jwnMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
 jMin = exp(-1.5*log(j(3)) + 2.5*log(j(2)));
@@ -95,21 +103,25 @@ jMin = exp(-1.5*log(j(3)) + 2.5*log(j(2)));
 % make K and J grid for log of variables in linear space
 N = 500;
 if isinf(options.kmax)
-    logKmax =  max(log10(kRadial(:)));
+    kMax =  max(kRadial(:));
+    kModeMax = max(kMode(:));
 else
-    logKmax = log10(options.kmax);
+    kMax = options.kmax;
+    kModeMax = find(kRadial>=options.kmax,1,'first');
 end
 if isinf(options.jmax)
-    logJmax =  max(log10(j(:)));
+    jMax =  max(j(:));
+    jwnMax = max(jWavenumber(:));
 else
-    logJmax = log10(options.jmax);
+    jMax = options.jmax;
+    jwnMax = jWavenumber(options.jmax);
 end
-logJWNmax = max(log10(jWavenumber));
-kLinLog = linspace(log10(kMin),logKmax,N);
-jLinLog = linspace(log10(jMin),logJmax,N);
-jwnLinLog = linspace(log10(jwnMin),logJWNmax,N);
-[KLinLog,JLinLog] = ndgrid(kLinLog,jLinLog);
-[~,JWNLinLog] = ndgrid(kLinLog,jwnLinLog);
+kLinLog = linspace(log10(kMin),log10(kMax),N);
+kModeLinLog = linspace(log10(kModeMin),log10(kModeMax),N);
+jLinLog = linspace(log10(jMin),log10(jMax),N);
+jwnLinLog = linspace(log10(jwnMin),log10(jwnMax),N);
+[KModeLinLog,JLinLog] = ndgrid(kModeLinLog,jLinLog); % mode number axis
+[KLinLog,JWNLinLog] = ndgrid(kLinLog,jwnLinLog); % wavenumber axis
 
 [hostAx, fig] = resolveHostAxes(options.figureHandle, visible=options.visible);
 
@@ -133,7 +145,7 @@ ax(1) = hostAx;
 IOMDA = zeros(size(KLinLog));
 IOMDA(KLinLog<log10(kPseudoLocation(1))) = 1;
 IOMDA(JLinLog<log10(jPseudoLocation(1))) = 1;
-contourf(ax(end),KLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
+contourf(ax(end),KModeLinLog, JLinLog, IOMDA, [1 1], LineStyle='none', FaceColor='k', FaceAlpha=.05, DisplayName="k=0 or j=0 modes", HandleVisibility='off'); % DisplayName="IO/MDA/BT modes"
 
 H = gobjects(0);
 if isfield(options,"forcingFlux")
@@ -150,7 +162,7 @@ if isfield(options,"forcingFlux")
         forcingFlux = options.forcingFlux(k).flux;
         fluxPadded = cat(1,forcingFlux(1,:),forcingFlux);
         fluxPadded = cat(2,fluxPadded(:,1),fluxPadded);
-        fluxLinLog = interpn(KPadded,JPadded,(fluxPadded.'),10.^KLinLog,10.^JLinLog,"linear");
+        fluxLinLog = interpn(KModePadded,JPadded,(fluxPadded.'),10.^KModeLinLog,10.^JLinLog,"linear");
 
         color_axis_limits = max(abs(forcingFlux(:)))*[-1 1]/options.forcingFlux(k).relativeAmplitude;
         cmap = WVDiagnostics.symmetricTintMap(options.forcingFlux(k).color);
@@ -165,23 +177,23 @@ if isfield(options,"forcingFlux")
             fluxLinLogTmp = fluxLinLog;
             fluxLinLogTmp(fluxLinLogTmp > negLevels(end) & fluxLinLog < posLevels(1)) = NaN;
             if options.forcingFlux(k).alpha < 1
-                [~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha, DisplayName=options.forcingFlux(k).fancyName); hold on
+                [~,H(length(H)+1)] = contourf(ax(end),KModeLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none',FaceAlpha=options.forcingFlux(k).alpha, DisplayName=options.forcingFlux(k).fancyName); hold on
             else
-                [~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none', DisplayName=options.forcingFlux(k).fancyName); hold on
+                [~,H(length(H)+1)] = contourf(ax(end),KModeLinLog, JLinLog, fluxLinLogTmp, [negLevels, posLevels], LineStyle='none', DisplayName=options.forcingFlux(k).fancyName); hold on
             end
             if nLevels>11 % cap on number of contour lines to draw.
                 skip = floor(nLevels/10);
             else
                 skip = 1;
             end
-            % contour(ax(k),KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
-            contour(ax(end),KLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
-            % contour(ax(k),KLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
-            contour(ax(end),KLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.5, DisplayName=options.forcingFlux(k).fancyName);
+            % contour(ax(k),KModeLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
+            contour(ax(end),KModeLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
+            % contour(ax(k),KModeLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
+            contour(ax(end),KModeLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.5, DisplayName=options.forcingFlux(k).fancyName);
 
         else
-            contour(KLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
-            contour(KLinLog, JLinLog, fluxLinLog, posLevels, '-',LineWidth=1.0)
+            contour(KModeLinLog, JLinLog, fluxLinLog, negLevels, '--',LineWidth=1.0), hold on
+            contour(KModeLinLog, JLinLog, fluxLinLog, posLevels, '-',LineWidth=1.0)
         end
         colormap(ax(end),cmap)
         clim(color_axis_limits)
@@ -215,12 +227,12 @@ Damp = zeros(size(KLinLog));
 Damp(pseudoRadialWavelength<1.2*pseudoRadialWavelengthDamp) = 1;
 % Damp(pseudoRadialWavelength<4*pseudoRadialWavelengthDamp) = 1;
 col = orderedcolors("gem");
-[~,H(length(H)+1)] = contourf(ax(end),KLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.2, DisplayName="adaptive damping");
+[~,H(length(H)+1)] = contourf(ax(end),KModeLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.2, DisplayName="adaptive damping");
 
 % add pseudoRadialWavelength contours
 hold on
 % pseudoRadialWavelength(pseudoRadialWavelength==Inf) = max(radialWavelength);
-[C,h] = contour(ax(end),KLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+[C,h] = contour(ax(end),KModeLinLog, JLinLog,pseudoRadialWavelength,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
 clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
 ax(end).Color = 'none';
 set(ax(end),'XTickLabel',[]);
@@ -233,8 +245,8 @@ if options.addFrequencyContours
     hold on
     omegaPadded = cat(1,wvd.omega_jk(1,:),wvd.omega_jk);
     omegaPadded = cat(2,omegaPadded(:,1),omegaPadded);
-    omegaJK = interpn(KPadded,JPadded,omegaPadded.',10.^KLinLog,10.^JLinLog,"linear");
-    [C,h] = contour(ax(end),KLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
+    omegaJK = interpn(KModePadded,JPadded,omegaPadded.',10.^KModeLinLog,10.^JLinLog,"linear");
+    [C,h] = contour(ax(end),KModeLinLog,JLinLog,omegaJK/wvd.wvt.f,options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
     clabel(C,h,options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
 end
 
@@ -244,8 +256,8 @@ if options.addKEPEContours
     fraction = wvd.geo_hke_jk./(wvd.geo_hke_jk+wvd.geo_pe_jk);
     fractionPadded = cat(1,fraction(1,:),fraction);
     fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
-    fractionJK = interpn(KPadded,JPadded,fractionPadded.',10.^KLinLog,10.^JLinLog,"linear");
-    [C,h] = contour(ax(end),KLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
+    fractionJK = interpn(KModePadded,JPadded,fractionPadded.',10.^KModeLinLog,10.^JLinLog,"linear");
+    [C,h] = contour(ax(end),KModeLinLog,JLinLog,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
     clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
 end
 
@@ -264,12 +276,17 @@ for k=1:length(options.inertialFlux)
 
     % compute quiver arrows for inertial flux
     [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux(k).flux.');
-    [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
     % we need two adjustments. 
     % First, we need to move the first row and column half an increment.
-    logX(1,:) = log10(kPseudoLocation(1));
-    logY(:,1) = log10(jPseudoLocation(1));
-    % Second, switch from log-spacing to linear-spacing at some wavenumber.
+    X(1,:) = kModePseudoLocation(1);
+    Y(:,1) = jPseudoLocation(1);
+    % Second, rescale for log-axes
+    [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
+    % % % % we need two adjustments. 
+    % % % % First, we need to move the first row and column half an increment.
+    % % % logX(1,:) = log10(kModePseudoLocation(1));
+    % % % logY(:,1) = log10(jPseudoLocation(1));
+    % Second, switch from log-spacing to linear-spacing at some transition wavenumber.
     if ~isinf(options.vectorDensityLinearTransitionWavenumber)
         % % % cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
         % % % index = find(logY(1,:) > cutoff,1,'first');
@@ -291,7 +308,8 @@ for k=1:length(options.inertialFlux)
         cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
         
         % x axis
-        xindex = find(logX(:,1) > cutoff,1,'first');
+        % % % xindex = find(logX(:,1) > cutoff,1,'first');
+        xindex = find(log10(kRadial) > cutoff,1,'first');
         deltax = logX(xindex+1,1) - logX(xindex,1);
         x = (logX(1:xindex+1,1)); % keep log-space x below cutoff
         x = cat(1,x,((x(end)+deltax):deltax:max(logX(:,1))).'); % create linear-space x above cutoff
