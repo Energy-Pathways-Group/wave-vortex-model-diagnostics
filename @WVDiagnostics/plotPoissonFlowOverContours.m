@@ -277,9 +277,9 @@ for k=1:length(options.inertialFlux)
     % compute quiver arrows for inertial flux
     [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux(k).flux.');
     % we need two adjustments. 
-    % First, we need to move the first row and column half an increment.
-    X(1,:) = kModePseudoLocation(1);
-    Y(:,1) = jPseudoLocation(1);
+    % % First, we need to move the first row and column half an increment.
+    % X(1,:) = kModePseudoLocation(1);
+    % Y(:,1) = jPseudoLocation(1);
     % Second, rescale for log-axes
     [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
     % % % % we need two adjustments. 
@@ -328,6 +328,14 @@ for k=1:length(options.inertialFlux)
         logX = X;
         logY = Y;
     end
+    
+    % drop first row/column (0 mode).
+    % Uprime = Uprime(2:end,2:end);
+    % Vprime = Vprime(2:end,2:end);
+    % logX = logX(2:end,2:end);
+    % logY = logY(2:end,2:end);
+    % Uprime(1,1) = 0;
+    % Vprime(1,1) = 0;
 
     % logic for quiver arrow alignment
     if isscalar(options.inertialFlux)
