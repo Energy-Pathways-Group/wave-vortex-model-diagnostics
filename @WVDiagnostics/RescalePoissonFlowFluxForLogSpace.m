@@ -37,7 +37,7 @@ end
 logX = log10(X);
 logY = log10(Y);
 
-Uprime = U./X;
-Vprime = V./Y;
+Uprime = U;%./X;
+Vprime = V;%./Y;
 
 end
