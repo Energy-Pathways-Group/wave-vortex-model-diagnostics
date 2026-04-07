@@ -306,20 +306,24 @@ for k=1:length(options.inertialFlux)
         % % % logY = Y;
 
         cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
-        
-        % x axis
-        % % % xindex = find(logX(:,1) > cutoff,1,'first');
-        xindex = find(log10(kRadial) > cutoff,1,'first');
-        deltax = logX(xindex+1,1) - logX(xindex,1);
-        x = (logX(1:xindex+1,1)); % keep log-space x below cutoff
-        x = cat(1,x,((x(end)+deltax):deltax:max(logX(:,1))).'); % create linear-space x above cutoff
 
         % y axis
-        yindex = find(log10(jWavenumber) > cutoff,1,'first');
-        deltay = logY(1,yindex+1) - logY(1,yindex);
-        y = (logY(1,1:yindex+1)).'; % keep log-space x below cutoff
+        yIndex = find(log10(jWavenumber) > cutoff,1,'first');
+        deltay = logY(1,yIndex+1) - logY(1,yIndex);
+        y = (logY(1,1:yIndex+1)).'; % keep log-space x below cutoff
         y = cat(1,y,((y(end)+deltay):deltay:max(logY(1,:))).'); % create linear-space x above cutoff
         y(2:end) = log10(round(10.^y(2:end))); % force 10.^y to be intteger mode number
+
+        % x axis
+        % xIndex = find(log10(kRadial) > cutoff,1,'first');
+        % deltax = logX(xIndex+1,1) - logX(xIndex,1);
+        % x = (logX(1:xIndex+1,1)); % keep log-space x below cutoff
+        % x = cat(1,x,((x(end)+deltax):deltax:max(logX(:,1))).'); % create linear-space x above cutoff
+
+        % x axis
+        xIndex = find(diff(logX(:,1)) < deltay,1,'first');
+        x = logX(1:xIndex+1,1);
+        x = cat(1,x,((x(end)+deltay):deltay:max(logX(:,1))).');
 
         [X,Y] = ndgrid(x,y);
         Uprime= interpn(logX,logY,Uprime,X,Y);

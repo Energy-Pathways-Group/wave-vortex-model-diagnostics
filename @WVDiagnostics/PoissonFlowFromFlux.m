@@ -6,14 +6,12 @@ function [X,Y,U,V] = PoissonFlowFromFlux(wvd, flux)
 %
 % [X,Y,U,V] = WVDiagnostics.PoissonFlowFromFlux(wvt.kRadial,jWavenumber,flux.');
 % quiver(X,Y,10*U,10*V,'off',Color=0*[1 1 1])
-% For the DCT2/DST2 we use a half-shift grid
-% % % x = wvd.kRadial + 0*(wvd.kRadial(2)-wvd.kRadial(1))/2;
-% % % y = wvd.jWavenumber + 0*(wvd.jWavenumber(2)-wvd.jWavenumber(1))/2;
+
 % compute flux in mode space
 x = wvd.kRadial/wvd.wvt.dk + 0*1/2; % this gives horizontal mode number corresponding to kRadial
 y = wvd.j + 0*1/2;
 
-% First, we need to move the first row and column half an increment.
+% move the first row and column half an increment to finite wavenumber for display.
 x(1) = x(2)/2;
 y(1) = y(2)/2;
 
@@ -22,6 +20,5 @@ y(1) = y(2)/2;
 % scale for different aspect ratio in X/Y direction:
 V = V.* ((max(wvd.kRadial)/max(wvd.jWavenumber))/(max(x)/max(y)));
 
-% U = U/wvd.kRadial(2);
-% V = V/wvd.jWavenumber(2);
+
 end
