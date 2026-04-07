@@ -263,47 +263,13 @@ end
 
 for k=1:length(options.inertialFlux)
 
-    %%% need to re-work the two funcitons below to compute flux in
-    %%% (jMode,kMode) space. the x and y directions need to have the same
-    %%% units for the flux calculation to make sense. And mode is better
-    %%% than wavenumber because Ld depends on both jMode and k for
-    %%% non-hydrostatic case. *Think* that doing all the calculations in
-    %%% jMode,kMode space will be best. 
-    %%% kmode = wvd.kRadial/wvd.wvt.dk;
-    %%% might even want to make this whole plotting routine work in
-    %%% (jMode,kMode) space. Then overlay the contours. And re-label x-axis
-    %%% with wavelength. That's the most true to the model.
-
     % compute quiver arrows for inertial flux
     [X,Y,U,V] = wvd.PoissonFlowFromFlux(options.inertialFlux(k).flux.');
     % we need two adjustments. 
-    % % First, we need to move the first row and column half an increment.
-    % X(1,:) = kModePseudoLocation(1);
-    % Y(:,1) = jPseudoLocation(1);
-    % Second, rescale for log-axes
+    % First, rescale for log-axes
     [logX,logY,Uprime,Vprime] = wvd.RescalePoissonFlowFluxForLogSpace(X,Y,U,V,shouldOnlyRescaleDirection=false);
-    % % % % we need two adjustments. 
-    % % % % First, we need to move the first row and column half an increment.
-    % % % logX(1,:) = log10(kModePseudoLocation(1));
-    % % % logY(:,1) = log10(jPseudoLocation(1));
     % Second, switch from log-spacing to linear-spacing at some transition wavenumber.
     if ~isinf(options.vectorDensityLinearTransitionWavenumber)
-        % % % cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
-        % % % index = find(logY(1,:) > cutoff,1,'first');
-        % % % delta = logY(1,index+1) - logY(1,index);
-        % % % y = (logY(1,1:index+1)).';
-        % % % 
-        % % % xIndex = find(diff(logX(:,1)) < delta,1,'first');
-        % % % x = logX(1:xIndex,1);
-        % % % x = cat(1,x,((x(end)+delta):delta:max(logX(:,1))).');
-        % % % y = cat(1,y,((y(end)+delta):delta:max(logY(1,:))).');
-        % % % 
-        % % % [X,Y] = ndgrid(x,y);
-        % % % Uprime= interpn(logX,logY,Uprime,X,Y);
-        % % % Vprime = interpn(logX,logY,Vprime,X,Y);
-        % % % 
-        % % % logX = X;
-        % % % logY = Y;
 
         cutoff = log10(options.vectorDensityLinearTransitionWavenumber);
 
@@ -314,13 +280,7 @@ for k=1:length(options.inertialFlux)
         y = cat(1,y,((y(end)+deltay):deltay:max(logY(1,:))).'); % create linear-space x above cutoff
         y(2:end) = log10(round(10.^y(2:end))); % force 10.^y to be intteger mode number
 
-        % x axis
-        % xIndex = find(log10(kRadial) > cutoff,1,'first');
-        % deltax = logX(xIndex+1,1) - logX(xIndex,1);
-        % x = (logX(1:xIndex+1,1)); % keep log-space x below cutoff
-        % x = cat(1,x,((x(end)+deltax):deltax:max(logX(:,1))).'); % create linear-space x above cutoff
-
-        % x axis
+        % x axis... spacing matches y axis
         xIndex = find(diff(logX(:,1)) < deltay,1,'first');
         x = logX(1:xIndex+1,1);
         x = cat(1,x,((x(end)+deltay):deltay:max(logX(:,1))).');
@@ -332,14 +292,6 @@ for k=1:length(options.inertialFlux)
         logX = X;
         logY = Y;
     end
-    
-    % drop first row/column (0 mode).
-    % Uprime = Uprime(2:end,2:end);
-    % Vprime = Vprime(2:end,2:end);
-    % logX = logX(2:end,2:end);
-    % logY = logY(2:end,2:end);
-    % Uprime(1,1) = 0;
-    % Vprime(1,1) = 0;
 
     % logic for quiver arrow alignment
     if isscalar(options.inertialFlux)
@@ -390,18 +342,31 @@ minor_x = [];
 for k = 1:length(major_x)-1
     minor_x = [minor_x, log10((2:9) * 10^major_x(k))];
 end
-% convert back to wavenumber and flip
-major_x_wn = log10(2*pi)-flip(major_x);
-minor_x_wn = log10(2*pi)-flip(minor_x);
+% convert ticks from wavelength to mode and flip
+major_x_mode = flip((2*pi./major_x)/wvd.wvt.dk);
+minor_x_mode = flip((2*pi./minor_x)/wvd.wvt.dk);
 % add major ticks
-set(h, 'XTick', (major_x_wn));
+set(h, 'XTick', major_x_mode);
 % Set tick labels to 10^x format, remembering to flip
 set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x-3), flip(major_x), 'UniformOutput', false));
 % add minor ticks
 set(h, 'XMinorTick','on')
-h.XAxis.MinorTickValues = (minor_x_wn);
+h.XAxis.MinorTickValues = (minor_x_mode);
 % add labels
 xlabel("Horizontal wavelength (km)")
+
+% % % % convert back to wavenumber and flip
+% % % major_x_wn = log10(2*pi)-flip(major_x);
+% % % minor_x_wn = log10(2*pi)-flip(minor_x);
+% % % % add major ticks
+% % % set(h, 'XTick', (major_x_wn));
+% % % % Set tick labels to 10^x format, remembering to flip
+% % % set(h, 'XTickLabel', arrayfun(@(x) sprintf('10^{%d}', x-3), flip(major_x), 'UniformOutput', false));
+% % % % add minor ticks
+% % % set(h, 'XMinorTick','on')
+% % % h.XAxis.MinorTickValues = (minor_x_wn);
+% % % % add labels
+% % % xlabel("Horizontal wavelength (km)")
 
 % y axis ticks
 if strcmp(options.yAxisLabel,"deformation length")
