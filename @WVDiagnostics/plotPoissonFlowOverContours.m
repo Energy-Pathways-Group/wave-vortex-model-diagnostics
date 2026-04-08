@@ -364,7 +364,7 @@ jModePseudo(1) = jModePseudo(2)/2;
 % set tick locations
 set(h, 'YTick', log10(jModePseudo));
 % set tick labels
-maxLeadDigit = 7;
+maxLeadDigit = 5;
 leadDigit = floor(jMode ./ 10.^floor(log10(jMode)));
 leadDigit(1) = 0;
 labels = strings(size(jMode));
