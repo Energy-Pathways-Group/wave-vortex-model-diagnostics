@@ -96,7 +96,6 @@ jPadded= cat(1,0,jPseudoLocation);
 % the same size as its neighbors.
 kMin = exp(-1.5*log(kRadial(3)) + 2.5*log(kRadial(2)));
 kModeMin = exp(-1.5*log(kMode(3)) + 2.5*log(kMode(2)));
-% % % jMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
 jwnMin = exp(-1.5*log(jWavenumber(3)) + 2.5*log(jWavenumber(2)));
 jMin = exp(-1.5*log(j(3)) + 2.5*log(j(2)));
 
@@ -186,9 +185,7 @@ if isfield(options,"forcingFlux")
             else
                 skip = 1;
             end
-            % contour(ax(k),KModeLinLog, JLinLog, fluxLinLog, negLevels, '--',LineColor=0.5*[1 1 1],LineWidth=1.0);
             contour(ax(end),KModeLinLog, JLinLog, fluxLinLog, negLevels(1:skip:end), '--',LineColor=options.forcingFlux(k).color,LineWidth=1.0, DisplayName=options.forcingFlux(k).fancyName);
-            % contour(ax(k),KModeLinLog, JLinLog, fluxLinLog, posLevels, '-', LineColor=0.5*[1 1 1],LineWidth=1.0);
             contour(ax(end),KModeLinLog, JLinLog, fluxLinLog, posLevels(1:skip:end), '-',LineColor=options.forcingFlux(k).color,LineWidth=0.5, DisplayName=options.forcingFlux(k).fancyName);
 
         else
@@ -211,11 +208,6 @@ if isfield(options,"forcingFlux")
 end
 
 % add coutour for damping scale
-% ax(end+1) = axes(Parent=fig);
-% ax(end).Color = 'none';                 % transparent background
-% ax(end).Units = hostAx.Units;
-% ax(end).Position = hostAx.Position;      % match positions
-% linkaxes([hostAx ax(end)])               % link panning/zooming
 kj = 10.^JWNLinLog; kr = 10.^ KLinLog;
 Kh = sqrt(kj.^2 + kr.^2);
 pseudoRadialWavelength = 2*pi./Kh/1000;
