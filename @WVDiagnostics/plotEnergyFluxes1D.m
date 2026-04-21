@@ -148,11 +148,20 @@ radialWavelength(1) = radialWavelengthSparse(1); %1.5*radialWavelength(2);
 
 filter = @(v) cumsum(v)/self.flux_scale;
 
-omegaAxis = self.omegaAxis/wvt.f;
-omegaAxis = [0.9,omegaAxis]; % add point below f
+% % omega axis in units of f
+% omegaAxis = self.omegaAxis/wvt.f;
+% omegaAxis = [0.9,omegaAxis]; % add point below f
+% 
+% omegaAxisSparse = omegaAxisSparse/wvt.f;
+% omegaAxisSparse = [0.9;omegaAxisSparse]; % add point below f
+% filter_omega = @(v) cumsum([0;v])/self.flux_scale;
 
-omegaAxisSparse = omegaAxisSparse/wvt.f;
-omegaAxisSparse = [0.9;omegaAxisSparse]; % add point below f
+% omega axis in cpd
+omegaAxis = self.omegaAxis/(2*pi/self.tscale);
+omegaAxis = [0.9,omegaAxis]; % add point below 1 cpd
+
+omegaAxisSparse = omegaAxisSparse/(2*pi/self.tscale);
+omegaAxisSparse = [0.9;omegaAxisSparse]; % add point below 1 cpd
 filter_omega = @(v) cumsum([0;v])/self.flux_scale;
 
 fig = figure(Visible=options.visible,Units="points",Position=[50 50 800 500]);
@@ -317,7 +326,8 @@ end
 ax.XScale = "log";
 ax.XLim = [min(omegaAxis) max(omegaAxis)];
 ax.YLim = yLimits;
-ax.XLabel.String = "frequency (f)";
+% ax.XLabel.String = "frequency (f)";
+ax.XLabel.String = "frequency (cpd)";
 ax.YTickLabels = [];
 
 text(ax,min(xlim)*1.05,max(ylim),'d)','FontSize',14,'HorizontalAlignment','left','VerticalAlignment','top')
