@@ -219,7 +219,7 @@ Damp = zeros(size(KLinLog));
 Damp(pseudoRadialWavelength<1.2*pseudoRadialWavelengthDamp) = 1;
 % Damp(pseudoRadialWavelength<4*pseudoRadialWavelengthDamp) = 1;
 col = orderedcolors("gem");
-[~,H(length(H)+1)] = contourf(ax(end),KModeLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.2, DisplayName="adaptive damping");
+[~,H(length(H)+1)] = contourf(ax(end),KModeLinLog, JLinLog, Damp, [1 1], LineStyle='none', FaceColor=col(2,:), FaceAlpha=.2, DisplayName="damping");
 
 % add pseudoRadialWavelength contours
 hold on

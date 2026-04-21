@@ -141,7 +141,7 @@ yticklabels([])
 
 cb = colorbar;
 cb.Layout.Tile = 'east';
-cb.Label.String = "vertical vorticity (f)";
+cb.Label.String = "vertical vorticity $\zeta$ $(f)$";
 cb.Label.Interpreter = 'latex';
 
 end
