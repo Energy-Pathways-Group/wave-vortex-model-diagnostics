@@ -1,5 +1,9 @@
 # Version History
 
+## [1.0.6] - 2026-05-06
+- Switched `plotEnergyFluxes1D` frequency axes from inertial-frequency units to cycles per day (cpd), including sparse frequency-axis handling and axis labeling.
+- Cleaned up plot labels for fluid decomposition vorticity and Poisson-flow damping legends.
+
 ## [1.0.5] - 2026-04-15
 - Reworked the Poisson-flow contour plotting to use mode-space axes, with cleaner tick labeling and corrected log/linear transition handling for inertial-flux overlays, damping masks, and contour annotations.
 - Updated the sparse vertical-axis helpers to return matching vertical mode indices and corrected the sparse-bin and wavenumber labeling used by the Poisson-flow plots.
