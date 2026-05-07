@@ -101,14 +101,14 @@ jMin = exp(-1.5*log(j(3)) + 2.5*log(j(2)));
 
 % make K and J grid for log of variables in linear space
 N = 500;
-if isinf(options.kmax)
+if isinf(options.kmax) || options.kmax>max(kRadial(:))
     kMax =  max(kRadial(:));
     kModeMax = max(kMode(:));
 else
     kMax = options.kmax;
     kModeMax = find(kRadial>=options.kmax,1,'first');
 end
-if isinf(options.jmax)
+if isinf(options.jmax) || options.jmax>max(j(:))
     jMax =  max(j(:));
     jwnMax = max(jWavenumber(:));
 else
