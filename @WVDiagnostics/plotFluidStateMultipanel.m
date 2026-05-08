@@ -62,27 +62,47 @@ zeta_limits = [-0.2 0.2];
 energy_limits = [-8 0];
 enstrophy_limits = [-16 -9];
 
-% Create wavelength axes for wvt variables
+% % % % Create wavelength axes for wvt variables
+% % % % We will pretend the "0" wavenumber is actually evenly spaced
+% % % % from the nearest two wavenumbers
+% % % kPseudoLocation = wvt.kRadial;
+% % % kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
+% % % jPseudoLocation = self.jWavenumber(wvt.j+1);
+% % % jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
+% % % [KPseudoLocation,JPseudoLocation] = ndgrid(kPseudoLocation,jPseudoLocation);
+% % % kPseudoRadial = sqrt(JPseudoLocation.^2 + KPseudoLocation.^2);
+
 % We will pretend the "0" wavenumber is actually evenly spaced
 % from the nearest two wavenumbers
-kPseudoLocation = wvt.kRadial;
+kPseudoLocation = self.kRadial;
 kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
-jPseudoLocation = self.jWavenumber(wvt.j+1);
+kModePseudoLocation = self.kRadial/self.wvt.dk;
+kModePseudoLocation(1) = exp(-log(kModePseudoLocation(3)) + 2*log(kModePseudoLocation(2)));
+jwnPseudoLocation = self.jWavenumber;
+jwnPseudoLocation(1) = exp(-log(jwnPseudoLocation(3)) + 2*log(jwnPseudoLocation(2)));
+jPseudoLocation = self.j;
 jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
-[KPseudoLocation,JPseudoLocation] = ndgrid(kPseudoLocation,jPseudoLocation);
-kPseudoRadial = sqrt(JPseudoLocation.^2 + KPseudoLocation.^2);
+
+% % % % For interpolation to work correctly we need to repeat the
+% % % % first entry, but properly back at zero
+% % % % NOTE: these are from wvd, including the anti-aliased modes.
+% % % kPseudoLocationWVD = self.kRadial;
+% % % kPseudoLocationWVD(1) = exp(-log(kPseudoLocationWVD(3)) + 2*log(kPseudoLocationWVD(2)));
+% % % jPseudoLocationWVD = self.jWavenumber;
+% % % jPseudoLocationWVD(1) = exp(-log(jPseudoLocationWVD(3)) + 2*log(jPseudoLocationWVD(2)));
+% % % kPaddedWVD = cat(1,0,kPseudoLocationWVD);
+% % % jPaddedWVD = cat(1,0,jPseudoLocationWVD);
+% % % [KPaddedWVD,JPaddedWVD] = ndgrid(kPaddedWVD,jPaddedWVD);
 
 % For interpolation to work correctly we need to repeat the
 % first entry, but properly back at zero
-% NOTE: these are from wvd, including the anti-aliased modes.
-kPseudoLocationWVD = self.kRadial;
-kPseudoLocationWVD(1) = exp(-log(kPseudoLocationWVD(3)) + 2*log(kPseudoLocationWVD(2)));
-jPseudoLocationWVD = self.jWavenumber;
-jPseudoLocationWVD(1) = exp(-log(jPseudoLocationWVD(3)) + 2*log(jPseudoLocationWVD(2)));
-kPaddedWVD = cat(1,0,kPseudoLocationWVD);
-jPaddedWVD = cat(1,0,jPseudoLocationWVD);
-[KPaddedWVD,JPaddedWVD] = ndgrid(kPaddedWVD,jPaddedWVD);
-
+kPadded = cat(1,0,kPseudoLocation);
+kModePadded = cat(1,0,kModePseudoLocation);
+jwnPadded= cat(1,0,jwnPseudoLocation);
+jPadded= cat(1,0,jPseudoLocation);
+[KModePadded,JPadded] = ndgrid(kModePadded,jPadded); % mode number grids
+[KPadded,JWNPadded] = ndgrid(kPadded,jwnPadded); % wavenumber grids
+kPseudoRadial = sqrt(JWNPadded.^2 + KPadded.^2);
 
 % create some nice tick labels to show wavelength
 % ticks_x = [500;300;200;100;50;30;20;10];
@@ -105,8 +125,8 @@ iY = 1;
 % % % % [omegaN,n] = wvt.transformToRadialWavenumber(abs(wvt.Omega),ones(size(wvt.Omega)));
 % % % % omegaJK = (omegaN./n)/wvt.f;
 
-% create the lines of constant deformation radius
-deformationJK = repmat(sqrt(wvt.Lr2)./1000,1,length(wvt.kRadial));
+% % % % create the lines of constant deformation radius
+% % % deformationJK = repmat(sqrt(wvt.Lr2)./1000,1,length(wvt.kRadial));
 
 nColumns = 2;
 if options.shouldShowEnergySpectra
@@ -233,10 +253,10 @@ if options.shouldShowEnergySpectra
     % % % ax = nexttile(tl,3);
     ax = nexttile(tl_inner,1);
     val = log10(TE_A0_j_kR);
-    pcolor(ax,2*pi./kPseudoLocation/1000,2*pi./jPseudoLocation/1000,val), shading flat,
+    pcolor(ax,2*pi./kPseudoLocation/1000,jPseudoLocation,val), shading flat,
     set(gca,'XDir','reverse')
     set(gca,'XScale','log')
-    set(gca,'YDir','reverse')
+    % % % set(gca,'YDir','reverse')
     set(gca,'YScale','log')
     xticklabels([])
     title('geostrophic energy spectrum')
@@ -259,11 +279,11 @@ if options.shouldShowEnergySpectra
     fractionPadded = cat(1,[fraction(1,:);fraction(1,:)],fraction(1:end-1,:));
     % fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
     fractionPadded = cat(2,[fractionPadded(:,1) fractionPadded(:,1)],fractionPadded(:,1:end-1));
-    fractionJK = interpn(KPaddedWVD,JPaddedWVD,fractionPadded.',KPseudoLocation,JPseudoLocation,"linear");
-    [C,h] = contour(ax,2*pi./KPseudoLocation/1000,2*pi./JPseudoLocation/1000,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
+    fractionJK = interpn(KPadded,JPadded,fractionPadded.',kPseudoLocation,jPseudoLocation,"linear");
+    [C,h] = contour(ax,2*pi./kPseudoLocation/1000,jPseudoLocation,fractionJK,options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
     clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
     % add pseudoWavelength 
-    [C,h] = contour(ax,2*pi./KPseudoLocation/1000,2*pi./JPseudoLocation/1000,2*pi./kPseudoRadial/1000,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+    [C,h] = contour(ax,2*pi./KPseudoLocation/1000,JPseudoLocation,2*pi./kPseudoRadial/1000,options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
     clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
     hold off
 
