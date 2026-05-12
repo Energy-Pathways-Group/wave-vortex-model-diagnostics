@@ -211,7 +211,7 @@ classdef WVDiagnostics < handle & CAAnnotatedClass
 
         fig = plotFluidStateMultipanel(self,options)
         fig = plotFluidDecompositionMultipanel(self,options)
-        fig = plotEnergySpectrum(self,options)
+        [fig, spectralSlopes] = plotEnergySpectrum(self,options)
         fig = plotEnstrophySpectrum(self,options)
         fig = plotPotentialEnergySpectrum(self,options)
 

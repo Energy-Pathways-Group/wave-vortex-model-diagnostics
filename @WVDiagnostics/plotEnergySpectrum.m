@@ -1,4 +1,4 @@
-function fig = plotEnergySpectrum(self,options)
+function [fig, spectralSlopes] = plotEnergySpectrum(self,options)
 % Plot the wave/geostrophic energy spectra at a given time.
 %
 % Plot the wave/geostrophic energy spectra at a given time
@@ -6,11 +6,15 @@ function fig = plotEnergySpectrum(self,options)
 % given time.
 %
 % - Topic: Figures — Model Snapshot
-% - Declaration: fig = plotEnergySpectrum(self,options)
+% - Declaration: [fig, spectralSlopes] = plotEnergySpectrum(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter iTime: time index in model output file
 % - Parameter visible: (optional) figure visibility (default: "on")
 % - Returns fig: handle to the generated figure
+% - Returns spectralSlopes: struct containing spectral slope fits
+%   (`IOIGW_kR_slope`, `A0_kR_slope`, `IOIGW_j_slope`, `A0_j_slope`,
+%   `IOIGW_jWavenumber_slope`, `A0_jWavenumber_slope`)
+%   Fit lines are shown on the 1D spectra when this output is requested.
 arguments
     self WVDiagnostics
     options.iTime
@@ -117,10 +121,10 @@ self.showRossbyRadiusYAxis(textColor=[.5,.5,.5])
 
 % plot vertical mode spectrum
 axJ = nexttile;
-plot(wvt.j,TE_inertial_j+TE_wave_j+TE_A0_j,wvt.j,TE_A0_j,wvt.j,TE_inertial_j+TE_wave_j)
+hJ = plot(wvt.j,TE_inertial_j+TE_wave_j+TE_A0_j,wvt.j,TE_A0_j,wvt.j,TE_inertial_j+TE_wave_j, 'LineWidth',2);
 hold on
-plot(wvt.j,TE_wave_j,'--','Color',linesTemp(3,:))
-plot(wvt.j,TE_inertial_j,':','Color',linesTemp(3,:))
+plot(wvt.j,TE_wave_j,'--','Color',linesTemp(3,:), 'LineWidth',2)
+plot(wvt.j,TE_inertial_j,':','Color',linesTemp(3,:), 'LineWidth',2)
 yscale('log')
 ylabel('energy (m^3 s^{-2})');
 xlabel('vertical mode');
@@ -130,7 +134,8 @@ legend('Total','Geostrophic','IO+IGW','IGW','IO','Location','southwest')
 
 % plot horizontal wavenumber spectrum
 axK = nexttile;
-plot(radialWavelength,TE_inertial_kR+TE_wave_kR+TE_A0_kR,radialWavelength,TE_A0_kR,radialWavelength,TE_inertial_kR+TE_wave_kR)
+hK = plot(radialWavelength,TE_inertial_kR+TE_wave_kR+TE_A0_kR,radialWavelength,TE_A0_kR,radialWavelength,TE_inertial_kR+TE_wave_kR, 'LineWidth',2);
+hold on
 set(gca,'XDir','reverse')
 xscale('log'); yscale('log')
 axis tight
@@ -153,39 +158,52 @@ cb = colorbar(axIGW);
 cb.Layout.Tile = 'south';
 cb.Label.String = "log10(m^3 s^{-2})";
 
-% % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % % %
-% % % %% wave spectrum power law fits
-% % % %
-% % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % % spectralSlopes = struct;
-% % % 
-% % % % select wavenumber range
-% % % k_no_damp = wvt.forcingWithName('adaptive damping').k_no_damp;
-% % % kInd = all([wvt.kRadial>(2*pi/wvt.Lx) , wvt.kRadial<k_no_damp],2);
-% % % % select vertical mode range
-% % % j_no_damp = wvt.forcingWithName('adaptive damping').j_no_damp;
-% % % jInd = all([wvt.j>2 , wvt.j<j_no_damp],2);
-% % % 
-% % % % radial wavenumber slope
-% % % p = polyfit( log(wvt.kRadial(kInd)), log(TE_inertial_kR(kInd)+TE_wave_kR(kInd)), 1 );
-% % % spectralSlopes.IOIGW_kR_slope = p(1);
-% % % 
-% % % p = polyfit( log(wvt.kRadial(kInd)), log(TE_A0_kR(kInd)), 1 );
-% % % spectralSlopes.A0_kR_slope = p(1);
-% % % 
-% % % % j mode slope
-% % % p = polyfit( log(wvt.j(jInd)), log(TE_inertial_j(jInd)+TE_wave_j(jInd)), 1 );
-% % % spectralSlopes.IOIGW_j_slope = p(1);
-% % % 
-% % % p = polyfit( log(wvt.j(jInd)), log(TE_A0_j(jInd)), 1 );
-% % % spectralSlopes.A0_j_slope = p(1);
-% % % 
-% % % % j wavenumber slope
-% % % p = polyfit( log(self.jWavenumber(jInd)), log(TE_inertial_j(jInd)+TE_wave_j(jInd)), 1 );
-% % % spectralSlopes.IOIGW_jWavenumber_slope = p(1);
-% % % 
-% % % p = polyfit( log(self.jWavenumber(jInd)), log(TE_A0_j(jInd)), 1 );
-% % % spectralSlopes.A0_jWavenumber_slope = p(1);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% wave spectrum power law fits
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+spectralSlopes = struct;
+
+% select wavenumber range
+k_no_damp = wvt.forcingWithName('adaptive damping').k_no_damp;
+kInd = all([wvt.kRadial>(2*pi/wvt.Lx) , wvt.kRadial<k_no_damp],2);
+% select vertical mode range
+j_no_damp = wvt.forcingWithName('adaptive damping').j_no_damp;
+jInd = all([wvt.j>2 , wvt.j<j_no_damp],2);
+
+% radial wavenumber slope
+p_IOIGW_kR = polyfit( log(wvt.kRadial(kInd)), log(TE_inertial_kR(kInd)+TE_wave_kR(kInd)), 1 );
+spectralSlopes.IOIGW_kR_slope = p_IOIGW_kR(1);
+
+p_A0_kR = polyfit( log(wvt.kRadial(kInd)), log(TE_A0_kR(kInd)), 1 );
+spectralSlopes.A0_kR_slope = p_A0_kR(1);
+
+% j mode slope
+p_IOIGW_j = polyfit( log(wvt.j(jInd)), log(TE_inertial_j(jInd)+TE_wave_j(jInd)), 1 );
+spectralSlopes.IOIGW_j_slope = p_IOIGW_j(1);
+
+p_A0_j = polyfit( log(wvt.j(jInd)), log(TE_A0_j(jInd)), 1 );
+spectralSlopes.A0_j_slope = p_A0_j(1);
+
+% j wavenumber slope
+p = polyfit( log(self.jWavenumber(jInd)), log(TE_inertial_j(jInd)+TE_wave_j(jInd)), 1 );
+spectralSlopes.IOIGW_jWavenumber_slope = p(1);
+
+p = polyfit( log(self.jWavenumber(jInd)), log(TE_A0_j(jInd)), 1 );
+spectralSlopes.A0_jWavenumber_slope = p(1);
+
+% add fit lines to 1d spectrum plots
+if nargout > 1
+    fitLineOffset = 2;
+    plot(axK,radialWavelength(kInd),fitLineOffset*exp(polyval(p_IOIGW_kR,log(wvt.kRadial(kInd)))), ...
+        Color=hK(3).Color,LineStyle=hK(3).LineStyle,LineWidth=1,HandleVisibility='off');
+    plot(axK,radialWavelength(kInd),fitLineOffset*exp(polyval(p_A0_kR,log(wvt.kRadial(kInd)))), ...
+        Color=hK(2).Color,LineStyle=hK(2).LineStyle,LineWidth=1,HandleVisibility='off');
+    plot(axJ,wvt.j(jInd),fitLineOffset*exp(polyval(p_IOIGW_j,log(wvt.j(jInd)))), ...
+        Color=hJ(3).Color,LineStyle=hJ(3).LineStyle,LineWidth=1,HandleVisibility='off');
+    plot(axJ,wvt.j(jInd),fitLineOffset*exp(polyval(p_A0_j,log(wvt.j(jInd)))), ...
+        Color=hJ(2).Color,LineStyle=hJ(2).LineStyle,LineWidth=1,HandleVisibility='off');
+end
 
 end

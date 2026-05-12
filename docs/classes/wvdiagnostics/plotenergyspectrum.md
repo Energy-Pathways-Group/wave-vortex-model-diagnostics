@@ -16,7 +16,7 @@ Plot the wave/geostrophic energy spectra at a given time.
 
 ## Declaration
 ```matlab
- fig = plotEnergySpectrum(self,options)
+ [fig, spectralSlopes] = plotEnergySpectrum(self,options)
 ```
 ## Parameters
 + `self`  WVDiagnostics object
@@ -25,6 +25,10 @@ Plot the wave/geostrophic energy spectra at a given time.
 
 ## Returns
 + `fig`  handle to the generated figure
++ `spectralSlopes`  struct containing spectral slope fits
+  (`IOIGW_kR_slope`, `A0_kR_slope`, `IOIGW_j_slope`, `A0_j_slope`,
+  `IOIGW_jWavenumber_slope`, `A0_jWavenumber_slope`). Fit lines are shown
+  on the 1D spectra when this output is requested.
 
 ## Discussion
 
