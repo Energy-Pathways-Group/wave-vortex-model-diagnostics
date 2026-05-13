@@ -88,9 +88,9 @@ title(tl,'Energy Spectrum')
 val = log10(TE_Apm_j_kR);
 axIGW = nexttile;
 pcolor(radialWavelength,jForLogAxis,val), shading flat
-set(gca,'XDir','reverse')
-set(gca,'XScale','log')
-set(gca,'YScale','log')
+set(axIGW,'XDir','reverse')
+set(axIGW,'XScale','log')
+set(axIGW,'YScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
 colormap(axIGW, self.cmocean('dense'));
 ylabel('vertical mode')
@@ -105,12 +105,12 @@ self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textCol
 val = log10(TE_A0_j_kR);
 axGEO = nexttile;
 pcolor(radialWavelength,jForLogAxis,val), shading flat
-set(gca,'XDir','reverse')
-set(gca,'XScale','log')
-set(gca,'YScale','log')
+set(axGEO,'XDir','reverse')
+set(axGEO,'XScale','log')
+set(axGEO,'YScale','log')
 clim([max(TE_Apm_j_kR(:))-6 max(TE_Apm_j_kR(:))])
 colormap(axGEO, self.cmocean('dense'));
-set(gca,'YTickLabel',[]);
+set(axGEO,'YTickLabel',[]);
 title('Geostrophic')
 xlabel('wavelength (km)')
 text(radialWavelength(1),max(jForLogAxis),'MDA','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
@@ -136,23 +136,13 @@ legend('Total','Geostrophic','IO+IGW','IGW','IO','Location','southwest')
 axK = nexttile;
 hK = plot(radialWavelength,TE_inertial_kR+TE_wave_kR+TE_A0_kR,radialWavelength,TE_A0_kR,radialWavelength,TE_inertial_kR+TE_wave_kR, 'LineWidth',2);
 hold on
-set(gca,'XDir','reverse')
+set(axK,'XDir','reverse')
 xscale('log'); yscale('log')
 axis tight
 title('Radial Wavenumber Spectrum')
 legend('Total','Geostrophic','IO+IGW','Location','southwest')
 xlabel('wavelength (km)')
 % yticklabels([])
-
-% match limits
-xlimK = get(axK,'xlim');
-ylimK = get(axK,'ylim');
-ylimJ = get(axJ,'ylim');
-set(axIGW,'xlim',xlimK);
-set(axGEO,'xlim',xlimK);
-set(axJ,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
-set(axJ,'xlim',[1 max(self.j)]) % remove if using linear xlim for axJ
-set(axK,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
 
 % colorbar
 cb = colorbar(axIGW);
@@ -227,5 +217,15 @@ if nargout > 1
         sprintf('%.1f',spectralSlopes.A0_j_slope),Color=hJ(2).Color, ...
         HorizontalAlignment='right',VerticalAlignment='bottom',HandleVisibility='off');
 end
+
+% match limits
+xlimK = get(axK,'xlim');
+ylimK = get(axK,'ylim');
+ylimJ = get(axJ,'ylim');
+set(axIGW,'xlim',xlimK);
+set(axGEO,'xlim',xlimK);
+set(axJ,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
+set(axJ,'xlim',[1 max(self.j)])
+set(axK,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
 
 end
