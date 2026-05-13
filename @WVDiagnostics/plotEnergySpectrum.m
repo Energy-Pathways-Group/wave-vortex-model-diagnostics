@@ -158,10 +158,10 @@ spectralSlopes = struct;
 
 % select wavenumber range
 k_no_damp = wvt.forcingWithName('adaptive damping').k_no_damp;
-kInd = all([wvt.kRadial>(2*pi/wvt.Lx) , wvt.kRadial<k_no_damp],2);
+kInd = all([wvt.kRadial>(4*pi/wvt.Lx) , wvt.kRadial<k_no_damp],2);
 % select vertical mode range
 j_no_damp = wvt.forcingWithName('adaptive damping').j_no_damp;
-jInd = all([wvt.j>2 , wvt.j<j_no_damp],2);
+jInd = all([wvt.j>3 , wvt.j<j_no_damp],2);
 
 % radial wavenumber slope
 p_IOIGW_kR = polyfit( log(wvt.kRadial(kInd)), log(TE_inertial_kR(kInd)+TE_wave_kR(kInd)), 1 );
