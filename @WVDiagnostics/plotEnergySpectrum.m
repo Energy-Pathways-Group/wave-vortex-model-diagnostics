@@ -96,7 +96,7 @@ colormap(axIGW, self.cmocean('dense'));
 ylabel('vertical mode')
 title('Internal Gravity Wave')
 xlabel('wavelength (km)')
-text(radialWavelength(1),max(jForLogAxis),'inertial','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
+text(radialWavelength(1),max(jForLogAxis),'IO','FontWeight','bold','VerticalAlignment','bottom','HorizontalAlignment','left')
 line([radialWavelength(2),radialWavelength(2)],[min(jForLogAxis),max(jForLogAxis)],'Color','k','LineWidth',1)
 
 self.overlayFrequencyContours(frequencies = [1.01 1.05 1.2 1.5 2 4 8 16],textColor = [.5,.5,.5],labelSpacing = 400,lineWidth = 1)
@@ -125,7 +125,7 @@ hJ = plot(wvt.j,TE_inertial_j+TE_wave_j+TE_A0_j,wvt.j,TE_A0_j,wvt.j,TE_inertial_
 hold on
 plot(wvt.j,TE_wave_j,'--','Color',linesTemp(3,:), 'LineWidth',2)
 plot(wvt.j,TE_inertial_j,':','Color',linesTemp(3,:), 'LineWidth',2)
-yscale('log')
+xscale('log'),yscale('log')
 ylabel('energy (m^3 s^{-2})');
 xlabel('vertical mode');
 axis tight
@@ -151,6 +151,7 @@ ylimJ = get(axJ,'ylim');
 set(axIGW,'xlim',xlimK);
 set(axGEO,'xlim',xlimK);
 set(axJ,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
+set(axJ,'xlim',[1 max(self.j)]) % remove if using linear xlim for axJ
 set(axK,'ylim',[min([ylimK,ylimJ]),max([ylimK,ylimJ])])
 
 % colorbar
@@ -196,14 +197,35 @@ spectralSlopes.A0_jWavenumber_slope = p(1);
 % add fit lines to 1d spectrum plots
 if nargout > 1
     fitLineOffset = 2;
-    plot(axK,radialWavelength(kInd),fitLineOffset*exp(polyval(p_IOIGW_kR,log(wvt.kRadial(kInd)))), ...
+    fitTextOffset = 2;
+    fit_IOIGW_kR = fitLineOffset*exp(polyval(p_IOIGW_kR,log(wvt.kRadial(kInd))));
+    fit_A0_kR = fitLineOffset*exp(polyval(p_A0_kR,log(wvt.kRadial(kInd))));
+    fit_IOIGW_j = fitLineOffset*exp(polyval(p_IOIGW_j,log(wvt.j(jInd))));
+    fit_A0_j = fitLineOffset*exp(polyval(p_A0_j,log(wvt.j(jInd))));
+
+    plot(axK,radialWavelength(kInd),fit_IOIGW_kR, ...
         Color=hK(3).Color,LineStyle=hK(3).LineStyle,LineWidth=1,HandleVisibility='off');
-    plot(axK,radialWavelength(kInd),fitLineOffset*exp(polyval(p_A0_kR,log(wvt.kRadial(kInd)))), ...
+    text(axK,radialWavelength(find(kInd,1,'last')),fitTextOffset*fit_IOIGW_kR(end), ...
+        sprintf('%.1f',spectralSlopes.IOIGW_kR_slope),Color=hK(3).Color, ...
+        HorizontalAlignment='right',VerticalAlignment='bottom',HandleVisibility='off');
+
+    plot(axK,radialWavelength(kInd),fit_A0_kR, ...
         Color=hK(2).Color,LineStyle=hK(2).LineStyle,LineWidth=1,HandleVisibility='off');
-    plot(axJ,wvt.j(jInd),fitLineOffset*exp(polyval(p_IOIGW_j,log(wvt.j(jInd)))), ...
+    text(axK,radialWavelength(find(kInd,1,'last')),fitTextOffset*fit_A0_kR(end), ...
+        sprintf('%.1f',spectralSlopes.A0_kR_slope),Color=hK(2).Color, ...
+        HorizontalAlignment='right',VerticalAlignment='bottom',HandleVisibility='off');
+
+    plot(axJ,wvt.j(jInd),fit_IOIGW_j, ...
         Color=hJ(3).Color,LineStyle=hJ(3).LineStyle,LineWidth=1,HandleVisibility='off');
-    plot(axJ,wvt.j(jInd),fitLineOffset*exp(polyval(p_A0_j,log(wvt.j(jInd)))), ...
+    text(axJ,wvt.j(find(jInd,1,'last')),fitTextOffset*fit_IOIGW_j(end), ...
+        sprintf('%.1f',spectralSlopes.IOIGW_j_slope),Color=hJ(3).Color, ...
+        HorizontalAlignment='right',VerticalAlignment='bottom',HandleVisibility='off');
+
+    plot(axJ,wvt.j(jInd),fit_A0_j, ...
         Color=hJ(2).Color,LineStyle=hJ(2).LineStyle,LineWidth=1,HandleVisibility='off');
+    text(axJ,wvt.j(find(jInd,1,'last')),fitTextOffset*fit_A0_j(end), ...
+        sprintf('%.1f',spectralSlopes.A0_j_slope),Color=hJ(2).Color, ...
+        HorizontalAlignment='right',VerticalAlignment='bottom',HandleVisibility='off');
 end
 
 end
