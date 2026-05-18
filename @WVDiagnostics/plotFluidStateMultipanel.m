@@ -64,16 +64,28 @@ enstrophy_limits = [-16 -9];
 
 % We will pretend the "0" wavenumber is actually evenly spaced
 % from the nearest two wavenumbers
-kPseudoLocation = self.kRadial;
+kPseudoLocation = wvt.kRadial;
 kPseudoLocation(1) = exp(-log(kPseudoLocation(3)) + 2*log(kPseudoLocation(2)));
-kModePseudoLocation = self.kRadial/self.wvt.dk;
+kModePseudoLocation = wvt.kRadial/wvt.dk;
 kModePseudoLocation(1) = exp(-log(kModePseudoLocation(3)) + 2*log(kModePseudoLocation(2)));
-jwnPseudoLocation = self.jWavenumber;
+jwnPseudoLocation = self.jWavenumber(wvt.j+1);
 jwnPseudoLocation(1) = exp(-log(jwnPseudoLocation(3)) + 2*log(jwnPseudoLocation(2)));
-jPseudoLocation = self.j;
+jPseudoLocation = wvt.j;
 jPseudoLocation(1) = exp(-log(jPseudoLocation(3)) + 2*log(jPseudoLocation(2)));
 [KPseudoLocation,JWNPseudoLocation] = ndgrid(kPseudoLocation,jwnPseudoLocation);
-kPseudoRadial = sqrt(JWNPseudoLocation.^2 + KPseudoLocation.^2);
+[KModePseudoLocation,JPseudoLocation] = ndgrid(kModePseudoLocation,jPseudoLocation);
+KPseudoRadial = sqrt(JWNPseudoLocation.^2 + KPseudoLocation.^2);
+
+% NOTE: these are from wvd, including the anti-aliased modes.
+% For interpolation of hke/omega from WVD to work correctly we need to
+% repeat the first entry, but properly back at zero
+kPseudoLocationWVD = self.kRadial;
+kPseudoLocationWVD(1) = exp(-log(kPseudoLocationWVD(3)) + 2*log(kPseudoLocationWVD(2)));
+jPseudoLocationWVD = self.j;
+jPseudoLocationWVD(1) = exp(-log(jPseudoLocationWVD(3)) + 2*log(jPseudoLocationWVD(2)));
+kPaddedWVD = cat(1,0,kPseudoLocationWVD);
+jPaddedWVD = cat(1,0,jPseudoLocationWVD);
+[KPaddedWVD,JPaddedWVD] = ndgrid(kPaddedWVD,jPaddedWVD);
 
 % % For interpolation to work correctly we need to repeat the
 % % first entry, but properly back at zero
@@ -207,19 +219,23 @@ if options.shouldShowEnergySpectra
     set(gca,'layer','top'),
     hold on
     % add ke:pe ratio contours. flipud/fliplr gives nicer clabel placement.
+    % Note: have to pad quantities to work right with our log-log axes. And here
+    % have to "double pad" to work right with pcolor's box shift and
+    % reversed axis direction. 
     fraction = self.geo_hke_jk./(self.geo_hke_jk+self.geo_pe_jk);
-    fractionPadded = cat(1,fraction(1,:),fraction);
-    fractionPadded = cat(2,fractionPadded(:,1),fractionPadded);
-    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(fractionPadded(1:end-1,1:end-1)),options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
+    fractionPadded = cat(1,[fraction(1,:);fraction(1,:)],fraction(1:end-1,:));
+    fractionPadded = cat(2,[fractionPadded(:,1) fractionPadded(:,1)],fractionPadded(:,1:end-1));
+    fractionJK = interpn(KPaddedWVD,JPaddedWVD,fractionPadded', KPseudoLocation,JPseudoLocation,'linear');
+    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(fractionJK'),options.keFractions,'LineWidth',options.lineWidth,'Color',options.keFractionColor, DisplayName="KE/(KE+PE)", HandleVisibility='off');
     clabel(C,h,options.keFractions,'Color',options.keFractionColor,'LabelSpacing',options.labelSpacing)
     % add pseudoWavelength. flipud/fliplr gives nicer clabel placement.
-    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(2*pi./kPseudoRadial'/1000),options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(2*pi./KPseudoRadial'/1000),options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
     clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
     hold off
     % y axis ticks
     % select reasonable jMode spacing for ticks
     jMode = [0:9,10:10:90,100:100:900];
-    jMode = jMode(jMode<=max(self.j)); % truncate at maximum mode
+    jMode = jMode(jMode<=max(wvt.j)); % truncate at maximum mode
     jModePseudo = jMode;
     jModePseudo(1) = jModePseudo(2)/2;
     % set tick locations
@@ -252,18 +268,22 @@ if options.shouldShowEnergySpectra
     set(gca,'layer','top'),
     hold on
     % add frequency contours. flipud/fliplr gives nicer clabel placement.
-    omegaPadded = cat(1,self.omega_jk(1,:),self.omega_jk);
-    omegaPadded = cat(2,omegaPadded(:,1),omegaPadded);
-    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(omegaPadded(1:end-1,1:end-1)/self.wvt.f),options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
+    % Note: have to pad quantities to work right with our log-log axes. And here
+    % have to "double pad" to work right with pcolor's box shift and
+    % reversed axis direction. 
+    omegaPadded = cat(1,[self.omega_jk(1,:);self.omega_jk(1,:)],self.omega_jk(1:end-1,:));
+    omegaPadded = cat(2,[omegaPadded(:,1) omegaPadded(:,1)],omegaPadded(:,1:end-1));
+    omegaJK = interpn(KPaddedWVD,JPaddedWVD,omegaPadded.',KPseudoLocation,JPseudoLocation,"linear");
+    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(omegaJK'/wvt.f),options.frequencies,'LineWidth',options.lineWidth,'Color',options.frequencyColor, DisplayName="frequency (f)", HandleVisibility='off');
     clabel(C,h,options.frequencies,'Color',options.frequencyColor,'LabelSpacing',options.labelSpacing)
     % add pseudoWavelength. flipud/fliplr gives nicer clabel placement.
-    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(2*pi./kPseudoRadial'/1000),options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
+    [C,h] = contour(ax,flipud(2*pi./kPseudoLocation/1000),jPseudoLocation,fliplr(2*pi./KPseudoRadial'/1000),options.wavelengths,'LineWidth',options.lineWidth,'Color',options.wavelengthColor, DisplayName="pseudo-wavelength (km)");
     clabel(C,h,options.wavelengths,'Color',options.wavelengthColor,'LabelSpacing',options.labelSpacing)
     hold off
-        % y axis ticks
+    % y axis ticks
     % select reasonable jMode spacing for ticks
     jMode = [0:9,10:10:90,100:100:900];
-    jMode = jMode(jMode<=max(self.j)); % truncate at maximum mode
+    jMode = jMode(jMode<=max(wvt.j)); % truncate at maximum mode
     jModePseudo = jMode;
     jModePseudo(1) = jModePseudo(2)/2;
     % set tick locations
