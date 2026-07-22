@@ -1,5 +1,8 @@
 # Version History
 
+## [1.0.7] - 2026-07-22
+- Made geostrophic-flux and reservoir-group generation completion-aware by preserving completed time slices, repairing missing slices, and allowing explicit recomputation with `shouldOverwriteExisting=true`.
+
 ## [1.0.6] - 2026-05-06
 - Switched `plotEnergyFluxes1D` frequency axes from inertial-frequency units to cycles per day (cpd), including sparse frequency-axis handling and axis labeling.
 - Cleaned up plot labels for fluid decomposition vorticity and Poisson-flow damping legends.

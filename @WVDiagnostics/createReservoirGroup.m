@@ -4,7 +4,7 @@ function createReservoirGroup(self,options)
 % Create a reservoir group in the diagnostics NetCDF and populate it.
 % Create (or open) a diagnostics group containing reservoir definitions as defined by specified flow components.
 % The function will create variables and dimensions as needed, then loop over
-% the requested time indices to compute and write reservoir diagnostics.
+% incomplete requested time indices to compute and write reservoir diagnostics.
 %
 % - Topic: Diagnostics Generation
 % - Declaration: createReservoirGroup(self,options)
@@ -13,12 +13,14 @@ function createReservoirGroup(self,options)
 % - Parameter name: (optional) Name of the reservoir group (default: "reservoir-damped-wave-geo").
 % - Parameter flowComponents: WVFlowComponent array specifying reservoirs to create.
 % - Parameter timeIndices: Time indices to process (default: all times in diagnostics file).
+% - Parameter shouldOverwriteExisting: Recompute requested completed slices when true (default: false).
 arguments
     self WVDiagnostics
     options.outputfile NetCDFGroup
     options.name string = "reservoir-damped-wave-geo"
     options.flowComponents WVFlowComponent
     options.timeIndices
+    options.shouldOverwriteExisting (1,1) logical = false
 end
 
 if self.diagnosticsHasExplicitAntialiasing
@@ -29,13 +31,6 @@ end
 
 if ~isfield(options,"outputfile")
     options.outputfile = self.diagfile;
-end
-
-if ~isfield(options,"timeIndices")
-    t = self.diagfile.readVariables("t");
-    timeIndices = 1:length(t);
-else
-    timeIndices = options.timeIndices;
 end
 
 if isfield(options,"flowComponents")
@@ -67,7 +62,39 @@ else
     flowComponents(i).maskA0 = flowComponents(i).maskA0 & ~NoDampMask;
 end
 
-[triadVar, forcingVar, energyVar] = self.variablesForReservoirGroup(outputfile=options.outputfile,name=options.name,flowComponents=flowComponents);
+isNewGroup = ~options.outputfile.hasGroupWithName(options.name);
+[triadVar, forcingVar, energyVar, didAddOutputVariable] = self.variablesForReservoirGroup(outputfile=options.outputfile,name=options.name,flowComponents=flowComponents);
+group = options.outputfile.groupWithName(options.name);
+
+triadNames = triadVar.keys;
+forcingVariableNames = forcingVar.keys;
+energyVariableNames = energyVar.keys;
+outputVariables = cell(length(triadNames) + length(forcingVariableNames) + length(energyVariableNames),1);
+iOutputVariable = 0;
+for iVariable = 1:length(triadNames)
+    iOutputVariable = iOutputVariable + 1;
+    outputVariables{iOutputVariable} = triadVar{triadNames(iVariable)};
+end
+for iVariable = 1:length(forcingVariableNames)
+    iOutputVariable = iOutputVariable + 1;
+    outputVariables{iOutputVariable} = forcingVar{forcingVariableNames(iVariable)};
+end
+for iVariable = 1:length(energyVariableNames)
+    iOutputVariable = iOutputVariable + 1;
+    outputVariables{iOutputVariable} = energyVar{energyVariableNames(iVariable)};
+end
+
+diagnosticTimes = self.diagfile.readVariables("t");
+if ~isfield(options,"timeIndices")
+    requestedTimeIndices = 1:length(diagnosticTimes);
+else
+    requestedTimeIndices = options.timeIndices;
+end
+[timeIndices,completionVariable] = self.timeIndicesToComputeForDiagnosticGroup(group,outputVariables,requestedTimeIndices,shouldOverwriteExisting=options.shouldOverwriteExisting,isNewGroup=isNewGroup,didAddOutputVariable=didAddOutputVariable);
+if isempty(timeIndices)
+    fprintf("Reservoir diagnostics in group %s are already complete for the requested time indices.\n",options.name);
+    return
+end
 forcingNames = wvt.forcingNames;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -109,6 +136,7 @@ for timeIndex = 1:length(timeIndices)
         dE = wvt.totalEnergyOfFlowComponent(flowComponents(k));
         energyVar{"E_"+k}.setValueAlongDimensionAtIndex(dE,'t',outputIndex);
     end
+    completionVariable.setValueAlongDimensionAtIndex(diagnosticTimes(outputIndex),'t',outputIndex);
 end
 deltaLoopTime = datetime('now')-loopStartTime;
 fprintf("Total loop time %s, which is %s per time index.\n",deltaLoopTime,deltaLoopTime/length(timeIndices));

@@ -190,6 +190,7 @@ classdef WVDiagnostics < handle & CAAnnotatedClass
         createDiagnosticsFile(self,options)
         create1DMirrorFluxes(self,options)
         create2DMirrorFluxes(self,options)
+        createGeostrophicFluxGroup(self,options)
         createReservoirGroup(self,options)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -198,7 +199,7 @@ classdef WVDiagnostics < handle & CAAnnotatedClass
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        [triadVar, forcingVar, energyVar] = variablesForReservoirGroup(self,options)
+        [triadVar, forcingVar, energyVar, didAddOutputVariable] = variablesForReservoirGroup(self,options)
         addTriadFluxesForReservoirGroupAtTime(self,options)
         [transferFlux, forcingFlux, ddt, energy] = fluxesForReservoirGroup(self,options)
         [sources, sinks, inertial_tx, inertial_cascade, ddt, energy] = filterEnergyForSourcesSinksReservoirs(self,options)
@@ -702,6 +703,10 @@ classdef WVDiagnostics < handle & CAAnnotatedClass
 
             addlistener(self,'iTime','PostSet',@WVDiagnostics.iTimeChanged);
         end
+    end
+
+    methods (Access=private)
+        [timeIndices, completionVariable] = timeIndicesToComputeForDiagnosticGroup(self,group,outputVariables,requestedTimeIndices,options)
     end
 
     methods (Static)

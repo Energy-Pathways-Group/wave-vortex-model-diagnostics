@@ -2,19 +2,20 @@ function createGeostrophicFluxGroup(self,options)
 % Create a geostrophic flux group in the diagnostics NetCDF and populate it.
 %
 % Computes the geostrophic fluxes from geostrophicFlux, valid only for
-% constant stratification..
+% constant stratification. Existing completed time slices are preserved by
+% default, and incomplete slices are computed or repaired.
 %
 % - Topic: Diagnostics Generation
-% - Declaration: createReservoirGroup(self,options)
+% - Declaration: createGeostrophicFluxGroup(self,options)
 % - Parameter self: WVDiagnostics object
 % - Parameter outputfile: NetCDFGroup to write into (default: self.diagfile).
-% - Parameter name: (optional) Name of the reservoir group (default: "reservoir-damped-wave-geo").
-% - Parameter flowComponents: WVFlowComponent array specifying reservoirs to create.
 % - Parameter timeIndices: Time indices to process (default: all times in diagnostics file).
+% - Parameter shouldOverwriteExisting: Recompute requested completed slices when true (default: false).
 arguments
     self WVDiagnostics
     options.outputfile NetCDFGroup
     options.timeIndices
+    options.shouldOverwriteExisting (1,1) logical = false
 end
 
 if self.diagnosticsHasExplicitAntialiasing
@@ -27,26 +28,37 @@ if ~isfield(options,"outputfile")
     options.outputfile = self.diagfile;
 end
 
-if ~isfield(options,"timeIndices")
-    t = self.diagfile.readVariables("t");
-    timeIndices = 1:length(t);
+isNewGroup = ~options.outputfile.hasGroupWithName("geostrophic-flux");
+if isNewGroup
+    group = options.outputfile.addGroup("geostrophic-flux");
 else
-    timeIndices = options.timeIndices;
+    group = options.outputfile.groupWithName("geostrophic-flux");
 end
 
-if ~options.outputfile.hasVariableWithName("geostrophic-flux/ggg")
-    group = options.outputfile.addGroup("geostrophic-flux");
-    dimensionNames = ["j", "kRadial", "t"];
+dimensionNames = ["j", "kRadial", "t"];
+variableNames = ["ggg", "ggw", "ggw_tx", "wwg_tx"];
+outputVariables = cell(size(variableNames));
+didAddOutputVariable = false;
+for iVariable = 1:length(variableNames)
+    if group.hasVariableWithName(variableNames(iVariable))
+        outputVariables{iVariable} = group.variableWithName(variableNames(iVariable));
+    else
+        outputVariables{iVariable} = group.addVariable(variableNames(iVariable),dimensionNames,type="double",isComplex=false);
+        didAddOutputVariable = true;
+    end
+end
+[ggg,ggw,ggw_tx,wwg_tx] = outputVariables{:};
 
-    ggg = group.addVariable("ggg",dimensionNames,type="double",isComplex=false);
-    ggw = group.addVariable("ggw",dimensionNames,type="double",isComplex=false);
-    ggw_tx = group.addVariable("ggw_tx",dimensionNames,type="double",isComplex=false);
-    wwg_tx = group.addVariable("wwg_tx",dimensionNames,type="double",isComplex=false);
+diagnosticTimes = self.diagfile.readVariables("t");
+if ~isfield(options,"timeIndices")
+    requestedTimeIndices = 1:length(diagnosticTimes);
 else
-    ggg = options.outputfile.variableWithName("geostrophic-flux/ggg");
-    ggw = options.outputfile.variableWithName("geostrophic-flux/ggw");
-    ggw_tx = options.outputfile.variableWithName("geostrophic-flux/ggw_tx");
-    wwg_tx = options.outputfile.variableWithName("geostrophic-flux/wwg_tx");
+    requestedTimeIndices = options.timeIndices;
+end
+[timeIndices,completionVariable] = self.timeIndicesToComputeForDiagnosticGroup(group,outputVariables,requestedTimeIndices,shouldOverwriteExisting=options.shouldOverwriteExisting,isNewGroup=isNewGroup,didAddOutputVariable=didAddOutputVariable);
+if isempty(timeIndices)
+    fprintf("Geostrophic flux diagnostics are already complete for the requested time indices.\n");
+    return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,7 +71,7 @@ integrationLastInformWallTime = datetime('now');
 loopStartTime = integrationLastInformWallTime;
 integrationLastInformLoopNumber = 1;
 integrationInformTime = 10;
-fprintf("Starting loop to compute reservoir fluxes for %d time indices.\n",length(timeIndices));
+fprintf("Starting loop to compute geostrophic fluxes for %d time indices.\n",length(timeIndices));
 for timeIndex = 1:length(timeIndices)
     deltaWallTime = datetime('now')-integrationLastInformWallTime;
     if ( seconds(deltaWallTime) > integrationInformTime)
@@ -78,6 +90,7 @@ for timeIndex = 1:length(timeIndices)
     ggw.setValueAlongDimensionAtIndex(wvt.transformToRadialWavenumber(spectralFlux.ggw),'t',outputIndex);
     ggw_tx.setValueAlongDimensionAtIndex(wvt.transformToRadialWavenumber(spectralFlux.ggw_tx),'t',outputIndex);
     wwg_tx.setValueAlongDimensionAtIndex(wvt.transformToRadialWavenumber(spectralFlux.wwg_tx),'t',outputIndex);
+    completionVariable.setValueAlongDimensionAtIndex(diagnosticTimes(outputIndex),'t',outputIndex);
 end
 deltaLoopTime = datetime('now')-loopStartTime;
 fprintf("Total loop time %s, which is %s per time index.\n",deltaLoopTime,deltaLoopTime/length(timeIndices));
