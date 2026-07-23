@@ -33,7 +33,7 @@ if exist(self.diagpath,"file") && ~isfield(options,"filename")
     didx = diff(idx);
     stride = didx(1);
     timeIndices = (idx(end)+stride):stride:length(self.t_wv);
-    wvt = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf);
+    wvt = WVTransform.waveVortexTransformFromFile(self.wvfile.path,iTime=Inf,shouldReadOnly=true);
     diagfile = self.diagfile;
     ncfile = self.wvfile;
 
